@@ -1,0 +1,39 @@
+:root
+{
+  --bg-color: #fffffe;
+  --sec-bg-color: #f7f8ff;
+  --font-color: #2b2c34;
+  --accent-color: #d1d1e9;
+  --action-color: #6246ea;
+  --progress-color: #55c577;
+}
+
+[data-theme="dark"]
+{
+  --bg-color: #303964;
+  --sec-bg-color: #232946;
+  --font-color: #fffffe;
+  --accent-color: #5c6dc0;
+  --action-color: #eebbc3;
+  --progress-color: #68e287;
+}
+
+*
+{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html 
+{
+  font-size: 62.5%;
+}
+
+body
+{
+  height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--font-color);
+  transition: background-color 0.3s, color 0.3s;
+}
