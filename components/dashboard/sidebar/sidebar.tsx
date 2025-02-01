@@ -6,23 +6,13 @@ import { MdWorkspacesFilled } from "react-icons/md";
 import Link from 'next/link';
 import { ListItem } from './listItem/listItem';
 import { usePathname } from 'next/navigation';
+import { Page } from '@/utils/dashboard/types';
+import { getAllPages } from '@/services/projectsService';
 
 export function SideBar() {
   const pathname = usePathname();
-  const proyectPages: {title: string, url: string}[] = [
-    {
-      title: 'Estatus General',
-      url: '/projects/general',
-    },
-    {
-      title: 'Planeación Global',
-      url: '/projects/planning'
-    },
-    {
-      title: 'Lista Proyectos',
-      url: '/projects/list',
-    }
-  ];
+  const pages: {[key: string]: Page[] } = getAllPages();
+
   return (
     <aside className={styles.sidebar}>
       <nav>
@@ -33,12 +23,12 @@ export function SideBar() {
             </Link>
           </li>
         </ul>
-        <hr />
         <section>
           <p className={styles.sidebar__workspace__title}> <span><MdWorkspacesFilled /></span> Espacios de trabajo</p>
           <ul>
-            <ListItem pages={proyectPages} mainTitle={'Proyectos'}/>
-            <ListItem pages={[]} mainTitle={'Regresar Web YNE'} mainUrl={'/'}/>
+            {Object.keys(pages).map((category) => (
+              <ListItem key={category} mainTitle={category} pages={pages[category]}/>
+            ))}
           </ul>
         </section>
       </nav>

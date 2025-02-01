@@ -2,3 +2,9 @@
 {
   background-color: var(--accent-color);
 }
+
+.link
+{
+  display: block;
+  width: 100%;
+}

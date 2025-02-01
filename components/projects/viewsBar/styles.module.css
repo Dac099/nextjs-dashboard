@@ -1,0 +1,26 @@
+.views-list
+{
+  display: flex;
+  font-size: 1.4rem;
+  gap: 10px;
+}
+
+.views-list li
+{
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.views-list li:hover
+{
+  background-color: var(--accent-color);
+  border-radius: 5px 5px 0 0; 
+}
+
+.active
+{
+  border-bottom: 2px solid var(--action-color);
+}

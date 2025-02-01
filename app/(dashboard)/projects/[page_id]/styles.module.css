@@ -1,0 +1,28 @@
+.base-container
+{
+  height: 100%;
+  display: grid;
+  grid-template-rows: repeat(3, auto) 1fr;
+}
+
+.title
+{
+  font-size: 2.4rem;
+  margin-bottom: 20px;
+}
+
+.views-container
+{
+  border-bottom: 1px solid var(--accent-color);
+  margin-bottom: 10px;
+  user-select: none;
+}
+
+.filters-container
+{
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}

@@ -1,0 +1,89 @@
+.multiBtn-main
+{
+  position: relative;
+}
+
+.multiBtn-container
+{
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  height: 32px;
+  width: 100px;
+}
+
+.multiBtn-container__btn
+{
+  width: 80px;
+  height: 32px;
+  background-color: var(--action-color);
+  outline: none;
+  border: none;
+  border-radius: 5px 0 0 5px;
+  color: var(--sec-bg-color);
+  cursor: pointer;
+  border-right: 1px solid var(--sec-bg-color);
+  transition: transform 0.1s, opacity 0.4s;
+}
+
+.multiBtn-container__arrow
+{
+  background-color: var(--action-color);
+  height: 32px;
+  width: 20px;
+  border-radius: 0 5px 5px 0;
+  color: var(--sec-bg-color);
+  font-size: 1.5rem;
+  display: grid;
+  place-content: center;
+  transition: transform 0.1s, opacity 0.4s;
+}
+
+.multiBtn-container__btn:hover, .multiBtn-container__arrow:hover
+{
+  opacity: 0.8;
+}
+
+.multiBtn-container__btn:active, .multiBtn-container__arrow:active
+{
+  transform: scale(0.95);
+}
+
+.options
+{
+  position: absolute;
+  right: -200px;
+  bottom: -50px;
+  width: 220px;
+  background-color: var(--bg-color);
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px 0px rgba(27, 27, 27, 0.219);
+}
+
+.options__btn
+{
+  width: 100%;
+  height: 32px;
+  background-color: var(--bg-color);
+  border: none;
+  outline: none;
+  color: var(--font-color);
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 1.9rem;
+}
+
+.options__btn span
+{
+  font-size: 1.3rem;
+}
+
+.options__btn:hover
+{
+  background-color: var(--accent-color);
+}

@@ -6,16 +6,18 @@
   --accent-color: #d1d1e9;
   --action-color: #6246ea;
   --progress-color: #55c577;
+  --invalid-color: #f7f8ff77;
 }
 
 [data-theme="dark"]
 {
-  --bg-color: #303964;
+  --bg-color: #29346b;
   --sec-bg-color: #232946;
   --font-color: #fffffe;
   --accent-color: #5c6dc0;
-  --action-color: #eebbc3;
+  --action-color: #B0ADFF;
   --progress-color: #68e287;
+  --invalid-color: #23294659;
 }
 
 *
@@ -36,4 +38,15 @@ body
   background-color: var(--bg-color);
   color: var(--font-color);
   transition: background-color 0.3s, color 0.3s;
+}
+
+ul, ol 
+{
+  list-style: none;
+}
+
+a 
+{
+  text-decoration: none;
+  color: inherit;
 }
