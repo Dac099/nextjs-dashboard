@@ -1,0 +1,21 @@
+.container
+{
+  border-right: 1px solid var(--accent-color);
+  padding: 2px 5px;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.pictures-container
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.circle
+{
+  border-radius: 50%;
+  margin-top: 10px;
+}

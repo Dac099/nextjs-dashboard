@@ -1,0 +1,31 @@
+.container
+{
+    cursor: pointer;
+    position: relative;
+}
+
+.chat-empty
+{
+    color: var(--font-color);
+    opacity: 0.7;
+}
+
+.chat-full
+{
+    color: var(--progress-color);
+}
+
+.counter
+{
+    position: absolute;
+    border-radius: 50%;
+    display: grid;
+    place-content: center;
+    width: 15px;
+    height: 15px;
+    background-color: var(--accent-color);
+    color: var(--font-color);
+    top: 20%;
+    left: 50%;
+
+}

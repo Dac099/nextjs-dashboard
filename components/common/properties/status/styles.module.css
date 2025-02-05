@@ -1,0 +1,59 @@
+.container
+{
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--font-color);
+    position: relative;
+}
+
+.corner
+{
+    width: 0;
+    height: 0;
+    display: none;
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    background-image: linear-gradient(to right top, rgba(0,0,0,0.3) 50%, var(--bg-color) 50%);
+    animation: expand 100ms ease-in forwards;
+}
+
+.container:hover .corner
+{
+    display: block;
+    width: 15px;
+    height: 15px;
+}
+
+
+@keyframes expand {
+    0%
+    {
+        width: 0;
+        height: 0;
+    }
+    25%
+    {
+        width: 5px;
+        height: 8px;
+    }
+    50%
+    {
+        width: 8px;
+        height: 11px;
+    }
+    75%
+    {
+        width: 10px;
+        height: 13px;
+    }
+    100%
+    {
+        width: 15px;
+        height: 15px;
+    }
+}

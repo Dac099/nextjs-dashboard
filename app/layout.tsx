@@ -10,11 +10,7 @@ const poppins = Poppins({
   weight: ['400', '700'],
 });
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
   const theme = useThemeStore((state) => state.theme);
 
   useEffect(() => {

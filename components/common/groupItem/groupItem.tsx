@@ -5,14 +5,18 @@ import { Format, GroupData } from '@/utils/common/types';
 import { IoIosArrowDown } from "react-icons/io";
 import { useState } from 'react';
 import { ResumeStatus } from './resumes/resumeStatus/resumeStatus';
+import { ResumeNumber } from './resumes/resumeNumber/resumeNumber';
+import { ResumePerson } from './resumes/resumePerson/resumePerson';
+import {RowItem} from "@/components/common/groupItem/rowItem/rowItem";
 
 type Props = {
   group: GroupData;
 };
 
 export const GroupItemTable = ({ group }: Props) => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(true);
   const groupProperties = group.items[0].properties;
+  const [ selectAll, setSelectAll ] = useState<boolean>(false);
 
   const getCharacterFromFormat = new Map<Format, string>([
     ['Currency', '$'],
@@ -24,7 +28,7 @@ export const GroupItemTable = ({ group }: Props) => {
     return (
       <article 
         className={`${styles.container} ${styles['container--closed']}`} 
-        style={{borderLeft: `5px solid ${group.color}`}}
+        style={{borderLeft: `8px solid ${group.color}`}}
       >
         <section className={styles['header--closed']}>
           
@@ -48,11 +52,29 @@ export const GroupItemTable = ({ group }: Props) => {
             groupProperties.map((property) => {
               switch(property.type){
                 case 'Number':
-                  return (<p key={property.id}>{property.userTitle || property.propertyTitle}</p>);
+                  return (
+                    <ResumeNumber 
+                      key={property.id}
+                      items={group.items}
+                      propertyTitle={property.propertyTitle}
+                    />
+                  );
                 case 'Status':
-                  return <ResumeStatus key={property.id} items={group.items}/>;
+                  return (
+                    <ResumeStatus 
+                      key={property.id} 
+                      items={group.items} 
+                      propertyTitle={property.propertyTitle}
+                    />
+                  );
                 case 'User':
-                  return (<p key={property.id}>{property.userTitle || property.propertyTitle}</p>);
+                  return (
+                    <ResumePerson 
+                      key={property.id} 
+                      items={group.items} 
+                      propertyTitle={property.propertyTitle}
+                    />
+                  );
               }
 
               return (<div key={property.id} className={styles['empty-column']}></div>);
@@ -65,11 +87,8 @@ export const GroupItemTable = ({ group }: Props) => {
   }
 
   return (
-    <article 
-      className={`${styles.container} ${styles['container--open']}`}
-      style={{borderLeft: `5px solid ${group.color}`}}
-    >
-      <section className={`${styles.header} ${styles['header--open']}`}>
+    <article>
+      <section className={`${styles.header} ${styles['header--open']}`} style={{color: group.color}}>
         <IoIosArrowDown 
           className={`${styles.icon} ${!isOpen ? styles['icon--closed'] : ''}`}
           onClick={() => setIsOpen(!isOpen)}
@@ -77,61 +96,41 @@ export const GroupItemTable = ({ group }: Props) => {
         <p>{group.title}</p>
       </section>
 
-      <table className={styles.projectsTable}>
-        <thead className={styles.projectsTableHeader}>
-          <tr>
-            <th>
-              <input type='checkbox'/>
-            </th>
-            <th>Proyecto</th>
-            {
-              groupProperties.map((property) => (
-                <th key={property.id}> 
-                  {property.format ? getCharacterFromFormat.get(property.format) : ''} 
-                  {property.userTitle || property.propertyTitle}
-                </th>
-              ))
-            }
-          </tr>
-        </thead>
+      <section 
+        className={`${styles.container} ${styles['container--open']}`}
+        style={{borderLeft: `8px solid ${group.color}`}}
+      >
+        <article
+          className={styles.row}
+        >
+          <div className={styles.checkbox}>
+            <input 
+              type="checkbox" 
+              name="" 
+              id="" 
+              onChange={(e) => setSelectAll(e.target.checked)}
+            />
+          </div>
 
-        <tbody>
+          <div className={styles['row-header']}>
+            <p>Proyecto</p>
+          </div>
+
           {
-            group.items.map((item) => (
-              <tr key={item.id}>
-                <td><input type='checkbox'/></td>
-                <td>
-                  <section>
-                    {item.title}
-                  </section>
-                  <section>
-                    <div>{item.completedTasks} / {item.totalTasks}</div>
-                    <div>{item.chats.length}</div>
-                  </section>
-                </td>
-                {
-                  item.properties.map((property) => {
-                    switch(property.type){
-                      case 'Number':
-                        return (<td key={property.id}>{property.value}</td>);
-                      case 'Status':
-                        return (<td key={property.id}>{property.value}</td>);
-                      case 'User':
-                        return (<td key={property.id}>{property.userName}</td>);
-                      case 'Date':
-                        return (<td key={property.id}>{property.value}</td>);
-                      case 'Text':
-                        return (<td key={property.id}>{property.value}</td>);
-                      case 'TimeLine':
-                        return (<td key={property.id}>{property.startDate} - {property.endDate}</td>);
-                    }
-                  })
-                }
-              </tr>
+            groupProperties.map(property => (
+              <div key={property.id} className={styles['row-header']}>
+                <p>{property.userTitle || property.propertyTitle}</p>
+              </div>
             ))
           }
-        </tbody>
-      </table>
+        </article>
+        {
+          group.items.map(item => (
+            <RowItem item={item} key={item.id} />
+          ))
+        }
+      </section>
+
     </article>
   );
 }

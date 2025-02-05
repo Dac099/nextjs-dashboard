@@ -33,6 +33,7 @@ export type TaskData = {
 
 export type PropertyData = {
   id: string;
+  itemId: string;
   userTitle: string;
   propertyTitle: string;
   type: DefinedProperty;
