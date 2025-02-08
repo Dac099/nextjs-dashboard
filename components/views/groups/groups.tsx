@@ -2,6 +2,7 @@
 
 import { GroupItemTable } from "@/components/common/groupItem/groupItem";
 import { GroupData } from "@/utils/common/types";
+import styles from './styles.module.css';
 
 const groups: Array<GroupData> = [
   {
@@ -15,13 +16,31 @@ const groups: Array<GroupData> = [
         createdAt: "Sat May 11 2024 17:32:47 GMT-0600 (hora estándar central)",
         updatedAt: "Mon Feb 03 2025 09:22:09 GMT-0600 (hora estándar central)",
         totalTasks: 5,
-        completedTasks: 0,
+        completedTasks: 1,
         chats: [
           {
             id: "1643ee6b-40d4-4eb2-80a4-a311e98d1376",
             message:
-              "amplexus denego totus vulgus amissio clam comminor succedo suus auctus",
+              '<h1>Objetivo semanal</h1><p></p><ul data-type="taskList"><li data-checked="false" data-type="taskItem"><label><input type="checkbox"><span></span></label><div><p>Definir diseño</p></div></li><li data-checked="false" data-type="taskItem"><label><input type="checkbox"><span></span></label><div><p>Terminar programación</p></div></li><li data-checked="false" data-type="taskItem"><label><input type="checkbox"><span></span></label><div><p>Tomar café</p></div></li><li data-checked="false" data-type="taskItem"><label><input type="checkbox"><span></span></label><div><p>Establecer presupuesto</p></div></li></ul>',
             tasks: [
+              {
+                id: "33230e28-d15a-4340-b326-737fe7b31845",
+                chatId: "a4fc0bd9-a55f-4524-b8a8-93ca32fb495c",
+                isCompleted: false,
+                content: "spiritus quidem artificiose et uberrime",
+              },
+              {
+                id: "33230e28-d15a-4340-b326-737fe7b31845",
+                chatId: "a4fc0bd9-a55f-4524-b8a8-93ca32fb495c",
+                isCompleted: false,
+                content: "spiritus quidem artificiose et uberrime",
+              },
+              {
+                id: "33230e28-d15a-4340-b326-737fe7b31845",
+                chatId: "a4fc0bd9-a55f-4524-b8a8-93ca32fb495c",
+                isCompleted: false,
+                content: "spiritus quidem artificiose et uberrime",
+              },
               {
                 id: "33230e28-d15a-4340-b326-737fe7b31845",
                 chatId: "a4fc0bd9-a55f-4524-b8a8-93ca32fb495c",
@@ -37,12 +56,12 @@ const groups: Array<GroupData> = [
           {
             id: "77a0c8b4-f582-4627-9414-c1fc55fc3305",
             message:
-              "stips autus cinis tolero doloremque advenio strenuus infit decerno suffragium",
+              '<h1>Elementos faltantes</h1><ul><li><p>Café diario</p></li><li><p>Botanas gratis</p></li><li><p>Sala para dormirse 15 minutos</p></li><li><p>aerosol para el baño</p></li></ul>',
             tasks: [
               {
                 id: "9aa03fe0-b905-4db5-b693-033172f5f942",
                 chatId: "a8a31972-eea0-40df-9cce-3ba5fea3461a",
-                isCompleted: false,
+                isCompleted: true,
                 content: "copiose taceo adficio tabernus cometes",
               },
             ],
@@ -103,8 +122,8 @@ const groups: Array<GroupData> = [
         title: "J-0002",
         createdAt: "Fri Mar 15 2024 16:03:21 GMT-0600 (hora estándar central)",
         updatedAt: "Sat Feb 01 2025 15:06:08 GMT-0600 (hora estándar central)",
-        totalTasks: 9,
-        completedTasks: 5,
+        totalTasks: 0,
+        completedTasks: 0,
         chats: [],
         properties: [
           {
@@ -158,10 +177,10 @@ const groups: Array<GroupData> = [
 
 export const Groups = () => {
   return (
-    <>
+    <article className={styles.container}>
       {groups.map((group) => (
         <GroupItemTable key={group.id} group={group} />
       ))}
-    </>
+    </article>
   );
 };

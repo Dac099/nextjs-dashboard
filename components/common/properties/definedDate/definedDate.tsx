@@ -1,7 +1,6 @@
 'use client';
 
 import styles from './styles.module.css';
-import 'react-calendar/dist/Calendar.css';
 import {PropertyData} from "@/utils/common/types";
 import { LuCalendarClock } from "react-icons/lu";
 import Calendar from 'react-calendar';

@@ -1,0 +1,59 @@
+.editor-container
+{
+  border: 1px solid var(--accent-color);
+  border-radius: 5px;
+}
+
+.control-group
+{
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid var(--accent-color);
+  padding: 5px 10px;
+}
+
+.control-group button
+{
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--action-color);
+  padding: 5px;
+}
+
+.control-group button:hover
+{
+  background-color: var(--accent-color);
+  border-radius: 4px;
+}
+
+
+.editor-area{
+  background-color: rgba(216, 215, 215, 0.404);
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px;
+}
+
+[data-theme="dark"] .editor-area
+{
+  background-color: rgba(0, 0, 0, 0.137);
+}
+
+.add-button
+{
+  margin-top: 10px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: var(--action-color);
+  outline: none;
+  color: var(--bg-color);
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: block;
+  margin-right: 0;
+  margin-left: auto;
+  width: 100px;
+  height: 30px;
+}

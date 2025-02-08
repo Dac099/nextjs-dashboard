@@ -1,3 +1,5 @@
+'use client';
+
 import styles from './styles.module.css';
 import { RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts';
 import {Tooltip} from "@/components/common/tooltip/tooltip";

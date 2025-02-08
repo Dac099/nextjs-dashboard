@@ -17,4 +17,6 @@
   background: var(--sec-bg-color);
   padding: 10px;
   border-top-left-radius: 10px;
+  position: relative;
+  min-height: 0;
 }

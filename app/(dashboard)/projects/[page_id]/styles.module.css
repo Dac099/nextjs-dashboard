@@ -26,9 +26,3 @@
   justify-content: flex-start;
   margin-bottom: 20px;
 }
-
-.dynamic-container
-{
-  overflow-x: auto;
-  overflow-y: auto;
-}

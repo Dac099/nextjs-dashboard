@@ -47,3 +47,4 @@ export type PropertyData = {
 
 export type DefinedProperty = 'Text' | 'Number' | 'Date' | 'User' | 'TimeLine' | 'Status';
 export type Format = 'Currency' | 'Count' | 'Porcentual';
+export type DetailView = 'chats' | 'files' | 'activity' | 'projectDetail';

@@ -1,3 +1,5 @@
+'use client';
+
 import styles from './styles.module.css';
 import { ItemData } from "@/utils/common/types";
 import { MdOpenInFull } from "react-icons/md";
@@ -7,13 +9,16 @@ import { Status } from "@/components/common/properties/status/status"
 import { Primitive } from "@/components/common/properties/primitive/primitive";
 import { DefinedDate } from "@/components/common/properties/definedDate/definedDate";
 import { TimeLine } from "@/components/common/properties/timeLine/timeLine";
-import {Person} from "@/components/common/properties/person/person";
+import { Person } from "@/components/common/properties/person/person";
+import { useItemSelected } from "@/stores/detailItemStore";
 
 type Props = {
     item: ItemData;
 };
 
 export const RowItem = ({item}: Props) => {
+    const itemStore = useItemSelected();
+
     return (
         <article className={styles.row}>
             <div className={styles.checkbox}>
@@ -25,14 +30,20 @@ export const RowItem = ({item}: Props) => {
                     className={styles.title}
                 >
                     <p>{item.title}</p>
-                    <span className={styles['open-tag']}>
+                    <span
+                        className={styles['open-tag']}
+                        onClick={() => {
+                            itemStore.setItem(item);
+                            itemStore.setShowModal(true);
+                        }}
+                    >
                         Detalle
                         <MdOpenInFull className={styles['icon-open']} />
                     </span>
                 </section>
 
                 <section className={styles.complements}>
-                    <TaskRing completedTasks={item.completedTasks} totalTasks={item.totalTasks} />
+                    {/* <TaskRing completedTasks={item.completedTasks} totalTasks={item.totalTasks} /> */}
                     <ChatRing chats={item.chats} itemId={item.id} />
                 </section>
             </div>

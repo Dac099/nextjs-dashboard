@@ -7,29 +7,29 @@ import { DynamicContainer } from '@/components/projects/dynamicContainer/dynamic
 import { MultiBtn } from '@/components/common/multiBtn/multiBtn';
 
 export default async function Page(props: {params: Promise<{page_id: string}>}) {
-  const { page_id } = await props.params;
-  const page: Page | undefined = getPageById(page_id);
+    const { page_id } = await props.params;
+    const page: Page | undefined = getPageById(page_id);
 
-  return (
-    <article className={styles['base-container']}>
+    return (
+        <article className={styles['base-container']}>
 
-      <section>
-        <p className={styles.title}>{ page?.name || 'Tablero YNE' }</p>
-      </section>
+            <section>
+                <p className={styles.title}>{ page?.name || 'Tablero YNE' }</p>
+            </section>
 
-      <section className={styles['views-container']}>
-        <ViewsBar />
-      </section>
+            <section className={styles['views-container']}>
+                <ViewsBar />
+            </section>
 
-      <section className={styles['filters-container']}>
-        <MultiBtn/>
-        <FiltersBar />
-      </section>
+            <section className={styles['filters-container']}>
+                <MultiBtn/>
+                <FiltersBar />
+            </section>
 
-      <section className={styles['dynamic-container']}>
-        <DynamicContainer />
-      </section>
+            <section className={styles['dynamic-container']}>
+                <DynamicContainer />
+            </section>
 
-    </article>
-  );
+        </article>
+    );
 } 
