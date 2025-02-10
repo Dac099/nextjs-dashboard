@@ -43,8 +43,19 @@ export const RowItem = ({item}: Props) => {
                 </section>
 
                 <section className={styles.complements}>
-                    {/* <TaskRing completedTasks={item.completedTasks} totalTasks={item.totalTasks} /> */}
-                    <ChatRing chats={item.chats} itemId={item.id} />
+                    <div>
+                        {item.totalTasks > 0 &&
+                            <TaskRing completedTasks={item.completedTasks} totalTasks={item.totalTasks} />
+                        }
+                    </div>
+                    <div
+                        onClick={() => {
+                            itemStore.setItem(item);
+                            itemStore.setShowModal(true);
+                        }}
+                    >
+                        <ChatRing chats={item.chats} itemId={item.id} />
+                    </div>
                 </section>
             </div>
 

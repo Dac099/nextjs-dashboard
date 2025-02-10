@@ -8,7 +8,7 @@ import { MultiBtn } from '@/components/common/multiBtn/multiBtn';
 
 export default async function Page(props: {params: Promise<{page_id: string}>}) {
     const { page_id } = await props.params;
-    const page: Page | undefined = getPageById(page_id);
+    const page: Page | undefined = await getPageById(page_id);
 
     return (
         <article className={styles['base-container']}>

@@ -1,54 +1,27 @@
 import { Page } from '@/utils/dashboard/types';
 import { ViewData } from '@/utils/proyectTemplate/types';
+import { getPages } from '@/actions/pages';
 
-export const getAllPages = () => {
-  const pages: Page[] =  [
-    {
-      id: '1111',
-      name: 'General',
-      category: 'projects'
-    },
-    {
-      id: '2222',
-      name: 'Lista de proyectos',
-      category: 'projects'
-    },
-    {
-      id: '3333',
-      name: 'Planeación global',
-      category: 'projects'
-    }
-  ];
+export const getAllPages = async() => {
+  const pages: Page[] | undefined = await getPages();
 
-  return pages.reduce((acc: { [key: string]: Page[] }, page) => {
-    const { category } = page;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(page);
-    return acc;
-  }, {});
+  if(pages){
+    return pages.reduce((acc: { [key: string]: Page[] }, page) => {
+      const { category } = page;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(page);
+      return acc;
+    }, {});
+  }
 }
 
-export const getPageById = (id: string): Page | undefined => {
-  const pages: Page[] =  [
-    {
-      id: '1111',
-      name: 'General',
-      category: 'projects'
-    },
-    {
-      id: '2222',
-      name: 'Lista de proyectos',
-      category: 'projects'
-    },
-    {
-      id: '3333',
-      name: 'Planeación global',
-      category: 'projects'
-    }
-  ];
-  return pages.find((page: Page) => page.id === id);
+export const getPageById = async(id: string): Promise<Page | undefined> => {
+  const pages: Page[] | undefined =  await getPages();
+  if(pages){
+    return pages.find((page: Page) => page.id === id);
+  }
 }
 
 

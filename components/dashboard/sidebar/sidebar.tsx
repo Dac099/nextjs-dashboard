@@ -8,10 +8,19 @@ import { ListItem } from './listItem/listItem';
 import { usePathname } from 'next/navigation';
 import { Page } from '@/utils/dashboard/types';
 import { getAllPages } from '@/services/projectsService';
+import { useEffect, useState } from 'react';
 
 export function SideBar() {
   const pathname = usePathname();
-  const pages: {[key: string]: Page[] } = getAllPages();
+  const [pages, setPages] = useState<{ [key: string]: Page[] }>({});
+
+  useEffect(() => {
+    const fetchPages = async () => {
+      const result = await getAllPages();
+      setPages(result);
+    }
+    fetchPages();
+  }, []);
 
   return (
     <aside className={styles.sidebar}>

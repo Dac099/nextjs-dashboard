@@ -107,7 +107,8 @@
 .complements
 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 30px 30px;
     justify-content: center;
-    align-items: end;
+    align-items: center;
+    gap: 10px;
 }

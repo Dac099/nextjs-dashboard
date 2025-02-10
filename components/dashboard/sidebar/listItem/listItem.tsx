@@ -27,7 +27,7 @@ export function ListItem({ pages, mainTitle, mainUrl='' }:
   if(mainUrl.length > 0) {
     return (
       <li className={`${styles.mainLink} ${pathname === mainUrl ? styles.selected : ''}`}>
-        <Link href={ mainUrl }>  <CiViewTimeline/> { mainTitle } </Link>
+        <Link href={ mainUrl }>  { mainTitle } </Link>
       </li>
     );
   }

@@ -1,9 +1,5 @@
-'use client';
-
 import styles from './styles.module.css';
-import { RadialBarChart, RadialBar, PolarAngleAxis } from 'recharts';
 import {Tooltip} from "@/components/common/tooltip/tooltip";
-import { FaCheck } from "react-icons/fa";
 
 type Props = {
     totalTasks: number;
@@ -12,39 +8,42 @@ type Props = {
 
 export const TaskRing = ({ totalTasks, completedTasks }: Props) => {
     const percentage = (100 * completedTasks) / totalTasks || 0;
-    const data = [{value: percentage}];
+    const radius: number = 50;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
 
     return (
-        <Tooltip text={`${completedTasks}/${totalTasks} marcadas`}>
-            <article className={styles.container}>
-                <span className={styles.icon}>
-                    <FaCheck size={10} />
-                </span>
-
-                <RadialBarChart
-                    width={30}
-                    height={30}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="80%"
-                    outerRadius="100%"
-                    barSize={10}
-                    data={data}
-                >
-                 <PolarAngleAxis
-                    type="number"
-                    domain={[0, 100]}
-                    angleAxisId={0}
-                    tick={false}
-                 />
-
-                <RadialBar
-                    background
-                    dataKey="value"
-                    fill="#68E287FF"
+        <Tooltip text={`${completedTasks}/${totalTasks} tareas completadas`}>
+            <svg width={30} height={30} viewBox="0 0 120 120">
+                <circle
+                    cx="60"
+                    cy="60"
+                    r={radius}
+                    fill="transparent"
+                    strokeWidth="10"
+                    className={styles['circle-back']}
                 />
-                </RadialBarChart>
-            </article>
+                <circle
+                    cx="60"
+                    cy="60"
+                    r={radius}
+                    fill="transparent"
+                    strokeWidth="10"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={offset}
+                    style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+                    className={styles['circle-front']}
+                />
+                <text
+                    x="60"
+                    y="65"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className={styles['graph-text']}
+                >
+                    {completedTasks}/{totalTasks}
+                </text>
+            </svg>
         </Tooltip>
     );
 };
