@@ -6,17 +6,17 @@ import { MdWorkspacesFilled } from "react-icons/md";
 import Link from 'next/link';
 import { ListItem } from './listItem/listItem';
 import { usePathname } from 'next/navigation';
-import { Page } from '@/utils/dashboard/types';
+import { Result } from '@/utils/dashboard/types';
 import { getAllPages } from '@/services/projectsService';
 import { useEffect, useState } from 'react';
 
 export function SideBar() {
   const pathname = usePathname();
-  const [pages, setPages] = useState<{ [key: string]: Page[] }>({});
+  const [pages, setPages] = useState<Result>({});
 
   useEffect(() => {
     const fetchPages = async () => {
-      const result = await getAllPages();
+      const result = await getAllPages() as Result;
       setPages(result);
     }
     fetchPages();

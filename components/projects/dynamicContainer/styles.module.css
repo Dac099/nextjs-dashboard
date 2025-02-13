@@ -1,0 +1,15 @@
+.errorContainer p:first-child
+{
+  text-align: center;
+  margin: 0 auto;
+  font-size: 3rem;
+  color: rgb(139, 1, 1);
+}
+
+.errorContainer p:last-child
+{
+  text-align: center;
+  margin: 0 auto;
+  font-size: 1.5rem;
+  color: var(--font-color);
+}

@@ -1,16 +1,18 @@
-'use client';
-
 import styles from './styles.module.css';
-import { useProjectStore } from '@/stores/projectViewStore';
-import { getViewsByPageId } from '@/services/projectsService';
-import { ViewData } from '@/utils/proyectTemplate/types';
+import { fetchViews, fetchViewTypes } from '@/services/projectsService';
+import { ViewData, ViewType } from '@/utils/proyectTemplate/types';
 import { getIconByName } from '@/utils/helpers';
+import { ModalViewBar } from './modal/modal';
+import Link from 'next/link';
 
-export const ViewsBar = () => {
-  const views: ViewData[] = getViewsByPageId('1111');
-  const setViewSelected = useProjectStore((state) => state.setViewType);
-  const viewSelected = useProjectStore((state) => state.viewType);
+type Props = {
+  pageId: string;
+  viewId: string;
+}
 
+export async function ViewsBar({ pageId, viewId }: Props) {
+  const views: ViewData[] = await fetchViews(pageId);
+  const viewTypes: ViewType[] = await fetchViewTypes();
 
   return (
     <nav>
@@ -18,13 +20,19 @@ export const ViewsBar = () => {
         {views.map((view: ViewData) => (
           <li 
             key={view.viewId} 
-            className={viewSelected === view.typeName ? styles.active : ''}
-            onClick={() => setViewSelected(view.typeName)}
+            className={viewId === view.viewId ? styles.active : ''}
           >
-            {getIconByName(view.icon)}
-            {view.name}            
+            <Link 
+              href={`/projects/${pageId}/${view.viewId}`}
+            >
+              {getIconByName(view.icon)}
+              {view.name}            
+            </Link>
           </li>
         ))}
+        <li>
+          <ModalViewBar viewTypes={viewTypes} />
+        </li>
       </ul>
     </nav>
   );

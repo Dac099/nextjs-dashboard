@@ -24,3 +24,26 @@
 {
   border-bottom: 2px solid var(--action-color);
 }
+
+.modal-control
+{
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 5px;
+}
+
+.modal-control:hover
+{
+  background-color: var(--accent-color);
+  border-radius: 3px;
+}
+
+.modal-icon
+{
+  color: var(--action-color);
+}

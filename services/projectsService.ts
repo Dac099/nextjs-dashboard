@@ -1,20 +1,44 @@
-import { Page } from '@/utils/dashboard/types';
-import { ViewData } from '@/utils/proyectTemplate/types';
-import { getPages } from '@/actions/pages';
+import { Page, Result, Acc } from '@/utils/dashboard/types';
+import { ViewData, ViewType } from '@/utils/proyectTemplate/types';
+import { 
+  getPages, 
+  getViewsByPageId, 
+  getViewTypes,
+} from '@/actions/pages';
+
 
 export const getAllPages = async() => {
   const pages: Page[] | undefined = await getPages();
+  if(!pages){
+    return [];
+  }
 
-  if(pages){
-    return pages.reduce((acc: { [key: string]: Page[] }, page) => {
-      const { category } = page;
-      if (!acc[category]) {
-        acc[category] = [];
+  const groupedPages = Object.groupBy(pages, (page: Page) => page.category);
+  const result: Result = {};
+
+  Object.keys(groupedPages).forEach((category: string) => {
+    
+    const pageWithViews: Acc = groupedPages[category]!.reduce((acc: Acc, page: Page) => {
+      if(!acc[page.name]){
+        acc[page.name] = {
+          id: page.id,
+          name: page.name,
+          category: page.category,
+          views: []
+        };
       }
-      acc[category].push(page);
+      acc[page.name].views.push(page.viewId);
       return acc;
     }, {});
-  }
+    
+    if(!result[category]){
+      result[category] = [];
+    }
+    
+    result[category] = Object.values(pageWithViews);
+  });
+  
+  return result;
 }
 
 export const getPageById = async(id: string): Promise<Page | undefined> => {
@@ -24,29 +48,16 @@ export const getPageById = async(id: string): Promise<Page | undefined> => {
   }
 }
 
+export const fetchViews = async(id: string): Promise<ViewData[]> => {
+  const result: ViewData[] | Error = await getViewsByPageId(id);
+  
+  if(result instanceof Error) throw result;
+  return result;
+}
 
-export const getViewsByPageId = (id: string): ViewData[] => {
-  return [
-    {
-      viewId: '0111',
-      pageId: '1111',
-      icon: 'main',
-      name: 'Tabla General',
-      typeName: 'table'
-    },
-    {
-      viewId: '0222',
-      pageId: '1111',
-      icon: 'chart',
-      name: 'Periodo anual',
-      typeName: 'chart'
-    },
-    {
-      viewId: '0333',
-      pageId: '1111',
-      icon: 'gantt',
-      name: 'Registro de proyectos',
-      typeName: 'gantt'
-    }
-  ];
+export const fetchViewTypes = async(): Promise<ViewType[]> => {
+  const result: ViewType[] | Error = await getViewTypes();
+
+  if(result instanceof Error) throw result;
+  return result;
 }

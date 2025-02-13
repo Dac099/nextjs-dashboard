@@ -41,7 +41,10 @@ export const MultiBtn = () => {
       
       {showOptions && (
         <section className={styles.options} ref={containerRef}>
-          <button className={styles.options__btn}>
+          <button 
+            className={styles.options__btn}
+            onClick={createGroup}
+          >
             <AiOutlineGroup/>
             <span>Nuevo grupo de items</span>
           </button>

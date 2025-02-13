@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import type { ViewTypeName } from '@/utils/proyectTemplate/types';
 
 type Filter = {
   type: string;
@@ -10,11 +9,11 @@ interface PageState {
   filters: Filter[];
   selectedRoute: string;
   viewSelected: string; 
-  viewType: ViewTypeName;
+  viewType: string;
   setFilters: (filters: Filter[]) => void;
   setSelectedRoute: (selectedRoute: string) => void;
   setViewSelected: (viewSelected: string) => void;
-  setViewType: (viewType: ViewTypeName) => void;
+  setViewType: (viewType: string) => void;
 }
 
 export const useProjectStore = create<PageState>((set) => ({
@@ -25,5 +24,5 @@ export const useProjectStore = create<PageState>((set) => ({
   setFilters: (filters) => set({ filters }),
   setSelectedRoute: (selectedRoute) => set({ selectedRoute }),
   setViewSelected: (viewSelected) => set({ viewSelected }),
-  setViewType: (viewType: ViewTypeName) => set({ viewType }),
+  setViewType: (viewType: string) => set({ viewType }),
 }));

@@ -1,9 +1,6 @@
-'use client';
-
 import styles from './styles.module.css';
-import { Format, GroupData } from '@/utils/common/types';
+import { GroupData } from '@/utils/common/types';
 import { IoIosArrowDown } from "react-icons/io";
-import { useState } from 'react';
 import { ResumeStatus } from './resumes/resumeStatus/resumeStatus';
 import { ResumeNumber } from './resumes/resumeNumber/resumeNumber';
 import { ResumePerson } from './resumes/resumePerson/resumePerson';
@@ -13,16 +10,8 @@ type Props = {
   group: GroupData;
 };
 
-export const GroupItemTable = ({ group }: Props) => {
+export async function GroupItemTable({ group }: Props){
   const [isOpen, setIsOpen] = useState<boolean>(true);
-  const groupProperties = group.items[0].properties;
-  const [ selectAll, setSelectAll ] = useState<boolean>(false);
-
-  const getCharacterFromFormat = new Map<Format, string>([
-    ['Currency', '$'],
-    ['Count', '#'],
-    ['Porcentual', '%'],
-  ]);
 
   if(!isOpen){
     return (

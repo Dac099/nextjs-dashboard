@@ -6,8 +6,8 @@ import { FiltersBar } from '@/components/projects/filtersBar/filtersBar';
 import { DynamicContainer } from '@/components/projects/dynamicContainer/dynamicContainer';
 import { MultiBtn } from '@/components/common/multiBtn/multiBtn';
 
-export default async function Page(props: {params: Promise<{page_id: string}>}) {
-    const { page_id } = await props.params;
+export default async function Page(props: {params: Promise<{page_id: string, view_id: string}>}) {
+    const { page_id, view_id } = await props.params;
     const page: Page | undefined = await getPageById(page_id);
 
     return (
@@ -18,7 +18,7 @@ export default async function Page(props: {params: Promise<{page_id: string}>}) 
             </section>
 
             <section className={styles['views-container']}>
-                <ViewsBar />
+                <ViewsBar pageId={page_id} viewId={view_id}/>
             </section>
 
             <section className={styles['filters-container']}>
@@ -27,7 +27,7 @@ export default async function Page(props: {params: Promise<{page_id: string}>}) 
             </section>
 
             <section className={styles['dynamic-container']}>
-                <DynamicContainer />
+                <DynamicContainer pageId={page_id} viewId={view_id}/>
             </section>
 
         </article>

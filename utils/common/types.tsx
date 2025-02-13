@@ -2,11 +2,12 @@ export type GroupData = {
   id: string;
   title: string;
   color: string;
-  items: Array<ItemData>;
 };
 
 export type ItemData = {
   id: string;
+  groupId: string;
+  projectId: string;
   title: string;
   createdAt: string;
   updatedAt: string;

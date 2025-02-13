@@ -10,7 +10,7 @@ export function getIconByName(name: string) {
       return <TbTableFilled />;
     case 'gantt':
       return <FaChartGantt />;
-    case 'chart':
+    case 'barchart':
       return <IoBarChartSharp />;
     case 'files':
       return <SiFiles />;
