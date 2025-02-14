@@ -3,7 +3,11 @@ import { SideBar } from '@/components/dashboard/sidebar/sidebar';
 import styles from './styles.module.css';
 import {ProjectDetail} from "@/components/common/projectDetail/projectDetail";
 
-export default function MainLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
+type Props = {
+    children: React.ReactNode;
+}
+
+export default function MainLayout({ children }: Props) {
     return (
         <article className={styles.layout}>
             <MainBar />

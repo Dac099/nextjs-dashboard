@@ -1,6 +1,19 @@
 import styles from './styles.module.css';
+import type { ProjectType } from '@/actions/items';
 
-export const Details = () => {
+type Props = {
+  detail: ProjectType;
+};
+
+export const Details = ({ detail }: Props) => {
+  
+  if(!detail) {
+    <section className={styles.searchContainer}>
+      
+    </section>
+  }
+
+
   return (
     <article className={styles.container}>
       <p className={styles['container-title']}>Proyecto</p>

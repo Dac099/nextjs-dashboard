@@ -92,8 +92,8 @@
     gap: 5px;
     align-items: center;
     font-size: 1rem;
-    color: var(--accent-color);
-    background-color: var(--action-color);
+    color: var(--action-color);
+    background-color: var(--accent-color);
     padding: 2px 4px;
     border-radius: 5px;
     height: max-content;

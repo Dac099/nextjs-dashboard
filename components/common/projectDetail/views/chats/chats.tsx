@@ -1,12 +1,12 @@
 import styles from "./styles.module.css";
 import Image from "next/image";
 import chatImage from "@/public/chat.png";
-import { ChatData } from '@/utils/common/types';
 import { RichText } from '@/components/common/richText/richText';
 import { ResponseChat } from '@/components/common/responseChat/responseChat';
+import { ChatType } from '@/actions/items';
 
 type Props = {
-  chats: ChatData[] | undefined;
+  chats: ChatType[];
 };
 
 export const Chats = ({ chats }: Props) => {

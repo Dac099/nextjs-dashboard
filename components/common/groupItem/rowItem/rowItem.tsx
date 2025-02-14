@@ -1,6 +1,5 @@
 import styles from './styles.module.css';
 import type { ItemData, ItemDetail } from "@/utils/common/types";
-import { MdOpenInFull } from "react-icons/md";
 import { TaskRing } from "@/components/common/taskRing/taskRing";
 import { ChatRing } from "@/components/common/chatRing/chatRing";
 import { Status } from "@/components/common/properties/status/status"
@@ -9,6 +8,7 @@ import { Primitive } from "@/components/common/properties/primitive/primitive";
 import { TimeLine } from "@/components/common/properties/timeLine/timeLine";
 // import { Person } from "@/components/common/properties/person/person";
 import { getTasksData } from '@/actions/groups';
+import { DetailBtn } from '../detailBtn/detailBtn';
 
 type Props = {
     detail: ItemDetail;
@@ -27,13 +27,12 @@ export async function RowItem({ detail, item }: Props){
                 <section
                     className={styles.title}
                 >
-                    <p>{item.title}</p>
-                    <span
-                        className={styles['open-tag']}
-                    >
-                        Detalle
-                        <MdOpenInFull className={styles['icon-open']} />
-                    </span>
+                    <p>{item.title}</p>     
+                    <DetailBtn 
+                        itemId={item.id}
+                        containerClass={styles['open-tag']}
+                        iconClassName={styles['icon-open']}
+                    />               
                 </section>
 
                 <section className={styles.complements}>

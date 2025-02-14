@@ -2,41 +2,72 @@
 
 import styles from './styles.module.css'
 import { FaArrowRightLong } from "react-icons/fa6";
-import { useItemSelected } from "@/stores/detailItemStore";
 import { useState, useRef, RefObject, useEffect } from "react";
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import useClickOutside from '@/hooks/useClickOutside';
 import { DetailBar } from './detailBar/detailBar';
 import { DetailView } from '@/utils/common/types';
 import { Chats } from './views/chats/chats';
-import { Files } from './views/files/files';
+// import { Files } from './views/files/files';
 import { Details } from './views/details/details';
+import { 
+    getProjectDetail, 
+    type ProjectDetailType,
+    updateItemTitle
+} from '@/actions/items';
 
 export const ProjectDetail = () => {
-    const itemStore = useItemSelected();
-    const [ updateTitle, setUpdateTitle ] = useState<boolean>(false);
+    const searchParams = useSearchParams();
+    const params = useParams();
+    const router = useRouter();        
     const containerRef = useRef<HTMLElement>(null);
     const inputElementRef = useRef<HTMLInputElement>(null);
+    const pageId = params.page_id as string;
+    const viewId = params.view_id as string;
+    const itemId = searchParams.get('detail');
     const [ viewSelected, setViewSelected ] = useState<DetailView>('chats');
+    const [ updateTitle, setUpdateTitle ] = useState<boolean>(false);
+    const [ itemData, setItemData ] = useState<ProjectDetailType | null>(null);
+    const [ newTitle, setNewTitle ] = useState<string>('');
 
+    useEffect(() => {
+        async function fetchData() {
+            const response = await getProjectDetail(itemId as string);
+            if(response instanceof Error) {                
+                return;
+            }
+
+            setItemData(response);
+            setNewTitle(response.title);
+        }
+
+        if(itemId) {
+            fetchData();
+        }
+    }, [itemId]);
+    
     useEffect(() => {
         if(updateTitle) {
             inputElementRef.current?.focus();
             inputElementRef.current?.select();
         }
     }, [updateTitle]);
-
+    
     useClickOutside(containerRef as RefObject<HTMLElement>, () => {
         setUpdateTitle(false);
     });
-
+    
+    if(!itemId) {
+        return null;
+    }
     return (
-        <article className={`${styles.container} ${!itemStore.showModal ? styles['container--backward'] : ''}`}>            
+        <article className={styles.container}>            
             <section className={styles.header}>
                 <section>
                     <FaArrowRightLong
                         className={styles.icon}
                         size={18}
-                        onClick={() => itemStore.setShowModal(false)}
+                        onClick={() => {router.push(`/projects/${pageId}/${viewId}`)}}
                     />
                 </section>
                 <section ref={containerRef}>
@@ -44,11 +75,9 @@ export const ProjectDetail = () => {
                         ? (
                             <input 
                                 type="text"
-                                onBlur={() => {
-                                    console.log('Ejecutando server action')
-                                }}
                                 className={styles['input-title']}
-                                defaultValue={itemStore.item?.title || 'Nombre de proyecto'}    
+                                onChange={(e) => setNewTitle(e.target.value)}
+                                defaultValue={itemData?.title || 'Proyecto'}    
                                 ref={inputElementRef}                            
                             />
                         )
@@ -57,7 +86,7 @@ export const ProjectDetail = () => {
                                 className={styles.title}
                                 onClick={() => setUpdateTitle(true)}
                             >
-                                {itemStore.item?.title || 'Nombre de proyecto'}
+                                {newTitle}
                             </p>
                         )
                     }
@@ -67,9 +96,9 @@ export const ProjectDetail = () => {
                 </section>
             </section>
             <section className={styles.body}>
-                {viewSelected === 'chats' && <Chats chats={itemStore.item?.chats}/>}
-                {viewSelected === 'files' && <Files itemId={itemStore.item?.id}/>}
-                {viewSelected === 'projectDetail' && <Details />}
+                {viewSelected === 'chats' && <Chats chats={itemData && itemData.chats ? itemData.chats : []}/>}
+                {/* {viewSelected === 'files' && <Files itemId={}/>} */}
+                {viewSelected === 'projectDetail' && <Details detail={itemData!.projectData}/>}
             </section>
         </article>
     );
