@@ -12,6 +12,7 @@ import type {
   GroupData, 
   ItemDetail 
 } from '@/utils/common/types';
+import { TitleControl } from './titleControl/titleControl';
 
 type Props = {
   group: GroupData;
@@ -41,14 +42,6 @@ export async function GroupItemTable({ group }: Props){
     itemsDetail = await Promise.all(promiseDetails) as ItemDetail[];
   }
 
-  console.log(1, items);
-  console.log(2, groupProperties);
-  console.log(3, itemsDetail);
-  console.log(4, textProperties);
-  console.log(5, numberProperties);
-  console.log(6, statusProperties);
-  console.log(7, timelineProperties);
-
   if(items.length === 0){
     return (
       <article 
@@ -57,12 +50,11 @@ export async function GroupItemTable({ group }: Props){
       >
         <section className={styles['header--closed']}>
           
-          <section className={styles.header}>
+          <section className={styles.header} style={{color: group.color}}>
             <IoIosArrowDown
-              className={`${styles.icon} ${styles['icon--closed']}`}
-              style={{color: group.color}}              
+              className={`${styles.icon} ${styles['icon--closed']}`}                           
             />
-            <p style={{color: group.color}}>{group.title}</p>
+            <TitleControl title={group.title} color={group.color} groupId={group.id}/>
           </section>
 
           <span>
@@ -82,7 +74,7 @@ export async function GroupItemTable({ group }: Props){
         <IoIosArrowDown 
           className={styles.icon}
         />
-        <p>{group.title}</p>
+        <TitleControl title={group.title} color={group.color} groupId={group.id}/>
       </section>
 
       <section 

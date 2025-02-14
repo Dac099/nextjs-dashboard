@@ -53,7 +53,7 @@ export const getViewTypes = async(): Promise<ViewType[] | Error> => {
     return resultSet.recordset;
   }catch(error){
     console.log(error);
-    const errorMsg: string = error.message ? error.message : 'SQL Server error while fetching view types';
+    const errorMsg: string = (error as Error).message ? (error as Error).message : 'SQL Server error while fetching view types';
     return new Error(errorMsg)
   }
 }

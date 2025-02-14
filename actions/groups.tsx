@@ -163,6 +163,14 @@ export async function createFirstItem(pageId: string, view_id: string): Promise<
       .input('pageId', pageId)
       .query(findFirstGroup);
 
+    if(response.recordset.length === 0){
+      await createGroup(pageId, view_id);
+      
+      response = await connection.request()
+      .input('pageId', pageId)
+      .query(findFirstGroup)
+    }
+
     const { groupId } = response.recordset[0];
 
     response = await connection.request()
@@ -277,4 +285,78 @@ try {
     : 'SQL Server error while fetching item task counts';
   return new Error(errorMsg);
 }
+}
+
+export async function createItem(groupId: string, pageId: string, viewId: string): Promise<number | Error> {
+  const query = `
+    INSERT INTO Item (Group_Id, Title)
+    VALUES (@groupId, @title);
+  `;
+  
+  try {
+    await connection.connect();
+    const result = await connection.request()
+      .input('groupId', groupId)
+      .input('title', faker.lorem.word(10))
+      .query(query);
+
+    revalidatePath(`/projects/${pageId}/${viewId}`);
+    return result.rowsAffected[0];
+  } catch(error) {
+    console.log(error);
+    const errorMsg = (error instanceof Error && error.message)
+      ? error.message
+      : 'SQL Server error while creating new item';
+    return new Error(errorMsg);
+  }
+}
+
+export async function updateGroupColor(groupId: string, color: string, pageId: string, viewId: string): Promise<number | Error> {
+  const query = `
+    UPDATE Grupo
+    SET Color = @color
+    WHERE Group_Id = @groupId;
+  `;
+  
+  try {
+    await connection.connect();
+    const result = await connection.request()
+      .input('groupId', groupId)
+      .input('color', color)
+      .query(query);
+
+    revalidatePath(`/projects/${pageId}/${viewId}`);
+    return result.rowsAffected[0];
+  } catch(error) {
+    console.log(error);
+    const errorMsg = (error instanceof Error && error.message)
+      ? error.message
+      : 'SQL Server error while updating group color';
+    return new Error(errorMsg);
+  }
+}
+
+export async function updateGroupTitle(groupId: string, title: string, pageId: string, viewId: string): Promise<number | Error> {
+  const query = `
+    UPDATE Grupo
+    SET Title = @title
+    WHERE Group_Id = @groupId;
+  `;
+  
+  try {
+    await connection.connect();
+    const result = await connection.request()
+      .input('groupId', groupId)
+      .input('title', title)
+      .query(query);
+
+    revalidatePath(`/projects/${pageId}/${viewId}`);
+    return result.rowsAffected[0];
+  } catch(error) {
+    console.log(error);
+    const errorMsg = (error instanceof Error && error.message)
+      ? error.message
+      : 'SQL Server error while updating group title';
+    return new Error(errorMsg);
+  }
 }
