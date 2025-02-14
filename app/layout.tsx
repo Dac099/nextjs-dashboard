@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['400', '700'],
+  weight: ['200' ,'400', '700', '900'],
 });
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {

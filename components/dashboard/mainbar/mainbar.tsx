@@ -1,13 +1,11 @@
-'use client';
-
 import styles from './styles.module.css';
 import Image from 'next/image';
 import LogoYne from '@/public/logo_yne.png';
 import { FaUser } from "react-icons/fa";
 import { IoNotifications } from "react-icons/io5";
-import { ThemeButton } from '../themeButton/themeButton';
+import { ThemeButton } from './themeButton/themeButton'
 
-export function MainBar() {
+export async function MainBar() {
   return (
     <article className={styles.mainbar}>
       <section>

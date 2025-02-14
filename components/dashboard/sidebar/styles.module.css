@@ -1,59 +1,12 @@
 .sidebar
 {
-  width: 250px;
-  padding: 10px 10px;
-  font-size: 1.4rem;
-  background: linear-gradient(to bottom right, var(--sec-bg-color) 60%, var(--bg-color));
+  min-width: 250px;
+  background-color: var(--sec-bg-color);
   border-top-right-radius: 10px;
-  user-select: none;
+  padding: 5px 10px;
 }
 
-.sidebar__workspace__title
+.division
 {
-  text-align: center;
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
-  border-top: 1px solid var(--font-color);
-}
-
-.sidebar svg
-{
-  font-size: 1.6rem;
-}
-
-.sidebar li
-{
-  padding: 4px;
-  border-radius: 4px;
-  transition: box-shadow 0.3s, border 0.3s, transform 0.3s;
-  margin-bottom: 4px;
-}
-
-.sidebar li:hover
-{
-  cursor: pointer;
-  background-color: var(--accent-color);
-  transform: translateX(10px);
-  border: 1px solid var(--font-color);
-  box-shadow: 2px 2px 0px 0px var(--font-color);
-}
-
-li.selected
-{
-  background-color: var(--accent-color);
-}
-
-.sidebar a
-{
-  text-decoration: none;
-  color: inherit;
-}
-
-.sidebar ul 
-{
-  list-style: none;
-
-  ul {
-    padding: 5px 5px 0 25px;
-  }
+  margin: 10px 0;
 }

@@ -1,7 +1,6 @@
 import { MainBar } from '@/components/dashboard/mainbar/mainbar';
 import { SideBar } from '@/components/dashboard/sidebar/sidebar';
-import styles from './styles.module.css';
-import {ProjectDetail} from "@/components/common/projectDetail/projectDetail";
+import styles from './app-layout.module.css';
 
 type Props = {
     children: React.ReactNode;
@@ -15,7 +14,6 @@ export default function MainLayout({ children }: Props) {
                 <SideBar />
                 <main className={styles.content}>
                     {children}
-                    <ProjectDetail />
                 </main>
             </section>
         </article>

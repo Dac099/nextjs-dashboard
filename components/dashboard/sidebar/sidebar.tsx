@@ -1,46 +1,28 @@
-'use client';
-
 import styles from './styles.module.css';
-import { TiHome } from "react-icons/ti";
+import { SideBarItem } from '@/components/common/sideBarItem/sideBarItem';
+import { RiHome9Fill } from "react-icons/ri";
 import { MdWorkspacesFilled } from "react-icons/md";
-import Link from 'next/link';
-import { ListItem } from './listItem/listItem';
-import { usePathname } from 'next/navigation';
-import { Result } from '@/utils/dashboard/types';
-import { getAllPages } from '@/services/projectsService';
-import { useEffect, useState } from 'react';
+import { MdDashboardCustomize } from "react-icons/md";
 
-export function SideBar() {
-  const pathname = usePathname();
-  const [pages, setPages] = useState<Result>({});
-
-  useEffect(() => {
-    const fetchPages = async () => {
-      const result = await getAllPages() as Result;
-      setPages(result);
-    }
-    fetchPages();
-  }, []);
-
+export async function SideBar() {
   return (
     <aside className={styles.sidebar}>
-      <nav>
-        <ul>
-          <li className={pathname === '/' ? styles.selected : ''}>
-            <Link href={'/'}>
-              <TiHome /> Inicio
-            </Link>
-          </li>
-        </ul>
-        <section>
-          <p className={styles.sidebar__workspace__title}> <span><MdWorkspacesFilled /></span> Espacios de trabajo</p>
-          <ul>
-            {Object.keys(pages).map((category) => (
-              <ListItem key={category} mainTitle={category} pages={pages[category]}/>
-            ))}
-          </ul>
-        </section>
-      </nav>
+      <section>
+        <SideBarItem url='/'>
+          <RiHome9Fill size={20}/>
+          <p>Tu espacio</p>
+        </SideBarItem>
+      </section>
+
+      <hr className={styles.division}/>
+
+      <section className={styles.control}>
+        
+      </section>
+
+      <section>
+
+      </section>
     </aside>
   );
 }

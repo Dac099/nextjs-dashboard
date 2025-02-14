@@ -1,0 +1,32 @@
+.linkItem
+{
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 2px;
+  color: var(--action-color);
+  border-radius: 5px;
+}
+
+.linkItem p
+{
+  font-size: 1.3rem;
+  color: var(--font-color);
+  font-weight: 400;
+}
+
+.linkItem:hover
+{
+  background-color: var(--accent-color);
+  color: var(--font-color);
+  border: 1px solid var(--action-color);
+}
+
+.active
+{
+  background-color: var(--accent-color);
+  color: var(--action-color);
+  border: 1px solid var(--action-color);
+  opacity: 0.6;
+}

@@ -1,3 +1,5 @@
+'use client';
+
 import useThemeStore from '@/stores/themeStore';
 import { IoMdMoon } from "react-icons/io";
 import { MdSunny } from "react-icons/md";
