@@ -11,8 +11,10 @@ type Props = {
 
 export const TimeLine = ({ property }: Props) => {
     const [ showCalendar, setShowCalendar ] = useState<boolean>(false);
-    const [ startDay, startMonth, startYear ] = property.startDate?.split('/') as string[];
-    const [ endDay, endMonth, endYear ] = property.endDate?.split('/') as string[];
+    const startDateFormatead = new Date(property.startDate as string).toLocaleDateString('en-GB');
+    const endDateFormatead = new Date(property.endDate as string).toLocaleDateString('en-GB');
+    const [ startDay, startMonth, startYear ] = startDateFormatead?.split('-') as string[];
+    const [ endDay, endMonth, endYear ] = endDateFormatead?.split('-') as string[];
 
     const currentDate = new Date();
     const startDate = new Date(`${startYear}/${startMonth}/${startDay}`);
@@ -30,7 +32,7 @@ export const TimeLine = ({ property }: Props) => {
             }
 
             <section className={styles['time-line']} onClick={ () => setShowCalendar(!showCalendar) }>
-                <p>{property.startDate} - {property.endDate}</p>
+                <p>{startDateFormatead} - {endDateFormatead}</p>
                 <div className={styles['progress-bg']}></div>
                 <div
                     className={styles['progress-bar']}

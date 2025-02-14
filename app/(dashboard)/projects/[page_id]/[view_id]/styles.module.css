@@ -2,7 +2,7 @@
 {
   height: 100%;
   display: grid;
-  grid-template-rows: repeat(3, auto) 1fr;
+  grid-template-rows: repeat(3, 50px) 700px;
 }
 
 .title
@@ -25,4 +25,10 @@
   align-items: center;
   justify-content: flex-start;
   margin-bottom: 20px;
+}
+
+.dynamic-container
+{
+  height: 100%;
+  overflow-y: auto;
 }

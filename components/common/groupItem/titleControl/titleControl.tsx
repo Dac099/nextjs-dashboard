@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { SlOptions } from "react-icons/sl";
 import { RiInsertRowTop, RiInsertColumnLeft } from "react-icons/ri";
 import { BsCardText } from "react-icons/bs";
-import { MdNumbers, MdOutlineViewTimeline } from "react-icons/md";
+import { MdNumbers, MdOutlineViewTimeline, MdDelete } from "react-icons/md";
 import { IoPricetagsOutline } from "react-icons/io5";
 import { IoIosColorPalette } from "react-icons/io";
 import { useState, useRef, RefObject, useEffect } from 'react';
@@ -14,16 +14,19 @@ import { HexColorPicker } from 'react-colorful';
 import { 
   updateGroupColor, 
   updateGroupTitle, 
-  createItem 
+  createItem,
+  deleteGroup,
+  createGroupColumn
 } from '@/actions/groups';
 
 type Props = {
   title: string;
   color: string;
   groupId: string;
+  totalItems: number;
 };
 
-export const TitleControl = ({ title, color, groupId }: Props) => {
+export const TitleControl = ({ title, color, groupId, totalItems }: Props) => {
   const params = useParams();
   const pageId = params.page_id as string;
   const viewId = params.view_id as string;
@@ -56,6 +59,7 @@ export const TitleControl = ({ title, color, groupId }: Props) => {
     setShowOptions(false);
     setShowColorPicker(false);
     setChangeTitle(false);
+    setShowProperties(false);
   }
 
   return (
@@ -68,6 +72,7 @@ export const TitleControl = ({ title, color, groupId }: Props) => {
             onChange={(e) => setNewTitle(e.target.value)} 
             autoFocus={true}
             onFocus={(e) => e.target.select()}
+            className={styles.inputTitle}
           />
         : 
           <p>{newTitle}</p>
@@ -88,18 +93,36 @@ export const TitleControl = ({ title, color, groupId }: Props) => {
             <p>Nuevo item</p>
           </div>
 
-          <div className={styles.option}>
-            <RiInsertColumnLeft size={20}/>
-            <p onClick={() => setShowProperties(!showProperties)}>Nueva columna</p>
-            {showProperties &&
-              <section className={styles.properties}>
-                <p><BsCardText size={15}/> Tipo texto</p>
-                <p><MdNumbers size={15}/> Tipo numérica</p>
-                <p><IoPricetagsOutline size={15}/> Tipo estatus</p>
-                <p><MdOutlineViewTimeline size={15}/> Tipo timeline</p>
-              </section>
-            }
-          </div>
+          {totalItems > 0 &&        
+            <div className={styles.option}>
+              <RiInsertColumnLeft size={20}/>
+              <p onClick={() => setShowProperties(!showProperties)}>Nueva columna</p>
+              {showProperties &&
+                <section className={styles.properties}>
+                  <p
+                    onClick={() => createGroupColumn(pageId, viewId, 'Text')}
+                  >
+                    <BsCardText size={15}/> Tipo texto
+                  </p>
+                  <p
+                    onClick={() => createGroupColumn(pageId, viewId, 'Number')}
+                  >
+                    <MdNumbers size={15}/> Tipo numérica
+                  </p>
+                  <p
+                    onClick={() => createGroupColumn(pageId, viewId, 'Status')}
+                  >
+                    <IoPricetagsOutline size={15}/> Tipo estatus
+                  </p>
+                  <p
+                    onClick={() => createGroupColumn(pageId, viewId, 'TimeLine')}
+                  >
+                    <MdOutlineViewTimeline size={15}/> Tipo timeline
+                  </p>
+                </section>
+              }
+            </div>
+          }
 
           <div className={styles.option}>
             <IoIosColorPalette size={20}/>
@@ -118,6 +141,14 @@ export const TitleControl = ({ title, color, groupId }: Props) => {
           >
             <BiRename size={20}/>
             <p>Cambiar nombre</p>
+          </div>
+          
+          <div 
+            className={styles.option}
+            onClick={() => deleteGroup(groupId, pageId, viewId)}
+          >
+            <MdDelete size={20}/>
+            <p>Eliminar Grupo</p>
           </div>
 
         </article>

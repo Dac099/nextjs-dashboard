@@ -5,6 +5,7 @@ import { ViewsBar } from '@/components/projects/viewsBar/viewsBar';
 import { FiltersBar } from '@/components/projects/filtersBar/filtersBar';
 import { DynamicContainer } from '@/components/projects/dynamicContainer/dynamicContainer';
 import { MultiBtn } from '@/components/common/multiBtn/multiBtn';
+import { countGroups } from '@/actions/groups';
 
 export default async function Page(props: {params: Promise<{page_id: string, view_id: string}>}) {
     const { page_id, view_id } = await props.params;

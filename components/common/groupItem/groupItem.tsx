@@ -54,7 +54,12 @@ export async function GroupItemTable({ group }: Props){
             <IoIosArrowDown
               className={`${styles.icon} ${styles['icon--closed']}`}                           
             />
-            <TitleControl title={group.title} color={group.color} groupId={group.id}/>
+            <TitleControl 
+              title={group.title} 
+              color={group.color} 
+              groupId={group.id}
+              totalItems={items.length}
+            />
           </section>
 
           <span>
@@ -74,7 +79,12 @@ export async function GroupItemTable({ group }: Props){
         <IoIosArrowDown 
           className={styles.icon}
         />
-        <TitleControl title={group.title} color={group.color} groupId={group.id}/>
+        <TitleControl 
+          title={group.title} 
+          color={group.color} 
+          groupId={group.id}
+          totalItems={items.length}
+        />
       </section>
 
       <section 
@@ -98,29 +108,29 @@ export async function GroupItemTable({ group }: Props){
 
           {/* Table's head rendering */}
           {
-            textProperties.map(property => (
-              <div key={property.propertyTitle} className={styles['row-header']}>
+            textProperties.map((property, index) => (
+              <div key={index} className={styles['row-header']}>
                 <p>{property.userTitle || property.propertyTitle}</p>
               </div>
             ))
           }
           {
-            numberProperties.map(property => (
-              <div key={property.propertyTitle} className={styles['row-header']}>
+            numberProperties.map((property, index) => (
+              <div key={index} className={styles['row-header']}>
                 <p>{property.userTitle || property.propertyTitle}</p>
               </div>
             ))
           }
           {
-            statusProperties.map(property => (
-              <div key={property.propertyTitle} className={styles['row-header']}>
+            statusProperties.map((property, index) => (
+              <div key={index} className={styles['row-header']}>
                 <p>{property.userTitle || property.propertyTitle}</p>
               </div>
             ))
           }
           {
-            timelineProperties.map(property => (
-              <div key={property.propertyTitle} className={styles['row-header']}>
+            timelineProperties.map((property, index) => (
+              <div key={index} className={styles['row-header']}>
                 <p>{property.userTitle || property.propertyTitle}</p>
               </div>
             ))

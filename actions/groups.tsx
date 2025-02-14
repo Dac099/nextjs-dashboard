@@ -3,6 +3,7 @@ import connection from '@/services/database';
 import type { GroupData, ItemData, ItemDetail, PageProperties, PropertyData } from '@/utils/common/types';
 import { faker } from '@faker-js/faker';
 import { revalidatePath } from 'next/cache';
+import type { DefinedProperty } from '@/utils/common/types';
 
 export const fetchGroups = async(pageId: string): Promise<GroupData[] | Error> => {
   try {
@@ -147,11 +148,6 @@ export const createGroup = async(pageId: string, viewId: string): Promise<number
 }
 
 export async function createFirstItem(pageId: string, view_id: string): Promise<number | Error> {
-  const newItemQuery: string = `
-    INSERT INTO Item (Group_Id, Title)
-    VALUES (@groupId, @title);
-  `;
-
   const findFirstGroup: string = `
     SELECT Group_Id as groupId FROM Grupo WHERE Page_Id = @pageId AND Render_Order = 1;
   `;
@@ -171,16 +167,7 @@ export async function createFirstItem(pageId: string, view_id: string): Promise<
       .query(findFirstGroup)
     }
 
-    const { groupId } = response.recordset[0];
-
-    response = await connection.request()
-      .input('groupId', groupId)
-      .input('title', faker.lorem.word(10))
-      .query(newItemQuery);
-    
-    revalidatePath(`/projects/${pageId}/${view_id}`);
-    return response.rowsAffected[0];
-
+    return await createItem(response.recordset[0].groupId, pageId, view_id);
   }catch(error){
     console.log(error);
     const errorMsg: string = (error instanceof Error && error.message) 
@@ -288,20 +275,81 @@ try {
 }
 
 export async function createItem(groupId: string, pageId: string, viewId: string): Promise<number | Error> {
-  const query = `
-    INSERT INTO Item (Group_Id, Title)
-    VALUES (@groupId, @title);
-  `;
-  
   try {
     await connection.connect();
-    const result = await connection.request()
+
+    const insertItemQuery = `
+      INSERT INTO Item (Group_Id, Title)
+      OUTPUT INSERTED.Item_Id
+      VALUES (@groupId, @title);
+    `;
+
+    const itemResult = await connection.request()
       .input('groupId', groupId)
       .input('title', faker.lorem.word(10))
-      .query(query);
+      .query(insertItemQuery);
+
+    const newItemId = itemResult.recordset[0].Item_Id;
+
+    const insertPropertiesQuery = `
+      -- Insertamos propiedades de texto existentes
+      INSERT INTO PText (Item_Id, Property_Title, Value)
+      SELECT 
+        @newItemId,
+        pt.Property_Title,
+        ''
+      FROM PText pt
+      INNER JOIN Item i ON pt.Item_Id = i.Item_Id
+      INNER JOIN Grupo g ON i.Group_Id = g.Group_Id
+      WHERE g.Page_Id = @pageId
+      GROUP BY pt.Property_Title;
+
+      -- Insertamos propiedades numéricas existentes  
+      INSERT INTO PNumber (Item_Id, Property_Title, Value)
+      SELECT 
+        @newItemId,
+        pn.Property_Title,
+        0
+      FROM PNumber pn
+      INNER JOIN Item i ON pn.Item_Id = i.Item_Id
+      INNER JOIN Grupo g ON i.Group_Id = g.Group_Id
+      WHERE g.Page_Id = @pageId
+      GROUP BY pn.Property_Title;
+
+      -- Insertamos propiedades de estado existentes
+      INSERT INTO PStatus (Item_Id, Property_Title, Value, Color)
+      SELECT 
+        @newItemId,
+        ps.Property_Title,
+        '',
+        ps.Color
+      FROM PStatus ps
+      INNER JOIN Item i ON ps.Item_Id = i.Item_Id
+      INNER JOIN Grupo g ON i.Group_Id = g.Group_Id
+      WHERE g.Page_Id = @pageId
+      GROUP BY ps.Property_Title, ps.Color;
+
+      -- Insertamos propiedades timeline existentes
+      INSERT INTO PTime_Line (Item_Id, Property_Title, Start_Date, End_Date)
+      SELECT 
+        @newItemId,
+        pt.Property_Title,
+        GETDATE(),
+        DATEADD(day, 7, GETDATE())
+      FROM PTime_Line pt
+      INNER JOIN Item i ON pt.Item_Id = i.Item_Id
+      INNER JOIN Grupo g ON i.Group_Id = g.Group_Id
+      WHERE g.Page_Id = @pageId
+      GROUP BY pt.Property_Title;
+    `;
+
+    await connection.request()
+      .input('newItemId', newItemId)
+      .input('pageId', pageId)
+      .query(insertPropertiesQuery);
 
     revalidatePath(`/projects/${pageId}/${viewId}`);
-    return result.rowsAffected[0];
+    return 1;
   } catch(error) {
     console.log(error);
     const errorMsg = (error instanceof Error && error.message)
@@ -358,5 +406,143 @@ export async function updateGroupTitle(groupId: string, title: string, pageId: s
       ? error.message
       : 'SQL Server error while updating group title';
     return new Error(errorMsg);
+  }
+}
+
+export async function deleteGroup(groupId: string, pageId: string, viewId: string): Promise<number | Error> {
+  const deleteGroupQuery: string = `
+    DELETE FROM Grupo WHERE Group_Id = @groupId;
+  `;
+  try{
+    await connection.connect();
+    const result = await connection.request()
+      .input('groupId', groupId)
+      .query(deleteGroupQuery);
+      revalidatePath(`/projects/${pageId}/${viewId}`);
+    return result.rowsAffected[0];
+  }catch(error){
+    console.log(error);
+    const errorMsg = (error instanceof Error && error.message)
+      ? error.message
+      : 'SQL Server error while deleting group';
+    return new Error(errorMsg);
+  }
+}
+
+export async function createGroupColumn(pageId: string, viewId: string, typeProperty: DefinedProperty): Promise<number | Error> {
+  try {
+    let tableName: string = '';
+    let propertyTitle: string = '';
+    let defaultValue: string | number;
+    let color: string = '';
+
+    switch(typeProperty){
+      case 'Text':
+        tableName = 'PText';
+        propertyTitle = 'Columna de texto';
+        defaultValue = '';
+        break;
+      case 'Number':
+        tableName = 'PNumber';
+        propertyTitle = 'Columna de número';
+        defaultValue = 0;
+        break;
+      case 'Status': 
+        tableName = 'PStatus';
+        propertyTitle = 'Columna de estado';
+        defaultValue = '';
+        color = faker.color.rgb();
+        break;
+      case 'TimeLine':
+        return await createTimelineProperty(pageId, viewId);
+    }
+
+    const query: string = `
+      INSERT INTO ${tableName} (
+        Item_Id,
+        Property_Title,
+        Value
+        ${typeProperty === 'Status' ? ',Color' : ''}
+      )
+      SELECT 
+        i.Item_Id,
+        @propertyTitle,
+        @defaultValue
+        ${typeProperty === 'Status' ? ',@color' : ''}
+      FROM Item i
+      INNER JOIN Grupo g ON i.Group_Id = g.Group_Id
+      INNER JOIN Page p ON g.Page_Id = p.Page_Id
+      WHERE p.Page_Id = @pageId
+    `;
+
+    await connection.connect();
+    const result = await connection.request()
+      .input('pageId', pageId)
+      .input('propertyTitle', propertyTitle)
+      .input('defaultValue', defaultValue!)
+      .input('color', color)
+      .query(query);
+
+    revalidatePath(`/projects/${pageId}/${viewId}`);
+    return result.rowsAffected[0];
+  } catch (error) {
+    console.log(error);
+    const errorMsg = (error instanceof Error && error.message)
+      ? error.message
+      : 'SQL Server error while creating new column';
+    return new Error(errorMsg);
+  }
+}
+
+async function createTimelineProperty( pageId: string, viewId: string): Promise<number | Error> {
+  try {
+    const query = `
+      INSERT INTO PTime_Line (
+        Item_Id,
+        Property_Title,
+        Start_Date,
+        End_Date
+      )
+      SELECT 
+        i.Item_Id,
+        @propertyTitle,
+        GETDATE(),
+        DATEADD(day, 7, GETDATE())
+      FROM Item i
+      INNER JOIN Grupo g ON i.Group_Id = g.Group_Id
+      INNER JOIN Page p ON g.Page_Id = p.Page_Id
+      WHERE p.Page_Id = @pageId;
+    `;
+
+    await connection.connect();
+    const result = await connection.request()
+      .input('pageId', pageId)
+      .input('propertyTitle', 'Columna de tiempo')
+      .query(query);
+
+    revalidatePath(`/projects/${pageId}/${viewId}`);
+    return result.rowsAffected[0];
+
+  } catch(error) {
+    console.error(error);
+    return new Error('Error creating new timeline property');
+  }
+}
+
+export async function countGroups(pageId: string): Promise<number | Error> {
+  const query = `
+    SELECT COUNT(*) as totalGroups FROM Grupo WHERE Page_Id = @pageId;
+  `;
+
+  try {
+    await connection.connect();
+    const result = await connection.request()
+      .input('pageId', pageId)
+      .query(query);
+
+    return result.recordset[0].totalGroups;
+  } catch(error) {
+    console.error(error);
+    return new Error('Error counting groups');
   }
 }
