@@ -1,5 +1,3 @@
-'use client';
-
 import { ItemData } from '@/utils/common/types';
 import styles from './styles.module.css';
 import { Tooltip } from '@/components/common/tooltip/tooltip';

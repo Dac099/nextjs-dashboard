@@ -1,24 +1,22 @@
-'use client';
-
 import styles from './styles.module.css';
-import { ItemData } from "@/utils/common/types";
+import type { ItemData, ItemDetail } from "@/utils/common/types";
 import { MdOpenInFull } from "react-icons/md";
 import { TaskRing } from "@/components/common/taskRing/taskRing";
 import { ChatRing } from "@/components/common/chatRing/chatRing";
 import { Status } from "@/components/common/properties/status/status"
 import { Primitive } from "@/components/common/properties/primitive/primitive";
-import { DefinedDate } from "@/components/common/properties/definedDate/definedDate";
+// import { DefinedDate } from "@/components/common/properties/definedDate/definedDate";
 import { TimeLine } from "@/components/common/properties/timeLine/timeLine";
-import { Person } from "@/components/common/properties/person/person";
-import { useItemSelected } from "@/stores/detailItemStore";
+// import { Person } from "@/components/common/properties/person/person";
+import { getTasksData } from '@/actions/groups';
 
 type Props = {
-    item: ItemData;
+    detail: ItemDetail;
+    item: ItemData
 };
 
-export const RowItem = ({item}: Props) => {
-    const itemStore = useItemSelected();
-
+export async function RowItem({ detail, item }: Props){
+    const tasksInfo = await getTasksData(item.id);
     return (
         <article className={styles.row}>
             <div className={styles.checkbox}>
@@ -32,10 +30,6 @@ export const RowItem = ({item}: Props) => {
                     <p>{item.title}</p>
                     <span
                         className={styles['open-tag']}
-                        onClick={() => {
-                            itemStore.setItem(item);
-                            itemStore.setShowModal(true);
-                        }}
                     >
                         Detalle
                         <MdOpenInFull className={styles['icon-open']} />
@@ -44,31 +38,26 @@ export const RowItem = ({item}: Props) => {
 
                 <section className={styles.complements}>
                     <div>
-                        {item.totalTasks > 0 &&
-                            <TaskRing completedTasks={item.completedTasks} totalTasks={item.totalTasks} />
+                        {!(tasksInfo instanceof Error) && tasksInfo.totalTasks > 0 &&
+                            <TaskRing completedTasks={tasksInfo.completedTasks} totalTasks={tasksInfo.totalTasks} />
                         }
                     </div>
-                    <div
-                        onClick={() => {
-                            itemStore.setItem(item);
-                            itemStore.setShowModal(true);
-                        }}
-                    >
-                        <ChatRing chats={item.chats} itemId={item.id} />
+                    <div>
+                        <ChatRing chats={detail.chats} itemId={item.id} />
                     </div>
                 </section>
             </div>
-
             {
-                item.properties.map((property) => (
-                    <div key={property.id}>
-                        {property.type === 'Status' && <Status property={property} />}
-                        {(property.type === 'Number' || property.type === 'Text') && <Primitive property={property} />}
-                        {property.type === 'Date' && <DefinedDate property={property} />}
-                        {property.type === 'TimeLine' && <TimeLine property={property} />}
-                        {property.type === 'User' && <Person property={property} />}
-                    </div>
-                ))
+                detail.textProps.map(property => (<Primitive property={property} key={property.id}/>))
+            }
+            {
+                detail.numberProps.map(property => (<Primitive property={property} key={property.id}/>))
+            }
+            {
+                detail.statusProps.map(property => (<Status property={property} key={property.id}/>))
+            }
+            {
+                detail.timelineProps.map(property => (<TimeLine property={property} key={property.id}/>))
             }
         </article>
     );

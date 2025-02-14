@@ -6,28 +6,19 @@ export type GroupData = {
 
 export type ItemData = {
   id: string;
-  groupId: string;
-  projectId: string;
   title: string;
   createdAt: string;
   updatedAt: string;
-  totalTasks: number;
-  completedTasks: number;
-  chats: Array<ChatData>;
-  properties: Array<PropertyData>;
 };
 
 export type ChatData = {
   id: string;
   message: string;
-  tasks: Array<TaskData>;
   createdAt: string;
-  updatedAt: string;
 };
 
 export type TaskData = {
   id: string;
-  chatId: string;
   isCompleted: boolean;
   content: string;
 };
@@ -44,6 +35,22 @@ export type PropertyData = {
   endDate?: string;
   color?: string;
   userName?: string;
+};
+
+export type PageProperties = {
+  PText: string;
+  PNumber: string;
+  PTimeLine: string;
+  PStatus: string;
+};
+
+export type ItemDetail = {
+  itemId: string;
+  textProps: Array<PropertyData>;
+  numberProps: Array<PropertyData>;
+  statusProps: Array<PropertyData>;
+  timelineProps: Array<PropertyData>;
+  chats:Array<ChatData>;
 };
 
 export type DefinedProperty = 'Text' | 'Number' | 'Date' | 'User' | 'TimeLine' | 'Status';

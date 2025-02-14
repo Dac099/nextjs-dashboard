@@ -4,11 +4,11 @@ import { IoPersonCircle } from "react-icons/io5";
 import Image from 'next/image';
 
 type Props = {
-  items: ItemData[];
+  groupId: string;
   propertyTitle: string;
 };
 
-export const ResumePerson = ({items, propertyTitle}: Props) => {
+export const ResumePerson = ({groupId, propertyTitle}: Props) => {
   const filteredItems = items.map((item) => item.properties).flat().filter((item) => item.propertyTitle === propertyTitle);
   const definedTitle = filteredItems[0].userTitle || filteredItems[0].propertyTitle;
   console.log(filteredItems);

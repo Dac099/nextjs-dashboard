@@ -1,16 +1,15 @@
 'use client';
 
 import styles from './styles.module.css';
-import {PropertyData} from "@/utils/common/types";
 import { LuCalendarClock } from "react-icons/lu";
 import Calendar from 'react-calendar';
 import {useState} from "react";
 
 type Props = {
-    property : PropertyData
+    date : string
 };
 
-export const DefinedDate = ({ property }: Props) => {
+export const DefinedDate = ({ date }: Props) => {
     const [ showCalendar, setShowCalendar ] = useState<boolean>(false);
 
     return (
@@ -21,7 +20,7 @@ export const DefinedDate = ({ property }: Props) => {
                     onClick={() => {setShowCalendar(!showCalendar)}}
                 />
             </span>
-            <p>{property.value}</p>
+            <p>{date}</p>
 
             {showCalendar &&
                 <section className={styles['calendar-container']}>

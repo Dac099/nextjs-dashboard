@@ -1,12 +1,12 @@
+import { PropertyData } from '@/utils/common/types';
 import styles from './styles.module.css';
-import { ItemData } from '@/utils/common/types';
+import { getResumeNumberProperties } from '@/actions/groups';
 
 type Props = {
-  items: ItemData[];
-  propertyTitle: string;
+  numberProperties: PropertyData[];
 };
 
-export const ResumeNumber = ({items, propertyTitle}: Props) => {
+export const ResumeNumber = ({numberProperties}: Props) => {
   const filteredProperties = items
     .map((item) => item.properties)
     .flat()

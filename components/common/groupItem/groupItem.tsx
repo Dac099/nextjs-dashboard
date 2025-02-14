@@ -1,19 +1,55 @@
 import styles from './styles.module.css';
-import { GroupData } from '@/utils/common/types';
 import { IoIosArrowDown } from "react-icons/io";
-import { ResumeStatus } from './resumes/resumeStatus/resumeStatus';
-import { ResumeNumber } from './resumes/resumeNumber/resumeNumber';
-import { ResumePerson } from './resumes/resumePerson/resumePerson';
 import {RowItem} from "@/components/common/groupItem/rowItem/rowItem";
+import { 
+  getGroupItems, 
+  getGroupProperties, 
+  getItemData 
+} from '@/actions/groups';
+import type { 
+  ItemData, 
+  PropertyData, 
+  GroupData, 
+  ItemDetail 
+} from '@/utils/common/types';
 
 type Props = {
   group: GroupData;
 };
 
-export async function GroupItemTable({ group }: Props){
-  const [isOpen, setIsOpen] = useState<boolean>(true);
+type HeaderProperty = {
+  userTitle: string;
+  propertyTitle: string;
+};
 
-  if(!isOpen){
+export async function GroupItemTable({ group }: Props){
+  const items = await getGroupItems(group.id) as ItemData[];
+  let groupProperties: PropertyData[][] = []
+  let textProperties: HeaderProperty[] = [];
+  let numberProperties: HeaderProperty[] = [];
+  let statusProperties: HeaderProperty[] = [];
+  let timelineProperties: HeaderProperty[] = [];
+  let itemsDetail: ItemDetail[] = [];
+
+  if(items.length > 0){
+    groupProperties = await getGroupProperties(items[0].id) as PropertyData[][];
+    textProperties = groupProperties[0];
+    numberProperties = groupProperties[1];
+    statusProperties = groupProperties[2];
+    timelineProperties = groupProperties[3];
+    const promiseDetails = items.map(item => getItemData(item.id));
+    itemsDetail = await Promise.all(promiseDetails) as ItemDetail[];
+  }
+
+  console.log(1, items);
+  console.log(2, groupProperties);
+  console.log(3, itemsDetail);
+  console.log(4, textProperties);
+  console.log(5, numberProperties);
+  console.log(6, statusProperties);
+  console.log(7, timelineProperties);
+
+  if(items.length === 0){
     return (
       <article 
         className={`${styles.container} ${styles['container--closed']}`} 
@@ -23,54 +59,19 @@ export async function GroupItemTable({ group }: Props){
           
           <section className={styles.header}>
             <IoIosArrowDown
-              className={`${styles.icon} ${!isOpen ? styles['icon--closed'] : ''}`}
-              onClick={() => setIsOpen(!isOpen)}
+              className={`${styles.icon} ${styles['icon--closed']}`}
               style={{color: group.color}}              
             />
             <p style={{color: group.color}}>{group.title}</p>
           </section>
 
           <span>
-            {`${group.items.length} ${group.items.length > 1 ? 'Elementos' : 'Elemento'}`}
+            0 elementos
           </span>
 
         </section>
 
-        <section className={styles['properties--closed']}>
-          {
-            groupProperties.map((property) => {
-              switch(property.type){
-                case 'Number':
-                  return (
-                    <ResumeNumber 
-                      key={property.id}
-                      items={group.items}
-                      propertyTitle={property.propertyTitle}
-                    />
-                  );
-                case 'Status':
-                  return (
-                    <ResumeStatus 
-                      key={property.id} 
-                      items={group.items} 
-                      propertyTitle={property.propertyTitle}
-                    />
-                  );
-                case 'User':
-                  return (
-                    <ResumePerson 
-                      key={property.id} 
-                      items={group.items} 
-                      propertyTitle={property.propertyTitle}
-                    />
-                  );
-              }
-
-              return (<div key={property.id} className={styles['empty-column']}></div>);
-            })
-          }
-        </section>
-
+        <section className={styles['properties--closed']}></section>
       </article>
     );
   }
@@ -79,8 +80,7 @@ export async function GroupItemTable({ group }: Props){
     <article>
       <section className={`${styles.header} ${styles['header--open']}`} style={{color: group.color}}>
         <IoIosArrowDown 
-          className={`${styles.icon} ${!isOpen ? styles['icon--closed'] : ''}`}
-          onClick={() => setIsOpen(!isOpen)}
+          className={styles.icon}
         />
         <p>{group.title}</p>
       </section>
@@ -97,7 +97,6 @@ export async function GroupItemTable({ group }: Props){
               type="checkbox" 
               name="" 
               id="" 
-              onChange={(e) => setSelectAll(e.target.checked)}
             />
           </div>
 
@@ -105,18 +104,49 @@ export async function GroupItemTable({ group }: Props){
             <p>Proyecto</p>
           </div>
 
+          {/* Table's head rendering */}
           {
-            groupProperties.map(property => (
-              <div key={property.id} className={styles['row-header']}>
+            textProperties.map(property => (
+              <div key={property.propertyTitle} className={styles['row-header']}>
+                <p>{property.userTitle || property.propertyTitle}</p>
+              </div>
+            ))
+          }
+          {
+            numberProperties.map(property => (
+              <div key={property.propertyTitle} className={styles['row-header']}>
+                <p>{property.userTitle || property.propertyTitle}</p>
+              </div>
+            ))
+          }
+          {
+            statusProperties.map(property => (
+              <div key={property.propertyTitle} className={styles['row-header']}>
+                <p>{property.userTitle || property.propertyTitle}</p>
+              </div>
+            ))
+          }
+          {
+            timelineProperties.map(property => (
+              <div key={property.propertyTitle} className={styles['row-header']}>
                 <p>{property.userTitle || property.propertyTitle}</p>
               </div>
             ))
           }
         </article>
+
+        {/* Table items rendering */}
         {
-          group.items.map(item => (
-            <RowItem item={item} key={item.id} />
-          ))
+          items.map(item => {
+            const detail = itemsDetail.find(detail => detail.itemId === item.id) as ItemDetail;
+            return (
+              <RowItem 
+                key={item.id}
+                detail={detail}
+                item={item}
+              />
+            );
+          })
         }
       </section>
 
