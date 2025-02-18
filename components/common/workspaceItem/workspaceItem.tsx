@@ -1,0 +1,121 @@
+'use client';
+import styles from './styles.module.css';
+import type { Workspace } from '@/utils/types/dashboard';
+import { KeyboardEvent, useState, useEffect, useRef } from 'react';
+import { MdWorkspaces } from "react-icons/md";
+import { TiCancel } from "react-icons/ti";
+import { updateWorkspace, addDashboard } from '@/actions/dashboard';
+import { GoPlus } from "react-icons/go";
+import { Tooltip } from '../tooltip/tooltip';
+import type { Dashboard } from '@/utils/types/dashboard';
+
+type Props = {
+  workspace: Workspace;
+};
+
+export function WorkspaceItem({ workspace }: Props){
+  const inputRef = useRef<HTMLInputElement>(null);
+  const inputDashboardRef = useRef<HTMLInputElement>(null);
+  const [ changeName, setChangeName ] = useState<boolean>(false);
+  const [ workspaceName, setWorkspaceName ] = useState<string>(workspace.name);
+  const [ inputDashboard, setInputDashboard ] = useState<boolean>(false);
+  const [ dashboards, setDashboards ] = useState<Dashboard[]>([]);
+
+  async function closeInputTitle(e: KeyboardEvent)
+  {
+    if(e.code === 'Enter' && workspace.name !== workspaceName)
+    {
+      setChangeName(false);
+      await updateWorkspace(workspace.id, false, workspaceName);
+    }
+  }
+
+  async function handleAddDashBoard(e: KeyboardEvent){
+    const inputValue: string = inputDashboardRef.current?.value as string;
+
+    if(e.code === 'Enter')
+    {
+      setInputDashboard(false);
+    }
+
+    if(e.code === 'Escape') setInputDashboard(false);
+
+    if(e.code === 'Enter' && inputValue.length > 0)
+    {
+      setInputDashboard(false);
+      setDashboards([
+        ...dashboards,
+        {
+          id: Math.random().toString(),
+          name: inputValue
+        }
+      ]);
+      await addDashboard(inputValue, workspace.id);
+    }
+  }
+
+
+  useEffect(() => {
+    if(changeName) inputRef.current?.select();
+    if(inputDashboard) inputDashboardRef.current?.focus();
+  }, [changeName, inputDashboard]);
+
+  return (
+    <article>
+      <section className={styles.workspaceTitle}>
+        <section>
+          {!changeName && 
+            <div className={styles.textTitle}>
+              <MdWorkspaces />
+              <p 
+                onDoubleClick={() => setChangeName(true)}
+              >
+                {workspaceName}
+              </p>
+            </div>
+          }
+          {changeName &&
+            <div className={styles.inputTitle}>
+              <input 
+                type="text"
+                defaultValue={workspaceName}
+                onKeyUp={(e) => closeInputTitle(e as KeyboardEvent)}
+                onChange={e => setWorkspaceName(e.target.value)}
+                ref={inputRef}
+              />
+              <TiCancel 
+                size={20} 
+                className={styles.inputTitleClose}
+                onClick={() => setChangeName(false)}
+              />
+            </div>
+          }
+        </section>
+        <section>
+          {!changeName && 
+            <Tooltip text='Agregar tablero'>
+              <div className={styles.addIcon}>
+                <GoPlus size={20} onClick={() => setInputDashboard(!inputDashboard)}/>
+              </div>
+            </Tooltip>
+          }
+        </section>        
+      </section>
+
+      <section className={styles.dashboards}>
+        {inputDashboard && 
+          <input 
+            type="text"
+            ref={inputDashboardRef}
+            placeholder='Título del tablero'
+            onKeyUp={(e) => handleAddDashBoard(e as KeyboardEvent)}
+            className={styles.inputDashboard}
+          />
+        }
+        {dashboards.map(dash => (
+          <p key={dash.id}>{dash.name}</p>
+        ))}
+      </section>
+    </article>
+  );
+}

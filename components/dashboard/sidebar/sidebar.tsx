@@ -1,10 +1,19 @@
 import styles from './styles.module.css';
 import { SideBarItem } from '@/components/common/sideBarItem/sideBarItem';
 import { RiHome9Fill } from "react-icons/ri";
-import { MdWorkspacesFilled } from "react-icons/md";
-import { MdDashboardCustomize } from "react-icons/md";
+import { SidebarControls } from '@/components/common/sidebarControls/sidebarControls';
+import { getAllWorkspace } from '@/actions/dashboard';
+import type { Workspace } from '@/utils/types/dashboard';
+import { WorkspaceItem } from '@/components/common/workspaceItem/workspaceItem';
 
 export async function SideBar() {
+  const response: Workspace[] | Error = await getAllWorkspace();
+  const workspaces: Workspace [] = [];
+
+  if(!(response instanceof Error)){
+    workspaces.push(...response);
+  }
+
   return (
     <aside className={styles.sidebar}>
       <section>
@@ -16,13 +25,13 @@ export async function SideBar() {
 
       <hr className={styles.division}/>
 
-      <section className={styles.control}>
-        
-      </section>
+      <SidebarControls />
 
-      <section>
+      <hr className={styles.division}/>
 
-      </section>
+      {workspaces.map(workspace => (
+        <WorkspaceItem workspace={workspace} key={workspace.id}/>
+      ))}
     </aside>
   );
 }
