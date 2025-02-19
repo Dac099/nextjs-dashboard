@@ -1,32 +1,34 @@
 'use client';
 import styles from './styles.module.css';
-import type { Workspace } from '@/utils/types/dashboard';
+import type { Dashboard } from '@/utils/types/dashboard';
 import { KeyboardEvent, useState, useEffect, useRef } from 'react';
 import { MdWorkspaces } from "react-icons/md";
 import { TiCancel } from "react-icons/ti";
 import { updateWorkspace, addDashboard } from '@/actions/dashboard';
 import { GoPlus } from "react-icons/go";
 import { Tooltip } from '../tooltip/tooltip';
-import type { Dashboard } from '@/utils/types/dashboard';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 type Props = {
-  workspace: Workspace;
+  workspace: Dashboard[];
 };
 
 export function WorkspaceItem({ workspace }: Props){
+  const params = useParams();
+  const boardId: string = params.id as string || '';
   const inputRef = useRef<HTMLInputElement>(null);
   const inputDashboardRef = useRef<HTMLInputElement>(null);
   const [ changeName, setChangeName ] = useState<boolean>(false);
-  const [ workspaceName, setWorkspaceName ] = useState<string>(workspace.name);
+  const [ workspaceName, setWorkspaceName ] = useState<string>(workspace[0].workspaceName);
   const [ inputDashboard, setInputDashboard ] = useState<boolean>(false);
-  const [ dashboards, setDashboards ] = useState<Dashboard[]>([]);
-
+  const [ dashboards, setDashboards ] = useState<Dashboard[]>(workspace);
   async function closeInputTitle(e: KeyboardEvent)
   {
-    if(e.code === 'Enter' && workspace.name !== workspaceName)
+    if(e.code === 'Enter' && workspace[0].workspaceName !== workspaceName)
     {
       setChangeName(false);
-      await updateWorkspace(workspace.id, false, workspaceName);
+      await updateWorkspace(workspace[0].workspaceId, false, workspaceName);
     }
   }
 
@@ -46,11 +48,13 @@ export function WorkspaceItem({ workspace }: Props){
       setDashboards([
         ...dashboards,
         {
-          id: Math.random().toString(),
-          name: inputValue
+          boardId: Math.random().toString(),
+          workspaceId: workspace[0].workspaceId,
+          workspaceName: workspace[0].workspaceName,
+          boardName: inputValue,
         }
       ]);
-      await addDashboard(inputValue, workspace.id);
+      await addDashboard(inputValue, workspace[0].workspaceId);
     }
   }
 
@@ -112,8 +116,14 @@ export function WorkspaceItem({ workspace }: Props){
             className={styles.inputDashboard}
           />
         }
-        {dashboards.map(dash => (
-          <p key={dash.id}>{dash.name}</p>
+        {dashboards.map(dashboard => (
+          <Link
+            key={dashboard.boardId}
+            href={`/board/${dashboard.boardId}`}
+            className={`${styles.boardLink} ${dashboard.boardId === boardId ? styles.boardLinkActive : ''}`}
+          >
+            {dashboard.boardName}
+          </Link>
         ))}
       </section>
     </article>

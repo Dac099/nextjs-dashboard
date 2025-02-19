@@ -6,6 +6,12 @@ export type Workspace = {
 };
 
 export type Dashboard = {
-  id: string,
-  name: string;
+  workspaceId: string;
+  workspaceName: string;
+  boardId: string;
+  boardName: string;
 };
+
+export type WorkspaceWithDashboards = {
+  [key: string] : Dashboard[]
+}

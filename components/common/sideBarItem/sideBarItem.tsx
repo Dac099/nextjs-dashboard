@@ -10,7 +10,6 @@ type Props = {
 
 export const SideBarItem = (props: Props) => {
   const pathName = usePathname();
-  console.log(pathName);
   return (
     <Link
       href={props.url}

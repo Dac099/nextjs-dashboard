@@ -1,9 +1,10 @@
 .container
 {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
 }
 
 .container-item
@@ -16,7 +17,7 @@
   border-radius: 4px;
   transition: color 0.3s, background-color 0.3s;
   padding: 3px 5px;
-  width: max-content;
+  width: 100%;
 }
 
 

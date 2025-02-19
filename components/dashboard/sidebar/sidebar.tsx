@@ -3,15 +3,15 @@ import { SideBarItem } from '@/components/common/sideBarItem/sideBarItem';
 import { RiHome9Fill } from "react-icons/ri";
 import { SidebarControls } from '@/components/common/sidebarControls/sidebarControls';
 import { getAllWorkspace } from '@/actions/dashboard';
-import type { Workspace } from '@/utils/types/dashboard';
+import type { Dashboard, WorkspaceWithDashboards } from '@/utils/types/dashboard';
 import { WorkspaceItem } from '@/components/common/workspaceItem/workspaceItem';
 
 export async function SideBar() {
-  const response: Workspace[] | Error = await getAllWorkspace();
-  const workspaces: Workspace [] = [];
+  const response: WorkspaceWithDashboards | Error = await getAllWorkspace();
+  let workspaces: Dashboard[][] = [];
 
   if(!(response instanceof Error)){
-    workspaces.push(...response);
+    workspaces = Object.values(response);
   }
 
   return (
@@ -30,7 +30,7 @@ export async function SideBar() {
       <hr className={styles.division}/>
 
       {workspaces.map(workspace => (
-        <WorkspaceItem workspace={workspace} key={workspace.id}/>
+        <WorkspaceItem workspace={workspace} key={workspace[0].workspaceId}/>
       ))}
     </aside>
   );

@@ -1,7 +1,7 @@
 'use server';
 import connection from '@/services/database';
 import { revalidatePath } from 'next/cache';
-import type { Workspace } from '@/utils/types/dashboard';
+import type { Workspace, WorkspaceWithDashboards } from '@/utils/types/dashboard';
 
 export async function addNewWorkspace(name: string) {
   const query: string = `
@@ -26,7 +26,7 @@ export async function addNewWorkspace(name: string) {
   }
 }
 
-export async function getAllWorkspace(): Promise<Workspace[] | Error> {
+export async function getAllWorkspace(): Promise<WorkspaceWithDashboards | Error> {
   const query: string = `
     SELECT 
       w.id,
@@ -41,7 +41,21 @@ export async function getAllWorkspace(): Promise<Workspace[] | Error> {
   try{
     await connection.connect();
     const results = (await connection.query(query));
-    return results.recordset;
+    return results.recordset.reduce((acc: WorkspaceWithDashboards, record: Workspace) => {
+      if(!acc[record.id])
+      {
+        acc[record.id] = [];
+      }
+
+      acc[record.id].push({
+        workspaceId: record.id,
+        workspaceName: record.name,
+        boardId: record.boardId,
+        boardName: record.boardName
+      });
+
+      return acc;
+    }, {});
   }catch(error){
     console.log(error);
     const errorMsg: string = (error instanceof Error && error.message) 
