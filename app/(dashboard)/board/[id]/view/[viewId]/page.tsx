@@ -1,5 +1,8 @@
+import { BoardData } from '@/utils/types/groups';
 import styles from './styles.module.css';
-import {addGroup} from "@/actions/groups";
+import { GetBoardData } from '@/actions/groups';
+import { AddGroupSection } from '@/components/common/addGroupSection/addGroupSection';
+import { GroupItem } from '@/components/common/groupItem/groupItem';
 
 type Props = {
     params: Promise<{ id: string, viewId: string }>
@@ -7,10 +10,22 @@ type Props = {
 
 export default async function Page({ params }: Props)
 {
-    const { id, viewId }  = await params;
+    const { id:boardId, viewId }  = await params;
+    const boardData: BoardData = await GetBoardData(boardId);
+    const arrayGroups = Array.from(boardData.groups.values());
+
     return (
         <article className={styles.container}>
-
+            <AddGroupSection 
+                boardId={boardId} 
+                columns={boardData.columns} 
+                groupsCount={arrayGroups.length}
+            />
+            {arrayGroups.length > 0 &&
+                arrayGroups.map(group => (
+                    <GroupItem key={group.id} group={group} />
+                ))
+            }
         </article>
     );
 }

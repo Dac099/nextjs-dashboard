@@ -1,0 +1,60 @@
+.control
+{
+  display: flex;
+  position: relative;
+  align-items: center;
+}
+
+.control p
+{
+  font-size: 2rem;
+}
+
+.control svg
+{
+  cursor: pointer;
+}
+
+.groupMenu
+{
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transform: translateY(105%) translateX(20px);
+  border: 1px solid var(--accent-color);
+  padding: 5px;
+  font-size: 1.2rem;
+  z-index: 2;
+  background-color: var(--bg-color);
+  width: 200px;
+  border-radius: 5px;
+}
+
+.groupMenu ul
+{
+  padding-left: 20px;
+}
+
+.groupMenu li
+{
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.groupMenu li:hover
+{
+  background-color: var(--action-color);
+  color: var(--bg-color);
+}
+
+.inputTitle
+{
+  border: none;
+  outline: none;
+  background: none;
+  font-family: inherit;
+  font-size: 2rem;
+  border-radius: 5px;
+  max-width: min-content;
+}

@@ -1,0 +1,11 @@
+.groupItem
+{
+  margin: 20px 0;
+}
+
+.groupBody
+{
+  border: 1px solid var(--accent-color);
+  border-left-width: 10px;
+  border-radius: 5px 0 0 5px;
+}
