@@ -58,3 +58,10 @@
   border-radius: 5px;
   max-width: min-content;
 }
+
+.subMenu li
+{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}

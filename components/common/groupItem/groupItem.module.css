@@ -9,3 +9,23 @@
   border-left-width: 10px;
   border-radius: 5px 0 0 5px;
 }
+
+.groupRow
+{
+  font-size: 1.4rem;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: minmax(200px, 2fr) repeat(auto-fit, minmax(60px, 1fr));
+}
+
+.groupHeader
+{
+  user-select: none;
+}
+
+
+.groupRow div
+{
+  border-right: 1px solid var(--accent-color);
+  padding: 5px 2px;
+}

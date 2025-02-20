@@ -13,7 +13,7 @@ export default async function Page({ params }: Props)
     const { id:boardId, viewId }  = await params;
     const boardData: BoardData = await GetBoardData(boardId);
     const arrayGroups = Array.from(boardData.groups.values());
-
+    const arrayColumns = Array.from(boardData.columns.values());
     return (
         <article className={styles.container}>
             <AddGroupSection 
@@ -23,7 +23,13 @@ export default async function Page({ params }: Props)
             />
             {arrayGroups.length > 0 &&
                 arrayGroups.map(group => (
-                    <GroupItem key={group.id} group={group} />
+                    <GroupItem 
+                        key={group.id} 
+                        group={group} 
+                        columns={arrayColumns}
+                        items={boardData.itemsByGroup.get(group.id)!}
+                        values={boardData.valuesByItem}
+                    />
                 ))
             }
         </article>

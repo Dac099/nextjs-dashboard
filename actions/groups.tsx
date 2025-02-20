@@ -17,7 +17,7 @@ export async function addGroup(boardId: string, name: string, viewId: string, co
   const query: string = `
     INSERT INTO Groups (board_id, name, position, color)
     VALUES (@boardId, @name, 
-      (SELECT ISNULL(MAX(position), 0) + 1 FROM Groups WHERE board_id = @boardId)
+      (SELECT ISNULL(MAX(position), 0) + 1 FROM Groups WHERE board_id = @boardId AND deleted_at IS NULL)
     , @color)
   `;
   await connection
@@ -41,8 +41,8 @@ export async function GetBoardData(boardId: string): Promise<BoardData>
   return {
     columns: columnsGroups.columns || new Map(),
     groups: columnsGroups.groups || new Map(),
-    itemsByGroup: boardItems,
-    valuesByItem: boardValues
+    itemsByGroup: boardItems || new Map(),
+    valuesByItem: boardValues || new Map()
   };
 }
 
@@ -162,3 +162,85 @@ async function fetchColumnsGroups(boardId: string): Promise<ColumnsGroups>
     columns: new Map<string, {id: string, name: string, type: string, position: number}>() 
   });
 };
+
+export async function addBoardColumn(boardId: string, viewId: string, columnType: string): Promise<void>
+{
+  await connection.connect();
+  let columnName: string = '';
+
+  switch(columnType)
+  {
+    case 'text':
+      columnName = 'Textos';
+      break;
+    case 'number':
+      columnName = 'Números'
+      break;
+    case 'date':
+      columnName = 'Fechas'
+      break;
+    case 'timeline':
+      columnName = 'TimeLine'
+      break;
+    case 'status':
+      columnName = 'Estados'
+      break;
+    case 'person':
+      columnName = 'Personas'
+      break;
+  }
+
+  const findColumnQuery: string = `
+    SELECT COUNT(name) as total
+    FROM Columns
+    WHERE board_id = @boardId AND name = @columnName AND deleted_at IS NULL
+  `;
+
+  let result = await connection
+    .request()
+    .input('boardId', boardId)
+    .input('columnName', columnName)
+    .query(findColumnQuery);
+
+  if(result.recordset[0].total > 0)
+  {
+    columnName = `${columnName} ${result.recordset[0].total}`;
+  }
+
+  const insertColumnQuery: string = `
+    INSERT INTO Columns (board_id, name, type, position)
+    VALUES (@boardId, @columnName, @columnType,
+      (
+        SELECT ISNULL(MAX(position), 0) + 1 
+        FROM Columns WHERE board_id = @boardId AND deleted_at IS NULL
+      )
+    )
+  `;
+
+  result = await connection
+    .request()
+    .input('boardId', boardId)
+    .input('columnName', columnName)
+    .input('columnType', columnType)
+    .query(insertColumnQuery);
+  
+  revalidatePath(`/board/${boardId}/view/${viewId}`);
+}
+
+export async function updateColumnName(columnId: string, name: string, boardId: string, viewId: string): Promise<void>
+{
+  await connection.connect();
+  const query: string = `
+    UPDATE Columns 
+    SET name = @name
+    WHERE id = @columnId
+  `;
+
+  await connection
+    .request()
+    .input('columnId', columnId)
+    .input('name', name)
+    .query(query);
+  
+  revalidatePath(`/board/${boardId}/view/${viewId}`);
+}

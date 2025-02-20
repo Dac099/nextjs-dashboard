@@ -38,20 +38,18 @@
   padding-bottom: 3px;
 }
 
-.groupTemplate
-{
-  margin-left: 20px;
-}
+
 
 .groupTemplateHeader
 {
+  user-select: none;
   border-radius: 5px 0 0 5px;
   border: 1px solid var(--accent-color);
   border-left: 10px solid;
   font-size: 1.4rem;
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(100px, 2fr) minmax(60px, 1fr);
+  grid-template-columns: minmax(200px, 2fr) repeat(auto-fit, minmax(60px, 1fr));
 }
 
 .groupTemplateHeader div

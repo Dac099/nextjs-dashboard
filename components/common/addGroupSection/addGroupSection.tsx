@@ -34,6 +34,14 @@ export function AddGroupSection({ boardId, columns, groupsCount }: Props){
     }
   }
 
+  function handleShowGroupTemplate(){
+    setShowGroupTemplate(!showGroupTemplate);
+    if(showGroupTemplate)
+    {
+      setColorGroup(faker.color.rgb());
+    }
+  }
+
   async function handleSubmitGroup(){
     const groupTitle: string = groupTitleRef.current!.value;
     
@@ -63,7 +71,7 @@ export function AddGroupSection({ boardId, columns, groupsCount }: Props){
       
       <button 
         type='button'
-        onClick={() => setShowGroupTemplate(!showGroupTemplate)}
+        onClick={handleShowGroupTemplate}
         className={styles.addGroupBtn}
       >
         <span className={styles.btnIcon}>

@@ -1,0 +1,26 @@
+.item
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.item p
+{
+  cursor: text;
+}
+
+.item input
+{
+  outline: none;
+  border: none;
+  border-radius: 3px;
+  height: 100%;
+  width: 100%;
+  font-family: inherit;
+  background: none;
+  color: var(--font-color);
+  text-align: center;
+  font-size: 1.4rem;
+}
