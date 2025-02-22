@@ -244,3 +244,41 @@ export async function updateColumnName(columnId: string, name: string, boardId: 
   
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
+
+export async function updateGroupTitle(groupId: string, name: string): Promise<void>
+{
+  await connection.connect();
+  const query: string = `
+    UPDATE Groups 
+    SET 
+      name = @name,
+      updated_at = GETDATE()
+    WHERE id = @groupId
+  `;
+  await connection
+    .request()
+    .input('groupId', groupId)
+    .input('name', name)
+    .query(query);
+}
+
+export async function updateGroupColor(groupId: string, color: string, boardId: string, viewId: string): Promise<void>
+{
+  await connection.connect();
+
+  const query: string = `
+    UPDATE Groups
+    SET
+      color = @color,
+      updated_at = GETDATE()
+    WHERE id = @groupId
+  `;
+
+  await connection
+    .request()
+    .input('groupId', groupId)
+    .input('color', color)
+    .query(query);
+
+  revalidatePath(`/board/${boardId}/view/${viewId}`);
+}

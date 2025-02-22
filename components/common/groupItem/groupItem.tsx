@@ -2,6 +2,7 @@ import styles from './groupItem.module.css';
 import type { Group, Column, Item, ItemValues } from '@/utils/types/groups';
 import { GroupTitle } from '../groupTitle/groupTitle';
 import { GroupHeaderColumn } from '../groupHeaderColumn/groupHeaderColumn';
+import { AddItemSection } from "@/components/common/addItemSection/addItemSection";
 
 type Props = {
     group: Group;
@@ -15,8 +16,7 @@ export function GroupItem({ group, columns, items, values }: Props)
   return (
     <article
       className={styles.groupItem}
-    >
-      
+    >      
       <GroupTitle group={group} />
 
       <section 

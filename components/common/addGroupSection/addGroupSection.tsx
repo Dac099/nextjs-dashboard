@@ -8,6 +8,7 @@ import { Columns } from '@/utils/types/groups';
 import { HexColorPicker } from 'react-colorful';
 import useClickOutside from '@/hooks/useClickOutside';
 import { useParams } from 'next/navigation';
+import { GroupHeaderColumn } from '../groupHeaderColumn/groupHeaderColumn';
 
 
 type Props = {
@@ -134,9 +135,10 @@ export function AddGroupSection({ boardId, columns, groupsCount }: Props){
             </div>
             {
               columnsArray.map(column => (
-                <div key={column.id}>
-                  <p>{column.name}</p>
-                </div>
+                <GroupHeaderColumn 
+                  key={column.id} 
+                  column={column}
+                />
               ))
             }
           </section>

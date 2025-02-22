@@ -2,7 +2,12 @@
 import styles from './groupTitle.module.css';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import type { Group } from '@/utils/types/groups';
-import { useState, useRef, RefObject, useEffect } from 'react';
+import { 
+  useState, 
+  useRef, 
+  RefObject, 
+  useEffect 
+} from 'react';
 import useClickOutside from '@/hooks/useClickOutside';
 import { LuTags as TagIcon} from "react-icons/lu";
 import { FaTimeline as TimeLineIcon} from "react-icons/fa6";
@@ -11,7 +16,12 @@ import { IoCalendarNumberSharp as DateIcon} from "react-icons/io5";
 import { GoNumber as NumberIcon} from "react-icons/go";
 import { IoPerson as PersonIcon} from "react-icons/io5";
 import { useParams } from 'next/navigation';
-import { addBoardColumn } from '@/actions/groups';
+import { 
+  addBoardColumn, 
+  updateGroupTitle, 
+  updateGroupColor 
+} from '@/actions/groups';
+import { HexColorPicker } from 'react-colorful';
 
 type Props = {
   group: Group;
@@ -25,10 +35,14 @@ export function GroupTitle({ group }: Props)
   const [ showMenu, setShowMenu ] = useState<boolean>(false);
   const [ showSubMenu, setShowSubMenu ] = useState<boolean>(false);
   const [ updateTitle, setUpdateTitle ] = useState<boolean>(false);
+  const [ groupName, setGroupName ] = useState<string>(group.name);
+  const [ showColorInput, setShowColorInput ] = useState<boolean>(false);
+  const [ colorGroup, setColorGroup ] = useState<string>(group.color);
 
   useClickOutside(containerRef as RefObject<HTMLDivElement>, () => {
     setShowMenu(false);
     setShowSubMenu(false);
+    setShowColorInput(false);
   });
 
   function handleChangeTitle(): void
@@ -38,11 +52,14 @@ export function GroupTitle({ group }: Props)
     setShowSubMenu(false);
   }
 
-  function handleUpdateTitle(e: React.KeyboardEvent<HTMLInputElement>): void
+  async function handleUpdateTitle(e: React.KeyboardEvent<HTMLInputElement>): Promise<void>
   {
     if(e.key === 'Enter')
     {
+      const inputValue: string = inputTitleRef.current!.value
+      setGroupName(inputValue);
       setUpdateTitle(false);
+      await updateGroupTitle(group.id, inputValue);      
     }
   }
 
@@ -53,6 +70,29 @@ export function GroupTitle({ group }: Props)
     await addBoardColumn(boardId as string, viewId as string, columnType);
   } 
 
+  async function handleChangeColor(): Promise<void>
+  {
+    setShowColorInput(false);
+    setShowMenu(false);
+    setShowSubMenu(false);
+
+    if(group.color === colorGroup) return;
+    
+    await updateGroupColor(group.id, colorGroup, boardId as string, viewId as string );
+  }
+
+  function handleShowColorInput(): void
+  {
+    setShowSubMenu(false);
+    setShowColorInput(!showColorInput)
+  }
+
+  function handleShowSubMenu(): void
+  {
+    setShowColorInput(false);
+    setShowSubMenu(!showSubMenu);
+  }
+
   useEffect(() => {
     if(updateTitle)
     {
@@ -60,6 +100,10 @@ export function GroupTitle({ group }: Props)
       inputTitleRef.current!.select();
     }
   }, [updateTitle]);
+
+  useEffect(() => {
+    setColorGroup(group.color);
+  }, [group.color]);
 
   return (
     <section 
@@ -69,26 +113,26 @@ export function GroupTitle({ group }: Props)
       <BsThreeDotsVertical 
         size={20}
         onClick={() => setShowMenu(!showMenu)}
-        style={{ color: group.color }}
+        style={{ color: colorGroup }}
       />
       {updateTitle
         ? <input 
             type="text" 
             ref={inputTitleRef}
-            defaultValue={group.name}
+            defaultValue={groupName}
             onBlur={() => setUpdateTitle(false)}
             className={styles.inputTitle}
-            style={{ color: group.color }}
+            style={{ color: colorGroup }}
             onKeyUp={(e) => handleUpdateTitle(e)}
           />
-        : <p style={{ color: group.color }}>
-            {group.name}
+        : <p style={{ color: colorGroup }}>
+            {groupName}
           </p>
       }
       {showMenu &&
         <ul className={styles.groupMenu}>
           <li onClick={() => handleChangeTitle()}>Renombrar</li>
-          <li onClick={() => setShowSubMenu(!showSubMenu)}>Nueva Columna</li>          
+          <li onClick={handleShowSubMenu}>Nueva Columna</li>          
           {showSubMenu &&
             <ul className={styles.subMenu}>
               <li
@@ -134,8 +178,22 @@ export function GroupTitle({ group }: Props)
               </li>
             </ul>
           }
-          <li>Nuevo Item</li>
-          <li>Cambiar color</li>
+          <li onClick={handleShowColorInput}>Cambiar color</li>
+            {showColorInput &&
+              <div>
+                <HexColorPicker 
+                  color={group.color}
+                  onChange={setColorGroup}
+                />
+                <button 
+                  type="button"
+                  className={styles.changeColorButton}
+                  onClick={() => handleChangeColor()}
+                >
+                  Cambiar
+                </button>
+              </div>
+            }
           <li>Eliminar</li>
         </ul>
       }

@@ -24,8 +24,9 @@
 }
 
 
-.groupRow div
+.groupRow > div
 {
   border-right: 1px solid var(--accent-color);
   padding: 5px 2px;
 }
+
