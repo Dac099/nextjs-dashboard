@@ -39,7 +39,7 @@ export function HeaderBoard({views, boardId}: Props)
     const [newViewType, setNewViewType] = useState<string>('');
     const translateViewType = new Map<string, string>([
         ['groups', 'Grupo'],
-        ['gantt', 'Gantt'],
+        ['gantt.tsx', 'Gantt'],
         ['chart', 'Gráfico'],
     ]);
 
@@ -140,7 +140,7 @@ export function HeaderBoard({views, boardId}: Props)
 
                             <span
                                 className={styles.menuOption}
-                                onClick={() =>handleShowViewInput('gantt')}
+                                onClick={() =>handleShowViewInput('gantt.tsx')}
                             >
                                 <LuChartGantt/>
                                 <p>Gantt</p>

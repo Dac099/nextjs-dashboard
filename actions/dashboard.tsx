@@ -105,26 +105,30 @@ export async function updateWorkspace(id: string, onDelete: boolean = false, new
   }
 }
 
-export async function addDashboard(name: string, workspaceId: string){
+export async function addDashboard(name: string, workspaceId: string): Promise<string>
+{
   const query: string = `
     INSERT INTO Boards (workspace_id, name)
+    OUTPUT inserted.id
     VALUES (@workspaceId, @name);
   `;
-  
   try {
     await connection.connect();
-    await connection
+    const result = await connection
       .request()
       .input('workspaceId', workspaceId)
       .input('name', name)
       .query(query);
-
+    
+    const boardId: string = result.recordset[0].id;
     revalidatePath('/');
+    return boardId;
+
   } catch (error) {
     console.log(error);
     const errorMsg: string = (error instanceof Error && error.message) 
-      ? error.message 
-      : 'SQL Server error while delete dashboard workspace';
-    return new Error(errorMsg)
+    ? error.message 
+    : 'SQL Server error while delete dashboard workspace';
+    throw new Error(errorMsg)
   }
 }

@@ -19,7 +19,8 @@ import { useParams } from 'next/navigation';
 import { 
   addBoardColumn, 
   updateGroupTitle, 
-  updateGroupColor 
+  updateGroupColor,
+  deleteGroup,
 } from '@/actions/groups';
 import { HexColorPicker } from 'react-colorful';
 
@@ -79,6 +80,14 @@ export function GroupTitle({ group }: Props)
     if(group.color === colorGroup) return;
     
     await updateGroupColor(group.id, colorGroup, boardId as string, viewId as string );
+  }
+
+  async function handleDeleteGroup(): Promise<void>
+  {
+    setShowColorInput(false);
+    setShowMenu(false);
+    setShowSubMenu(false);
+    await deleteGroup(group.id, boardId as string, viewId as string);
   }
 
   function handleShowColorInput(): void
@@ -170,12 +179,12 @@ export function GroupTitle({ group }: Props)
                 Fecha
               </li>
               
-              <li
-                onClick={() => handleInsertColumn('person')}
-              >
-                <PersonIcon />
-                Persona
-              </li>
+              {/*<li*/}
+              {/*  onClick={() => handleInsertColumn('person')}*/}
+              {/*>*/}
+              {/*  <PersonIcon />*/}
+              {/*  Persona*/}
+              {/*</li>*/}
             </ul>
           }
           <li onClick={handleShowColorInput}>Cambiar color</li>
@@ -194,7 +203,7 @@ export function GroupTitle({ group }: Props)
                 </button>
               </div>
             }
-          <li>Eliminar</li>
+          <li onClick={handleDeleteGroup}>Eliminar</li>
         </ul>
       }
     </section>

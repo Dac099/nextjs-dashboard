@@ -8,13 +8,14 @@ import { updateWorkspace, addDashboard } from '@/actions/dashboard';
 import { GoPlus } from "react-icons/go";
 import { Tooltip } from '../tooltip/tooltip';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 type Props = {
   workspace: Dashboard[];
 };
 
 export function WorkspaceItem({ workspace }: Props){
+  const router = useRouter();
   const params = useParams();
   const boardId: string = params.id as string || '';
   const inputRef = useRef<HTMLInputElement>(null);
@@ -23,6 +24,7 @@ export function WorkspaceItem({ workspace }: Props){
   const [ workspaceName, setWorkspaceName ] = useState<string>(workspace[0].workspaceName);
   const [ inputDashboard, setInputDashboard ] = useState<boolean>(false);
   const [ dashboards, setDashboards ] = useState<Dashboard[]>(workspace);
+
   async function closeInputTitle(e: KeyboardEvent)
   {
     if(e.code === 'Enter' && workspace[0].workspaceName !== workspaceName)
@@ -44,17 +46,18 @@ export function WorkspaceItem({ workspace }: Props){
 
     if(e.code === 'Enter' && inputValue.length > 0)
     {
-      setInputDashboard(false);
+      setInputDashboard(false);    
+      const boardId = await addDashboard(inputValue, workspace[0].workspaceId);
       setDashboards([
         ...dashboards,
         {
-          boardId: Math.random().toString(),
+          boardId: boardId,
           workspaceId: workspace[0].workspaceId,
           workspaceName: workspace[0].workspaceName,
           boardName: inputValue,
         }
       ]);
-      await addDashboard(inputValue, workspace[0].workspaceId);
+      router.push(`/board/${boardId}`);
     }
   }
 
@@ -116,15 +119,20 @@ export function WorkspaceItem({ workspace }: Props){
             className={styles.inputDashboard}
           />
         }
-        {dashboards.map(dashboard => (
-          <Link
-            key={dashboard.boardId}
-            href={`/board/${dashboard.boardId}`}
-            className={`${styles.boardLink} ${dashboard.boardId === boardId ? styles.boardLinkActive : ''}`}
-          >
-            {dashboard.boardName}
-          </Link>
-        ))}
+        {dashboards.map(dashboard => {
+          if(dashboard.boardId)
+          {
+            return (
+              <Link
+                key={dashboard.boardId}
+                href={`/board/${dashboard.boardId}`}
+                className={`${styles.boardLink} ${dashboard.boardId === boardId ? styles.boardLinkActive : ''}`}
+              >
+                {dashboard.boardName}
+              </Link>
+            );
+          }
+        })}
       </section>
     </article>
   );

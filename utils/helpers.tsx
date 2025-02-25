@@ -1,55 +1,62 @@
 import { BoardData } from './types/groups';
 
-/**
- * Convierte BoardData a un formato de datos específico para el gantt
- * con cálculo de progreso basado en fechas o columna específica
- */
-export function formatBoardDataForGantt(boardData: BoardData) {
+export function formatBoardData(boardData: BoardData) {
   const { groups, columns, itemsByGroup, valuesByItem } = boardData;
-  const result = [];
   const currentDate = new Date();
 
-  // Encontrar columnas de tipo Timeline y Progress (si existe)
+  // Definición de columnas para Google Charts Gantt
+  const chartColumns = [
+    { type: "string", label: "Task ID" },
+    { type: "string", label: "Task Name" },
+    { type: "string", label: "Resource" },
+    { type: "date", label: "Start Date" },
+    { type: "date", label: "End Date" },
+    { type: "number", label: "Duration" },
+    { type: "number", label: "Percent Complete" },
+    { type: "string", label: "Dependencies" },
+  ];
+
+  // Array para almacenar las filas del gráfico Gantt
+  const chartRows = [];
+
+  // Encontrar columnas de tipo Timeline y Status
   const timelineColumns = new Map();
-  const progressColumns = new Map();
+  const statusColumns = new Map();
+
   for (const [columnId, column] of columns.entries()) {
     if (column.type === 'timeline') {
       timelineColumns.set(columnId, column);
-    } 
-    // Asumiendo que podrías tener una columna de tipo 'number' que represente el progreso
-    else if (column.type === 'number' && column.name.toLowerCase().includes('progreso')) {
-      progressColumns.set(columnId, column);
+    } else if (column.type === 'status') {
+      statusColumns.set(columnId, column);
     }
   }
 
-  // Procesar cada grupo
+  // Maps para almacenar datos procesados
+  const processedItems = new Map();
+  const groupStartDates = new Map();
+  const groupEndDates = new Map();
+
+  // Procesar primero cada ítem
   for (const [groupId, group] of groups.entries()) {
     const items = itemsByGroup.get(groupId) || [];
-    
-    if (items.length === 0) {
-      continue;
-    }
+    processedItems.set(groupId, []);
 
-    let groupStartDate = null;
-    let groupEndDate = null;
-    const subtasks = [];
-
-    // Procesar cada item del grupo
     for (const item of items) {
       const itemValues = valuesByItem.get(item.id) || [];
-      
+
       let itemStartDate = null;
       let itemEndDate = null;
-      let itemDuration = 0;
-      let itemProgress = 0; // Inicializar progreso
-      let progressFound = false;
+      let itemDuration = null;
+      let itemProgress = 0;
+      let itemResource = "Por definir"; // Valor predeterminado
 
-      // Primero buscar valores de timeline
+      // Extraer valores de timeline y status
       for (const value of itemValues) {
+        // Procesar timeline
         if (timelineColumns.has(value.columnId) && value.value) {
           try {
             const timelineDates = JSON.parse(value.value);
-            
+
             if (Array.isArray(timelineDates) && timelineDates.length >= 2) {
               itemStartDate = new Date(timelineDates[0]);
               itemEndDate = new Date(timelineDates[1]);
@@ -58,76 +65,156 @@ export function formatBoardDataForGantt(boardData: BoardData) {
             console.error(`Error parsing timeline value for item ${item.id}:`, e);
           }
         }
-      }
 
-      // Después buscar explícitamente el valor de progreso
-      for (const value of itemValues) {
-        if (progressColumns.has(value.columnId) && value.value) {
+        // Procesar recursos o asignaciones
+        // Aquí puedes agregar la lógica para obtener el recurso de una columna específica
+        // Por ejemplo, si tienes una columna de tipo 'people' o 'person'
+        if (value.columnId === 'people_column_id' && value.value) {
           try {
-            // Si la columna es de tipo número y contiene progreso
-            const progressValue = parseFloat(value.value);
-            if (!isNaN(progressValue)) {
-              itemProgress = progressValue;
-              progressFound = true;
-              break;
+            const peopleData = JSON.parse(value.value);
+            if (peopleData && peopleData.length > 0) {
+              itemResource = peopleData[0].name || "Por definir";
             }
           } catch (e) {
-            console.error(`Error parsing progress value for item ${item.id}:`, e);
+            console.error(`Error parsing people value for item ${item.id}:`, e);
+          }
+        }
+
+        // Procesar progreso desde columnas de status
+        if (statusColumns.has(value.columnId) && value.value) {
+          const statusValue = value.value;
+          // Aquí puedes mapear valores de status a porcentajes de progreso
+          if (statusValue === "Completo" || statusValue === "Finalizado") {
+            itemProgress = 100;
+          } else if (statusValue === "En progreso") {
+            itemProgress = 50;
+          } else if (statusValue === "No iniciado") {
+            itemProgress = 0;
           }
         }
       }
 
-      // Si no encontramos un valor explícito de progreso, calcularlo basado en fechas
-      if (!progressFound && itemStartDate && itemEndDate) {
-        // Calcular progreso basado en la fecha actual en relación a la duración total
+      // Asignar fechas predeterminadas si no están definidas
+      if (!itemStartDate || !itemEndDate) {
+        itemStartDate = new Date(currentDate);
+
+        // Crear fecha de finalización dos meses después
+        const twoMonthsLater = new Date(currentDate);
+        twoMonthsLater.setMonth(twoMonthsLater.getMonth() + 2);
+        itemEndDate = twoMonthsLater;
+      }
+
+      // Calcular duración en milisegundos (para Google Charts)
+      itemDuration = itemEndDate.getTime() - itemStartDate.getTime();
+
+      // Calcular progreso basado en el tiempo transcurrido solo si no se definió por status
+      if (itemProgress === 0) {
         if (currentDate < itemStartDate) {
-          // La tarea aún no ha comenzado
           itemProgress = 0;
         } else if (currentDate > itemEndDate) {
-          // La tarea ya ha terminado
           itemProgress = 100;
         } else {
-          // La tarea está en progreso
           const totalDuration = itemEndDate.getTime() - itemStartDate.getTime();
           const elapsedDuration = currentDate.getTime() - itemStartDate.getTime();
           itemProgress = Math.round((elapsedDuration / totalDuration) * 100);
         }
       }
 
-      // Calcular duración en días
-      if (itemStartDate && itemEndDate) {
-        const diffTime = Math.abs(itemEndDate.getTime() - itemStartDate.getTime());
-        itemDuration = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // Actualizar fechas mínimas y máximas del grupo
+      if (!groupStartDates.has(groupId) || itemStartDate < groupStartDates.get(groupId)) {
+        groupStartDates.set(groupId, itemStartDate);
+      }
+      if (!groupEndDates.has(groupId) || itemEndDate > groupEndDates.get(groupId)) {
+        groupEndDates.set(groupId, itemEndDate);
       }
 
-      // Actualizar las fechas del grupo
-      if (itemStartDate && (!groupStartDate || itemStartDate < groupStartDate)) {
-        groupStartDate = itemStartDate;
-      }
-      if (itemEndDate && (!groupEndDate || itemEndDate > groupEndDate)) {
-        groupEndDate = itemEndDate;
-      }
-
-      // Crear el objeto de subtask
-      subtasks.push({
-        TaskID: item.id,
-        TaskName: item.name,
-        StartDate: itemStartDate,
-        EndDate: itemEndDate,
-        Duration: itemDuration,
-        Progress: itemProgress
+      // Guardar el ítem procesado
+      processedItems.get(groupId).push({
+        id: item.id,
+        name: item.name,
+        resource: itemResource,
+        startDate: itemStartDate,
+        endDate: itemEndDate,
+        duration: itemDuration,
+        progress: itemProgress,
+        dependency: groupId  // La dependencia es el grupo al que pertenece
       });
     }
-
-    // Crear el objeto de grupo
-    result.push({
-      TaskID: groupId,
-      TaskName: group.name,
-      StartDate: groupStartDate,
-      EndDate: groupEndDate,
-      subtasks: subtasks
-    });
   }
 
-  return result;
+  // Construir las filas en orden: primero grupos, luego sus ítems
+  for (const [groupId, group] of groups.entries()) {
+    // Obtener las fechas del grupo, o usar fechas predeterminadas si no hay
+    let groupStartDate = groupStartDates.get(groupId);
+    let groupEndDate = groupEndDates.get(groupId);
+    let groupDuration = null;
+
+    // Si el grupo no tiene fechas definidas (no tiene elementos con fechas),
+    // asignar fechas predeterminadas
+    if (!groupStartDate || !groupEndDate) {
+      groupStartDate = new Date(currentDate);
+      const twoMonthsLater = new Date(currentDate);
+      twoMonthsLater.setMonth(twoMonthsLater.getMonth() + 2);
+      groupEndDate = twoMonthsLater;
+    }
+
+    // Calcular duración solo si ambas fechas son válidas
+    if (groupStartDate && groupEndDate) {
+      groupDuration = groupEndDate.getTime() - groupStartDate.getTime();
+    }
+
+    // Agregar el grupo como una fila, asegurándose de que siempre tenga fechas válidas
+    chartRows.push([
+      groupId,             // Task ID
+      group.name,          // Task Name
+      null,                // Resource (null para grupos)
+      groupStartDate,      // Start Date (ahora siempre tiene un valor)
+      groupEndDate,        // End Date (ahora siempre tiene un valor)
+      groupDuration,       // Duration
+      100,                 // Percent Complete (asumimos 100% para grupos)
+      null                 // Dependencies (grupos no tienen dependencias)
+    ]);
+
+    // Agregar los ítems de este grupo
+    const items = processedItems.get(groupId) || [];
+    for (const item of items) {
+      // Verificar que las fechas sean válidas, de lo contrario usar las del grupo
+      const itemStartDate = item.startDate || groupStartDate;
+      const itemEndDate = item.endDate || groupEndDate;
+      const itemDuration = item.duration || groupDuration;
+
+      chartRows.push([
+        item.id,           // Task ID
+        item.name,         // Task Name
+        item.resource,     // Resource
+        itemStartDate,     // Start Date (garantizado válido)
+        itemEndDate,       // End Date (garantizado válido)
+        itemDuration,      // Duration
+        item.progress,     // Percent Complete
+        item.dependency    // Dependencies (el ID del grupo al que pertenece)
+      ]);
+    }
+  }
+
+  // Verificar que todos los elementos tengan fechas válidas
+  // independientemente del nombre del grupo
+  for (let i = 0; i < chartRows.length; i++) {
+    const row = chartRows[i];
+
+    // Si cualquier elemento tiene fechas null, asignar fechas predeterminadas
+    if (row[3] === null || row[4] === null) {
+      // Asignar fechas válidas
+      const defaultStartDate = new Date(currentDate);
+      const defaultEndDate = new Date(currentDate);
+      defaultEndDate.setMonth(defaultEndDate.getMonth() + 2);
+
+      // Reemplazar fechas null con valores predeterminados
+      row[3] = defaultStartDate;
+      row[4] = defaultEndDate;
+      row[5] = defaultEndDate.getTime() - defaultStartDate.getTime();
+    }
+  }
+
+  // Retornar el formato exacto que requiere Google Charts
+  return [chartColumns, ...chartRows];
 }

@@ -5,6 +5,7 @@ import { AddGroupSection } from '@/components/common/addGroupSection/addGroupSec
 import { GroupItem } from '@/components/common/groupItem/groupItem';
 import { getViewType } from '@/actions/boards';
 import { GanttContainer } from '@/components/common/ganttContainer/ganttContainer';
+import {getGanttChartData} from "@/actions/gantt";
 
 type Props = {
     params: Promise<{ id: string, viewId: string }>
@@ -17,6 +18,7 @@ export default async function Page({ params }: Props)
     const arrayGroups = Array.from(boardData.groups.values());
     const arrayColumns = Array.from(boardData.columns.values());
     const viewType: string = await getViewType(viewId);
+    const gantData = await getGanttChartData(boardId);
 
     return (
         <article className={styles.container}>
@@ -42,7 +44,7 @@ export default async function Page({ params }: Props)
                 </>
             }
             {viewType === 'gantt' &&
-                <GanttContainer boardData={boardData}/>
+                <GanttContainer boardData={gantData}/>
             }
         </article>
     );

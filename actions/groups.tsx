@@ -402,3 +402,20 @@ export async function deleteStatusColumn(itemId: string, boardId: string, viewId
       .query(query);
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
+
+export async function deleteGroup(groupId: string, boardId: string, viewId: string): Promise<void>
+{
+  await connection.connect();
+  const query: string = `
+    UPDATE Groups 
+    SET deleted_at = GETDATE()
+    WHERE id = @groupId
+  `;
+
+  await connection
+      .request()
+      .input('groupId', groupId)
+      .query(query);
+
+  revalidatePath(`/board/${boardId}/view/${viewId}`);
+}

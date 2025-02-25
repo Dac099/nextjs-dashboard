@@ -72,7 +72,8 @@ export const TimeLine = ({ value, columnId, itemId }: Props) => {
                     style={{ 
                         width: `${percentage}%`, 
                         borderRadius: percentage < 94 ? '15px 0 0 15px' : '15px', 
-                        maxWidth: '100%'
+                        maxWidth: '100%',
+                        display: `${percentage <= 0 ? 'none' : 'block'}`
                     }}
                 ></div>
             </section>

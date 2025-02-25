@@ -33,6 +33,7 @@ export function AddItemSection({ columns, groupId }: Props)
             const inputValue: string = inputRef.current!.value;
             if(inputValue.length > 0){
                 await addItemBoard(groupId, viewId as string, boardId as string, inputValue);
+                setShowItemInput(false);
             }
         }
     }
