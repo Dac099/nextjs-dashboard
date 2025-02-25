@@ -103,19 +103,19 @@ export async function addViewBoard(boardId: string, view: ViewWithSettings): Pro
     redirect(`/board/${boardId}/view/${viewId}`);
 }
 
+export async function getViewType(viewId: string): Promise<string>
+{
+    await connection.connect()
+    const query: string = `
+        SELECT type
+        FROM Views
+        WHERE id = @viewId
+    `;
 
+    const result = await connection
+        .request()
+        .input('viewId', viewId)
+        .query(query);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return result.recordset[0].type;
+}
