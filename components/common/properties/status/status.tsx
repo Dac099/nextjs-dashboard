@@ -7,7 +7,6 @@ import {
     useEffect,
     useRef,
     RefObject,
-    MouseEvent
 } from "react";
 import {
     getBoardStatusList,
@@ -25,6 +24,7 @@ type Props = {
     value: TableValue;
     itemId: string;
     columnId: string;
+    status: Tag[];
 };
 
 type Tag = {
@@ -33,20 +33,19 @@ type Tag = {
     id: string;
 }
 
-export function Status({value, itemId, columnId}: Props) {
+export function Status({value, itemId, columnId, status}: Props) {
     let defaultValue: Tag;
     const {id: boardId, viewId} = useParams();
     const containerListRef = useRef<HTMLDivElement | null>(null);
     const [showStatusList, setShowStatusList] = useState<boolean>(false);
-    const [statusList, setStatusList] = useState<Tag[]>([]);
+    const [statusList, setStatusList] = useState<Tag[]>(status);
     const [showInputTag, setShowInputTag] = useState<boolean>(false);
     const [newInputName, setNewInputName] = useState<string>("");
     const [newInputColor, setNewInputColor] = useState<string>("");
 
     useEffect(() => {
-        getBoardStatusList(columnId)
-            .then(result => setStatusList(result));
-    }, [columnId]);
+        setStatusList(status);
+    }, [status]);
 
     useClickOutside(containerListRef as RefObject<HTMLDivElement>, () => {
         setShowStatusList(false);
@@ -72,7 +71,10 @@ export function Status({value, itemId, columnId}: Props) {
             const valueId: string = await addStatusColumn(columnId, JSON.stringify({
                 color: newInputColor,
                 text: newInputName
-            }));
+            }),
+            boardId as string, 
+            viewId as string
+            );
 
             tags.push({
                 color: newInputColor,
@@ -90,25 +92,22 @@ export function Status({value, itemId, columnId}: Props) {
         const tagId: string = tags[indexTag].id as string;
         tags.splice(indexTag, 1);
         setStatusList(tags);
-        await deleteStatusColumn(tagId);
+        await deleteStatusColumn(tagId, boardId as string, viewId as string);
     }
 
-    async function handleAddValue(e, item:Tag){
-        if(!(e.target.classList.contains(styles.icon)))
-        {
-            setShowStatusList(false);
-            await setTableValue(
-                boardId as string,
-                viewId as string,
-                itemId,
-                columnId,
-                JSON.stringify({
-                    color: item.color,
-                    text: item.text
-                }),
-                value.id
-            );
-        }
+    async function handleAddValue(item:Tag){
+        setShowStatusList(false);
+        await setTableValue(
+            boardId as string,
+            viewId as string,
+            itemId,
+            columnId,
+            JSON.stringify({
+                color: item.color,
+                text: item.text
+            }),
+            value.id
+        );
     }
 
     return (
@@ -152,18 +151,24 @@ export function Status({value, itemId, columnId}: Props) {
                         <section className={styles.tagsContainer}>
                             {
                                 statusList.map((item, index) => (
-                                    <article
+                                    <article 
                                         className={styles.listItem}
                                         key={`${item.color}-${item.text}`}
-                                        style={{backgroundColor: item.color}}
-                                        onClick={e => handleAddValue(e, item)}
                                     >
-                                        {item.text}
-                                        <TbTrashXFilled
-                                            className={styles.icon}
-                                            size={18}
-                                            onClick={() => handleDeleteTag(index)}
-                                        />
+                                        <article                                            
+                                            style={{backgroundColor: item.color}}
+                                            onClick={() => handleAddValue(item)}
+                                            >
+                                            <p>{item.text}</p>
+                                        </article>
+                                        <article
+                                            style={{backgroundColor: item.color}}
+                                        >
+                                            <TbTrashXFilled
+                                                className={styles.icon}
+                                                onClick={() => handleDeleteTag(index)}
+                                            />
+                                        </article>
                                     </article>
                                 ))
                             }

@@ -45,7 +45,9 @@ export function GroupHeaderColumn({ column }: Props)
       ? <DateIcon />
       : type === 'number'
       ? <NumberIcon />
-      : <PersonIcon />;
+      : type === 'person'
+      ? <PersonIcon />
+      : <></>;
   }
 
   async function handleUpdateColumn(e: React.KeyboardEvent<HTMLInputElement> | null = null): Promise<void>{

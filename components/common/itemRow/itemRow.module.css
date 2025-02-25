@@ -10,3 +10,9 @@
 {
     border-right: 1px solid var(--accent-color);
 }
+
+.itemTitle
+{
+    display: flex;
+    align-items: center;
+}

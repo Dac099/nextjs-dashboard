@@ -369,7 +369,7 @@ export async function getBoardStatusList(columnId: string): Promise<{color: stri
   }));
 }
 
-export async function addStatusColumn(columnId: string, value: string): Promise<string>
+export async function addStatusColumn(columnId: string, value: string, boardId: string, viewId: string): Promise<string>
 {
   await connection.connect();
   const query: string = `
@@ -384,10 +384,11 @@ export async function addStatusColumn(columnId: string, value: string): Promise<
       .input('value', value)
       .query(query);
 
+  revalidatePath(`/board/${boardId}/view/${viewId}`);
   return result.recordset[0].id;
 }
 
-export async function deleteStatusColumn(itemId: string): Promise<void> {
+export async function deleteStatusColumn(itemId: string, boardId: string, viewId: string): Promise<void> {
   await connection.connect();
   const query: string = `
     UPDATE TableValues
@@ -399,5 +400,5 @@ export async function deleteStatusColumn(itemId: string): Promise<void> {
       .request()
       .input('itemId', itemId)
       .query(query);
+  revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
-

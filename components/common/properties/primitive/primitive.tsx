@@ -17,7 +17,9 @@ export const Primitive = ({ value, type, itemId, columnId }: Props) =>
 {
     const {id: boardId, viewId} = useParams();
     const inputRef = useRef<HTMLInputElement>(null);
-    const defaultValue:string | number = JSON.parse(value.value) || (type === 'number' ? 0 : '...');
+    const defaultValue:string | number = value.value 
+        ? JSON.parse(value.value) 
+        : (type === 'number' ? 0 : '...');
     const [definedValue, setDefinedValue] = useState<string | number>(defaultValue);
 
     async function handleSubmit(e: KeyboardEvent<HTMLInputElement> )

@@ -27,7 +27,6 @@
 .groupRow > div
 {
   border-right: 1px solid var(--accent-color);
-  border-bottom: 1px solid var(--accent-color);
   border-top: 1px solid var(--accent-color);
   height: 35px;
 }
@@ -40,9 +39,16 @@
 .groupBody .groupRow:first-child div
 {
   border-top: none;
+  border-bottom: 1px solid var(--accent-color);
 }
 
 .groupBody .groupRow:last-child div
 {
   border-bottom: none;
+}
+
+.groupHeaderProyect
+{
+  display: flex;
+  align-items: center;
 }
