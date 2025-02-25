@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@syncfusion/ej2-react-gantt": "^28.2.7",
     "@tiptap/extension-document": "^2.11.5",
     "@tiptap/extension-paragraph": "^2.11.5",
     "@tiptap/extension-task-item": "^2.11.5",
