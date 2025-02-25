@@ -5,9 +5,10 @@
     display: grid;
     place-content: center;
     cursor: pointer;
-    font-size: 1.2rem;
+    font-size: inherit;
     color: var(--font-color);
     position: relative;
+    user-select: none;
 }
 
 .corner
@@ -29,6 +30,73 @@
     height: 15px;
 }
 
+.showInput
+{
+    text-align: center;
+    border-bottom: 1px solid var(--action-color);
+    margin-bottom: 5px;
+}
+
+.listPreview
+{
+    position: absolute;
+    top: 40px;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    width: 222px;
+    height: max-content;
+    z-index: 2;
+    background-color: var(--bg-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.newInput
+{
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+    padding-bottom: 5px;
+}
+
+.newInput button
+{
+    background-color: var(--action-color);
+    border: none;
+    color: var(--bg-color);
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.newInput input
+{
+    width: 100%;
+    font-family: inherit;
+    border: 1px solid var(--action-color);
+    background: none;
+    border-radius: 3px;
+    outline: none;
+    padding: 5px;
+    color: var(--font-color);
+}
+
+.tagsContainer
+{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 30px;
+    gap: 3px;
+}
+
+.listItem
+{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+    overflow: hidden;
+    border-radius: 2px;
+}
 
 @keyframes expand {
     0%

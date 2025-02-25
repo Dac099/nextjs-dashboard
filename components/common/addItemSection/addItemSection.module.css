@@ -10,4 +10,39 @@
 {
     border-right: 1px solid var(--accent-color);
     padding: 5px 2px;
+    color: var(--accent-color);
 }
+
+.containerRow > div:last-child
+{
+    border-right: none;
+}
+
+.addBtn
+{
+    display: block;
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 250ms ease;
+    user-select: none;
+}
+
+.addBtn:active
+{
+    background-color: var(--accent-color);
+}
+
+.inputTitle
+{
+    height: 100%;
+    width: 100%;
+    display: block;
+    font-family: inherit;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--font-color);
+    padding-left: 5px;
+}
+

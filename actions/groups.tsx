@@ -75,7 +75,8 @@ async function fetchBoardValues(boardId: string): Promise<ItemValues>
       id: curr.id,
       itemId: curr.itemId,
       groupId: curr.groupId,
-      value: curr.value
+      value: curr.value,
+      columnId: curr.columnId,
     });
     return acc;
   }, new Map<string, TableValue[]>());
@@ -282,3 +283,121 @@ export async function updateGroupColor(groupId: string, color: string, boardId: 
 
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
+
+export async function addItemBoard(groupId: string, viewId: string, boardId: string, itemName: string): Promise<void>
+{
+  const addItemQuery: string = `
+    INSERT INTO Items (group_id, name, position)
+    VALUES (@groupId, @name,
+        (SELECT ISNULL(MAX(position), 0) + 1 FROM Items 
+        WHERE group_id = @groupId AND deleted_at IS NULL)
+    )
+  `;
+
+  await connection.connect();
+  await connection
+      .request()
+      .input('groupId', groupId)
+      .input('name', itemName)
+      .query(addItemQuery);
+
+  revalidatePath(`board/${boardId}/view/${viewId}`);
+}
+
+export async function setTableValue(
+    boardId: string,
+    viewId: string,
+    itemId: string | undefined,
+    columnId: string | undefined,
+    value: string,
+    valueId: string | undefined
+): Promise<void> {
+  await connection.connect();
+
+  const updateValueQuery: string = `
+    UPDATE TableValues
+    SET 
+        value = @value,
+        updated_at = GETDATE()
+    WHERE id = @valueId
+  `;
+
+  if(!valueId)
+  {
+    const setValueQuery: string = `
+        INSERT INTO TableValues (item_id, column_id, value)
+        VALUES (@itemId, @columnId, @value);
+    `;
+    await connection
+        .request()
+        .input('itemId', itemId)
+        .input('columnId', columnId)
+        .input('value', value)
+        .query(setValueQuery);
+  }
+
+  await connection
+      .request()
+      .input('valueId', valueId)
+      .input('value', value)
+      .query(updateValueQuery);
+
+  revalidatePath(`/board/${boardId}/view/${viewId}`);
+}
+
+export async function getBoardStatusList(columnId: string): Promise<{color: string, text: string, id: string}[]> {
+  await connection.connect();
+
+  const selectQuery: string = `
+    SELECT 
+        id,
+        value 
+    FROM TableValues
+    WHERE column_id = @columnId 
+        AND item_id IS NULL
+        AND deleted_at IS NULL
+  `;
+
+  const result = await connection
+      .request()
+      .input('columnId', columnId)
+      .query(selectQuery);
+
+  return result.recordset.map((res): {color: string, text: string, id: string} => ({
+    ...JSON.parse(res.value),
+    id: res.id
+  }));
+}
+
+export async function addStatusColumn(columnId: string, value: string): Promise<string>
+{
+  await connection.connect();
+  const query: string = `
+    INSERT INTO TableValues (column_id, value)
+    OUTPUT inserted.id
+    VALUES (@columnId, @value)
+  `;
+
+  const result = await connection
+      .request()
+      .input('columnId', columnId)
+      .input('value', value)
+      .query(query);
+
+  return result.recordset[0].id;
+}
+
+export async function deleteStatusColumn(itemId: string): Promise<void> {
+  await connection.connect();
+  const query: string = `
+    UPDATE TableValues
+    SET deleted_at = GETDATE()
+    WHERE id = @itemId
+  `;
+
+  await connection
+      .request()
+      .input('itemId', itemId)
+      .query(query);
+}
+

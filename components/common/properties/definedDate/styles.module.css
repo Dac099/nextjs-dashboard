@@ -16,7 +16,7 @@
 
 .container > span
 {
-    color: var(--action-color);
+    color: var(--font-color);
     cursor: pointer;
 }
 

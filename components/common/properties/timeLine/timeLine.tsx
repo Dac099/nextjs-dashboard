@@ -6,21 +6,22 @@ import Calendar from 'react-calendar';
 import { useState } from "react";
 
 type Props = {
-    property: PropertyData
+    startDate: string;
+    endDate: string;
 };
 
-export const TimeLine = ({ property }: Props) => {
+export const TimeLine = ({ startDate, endDate }: Props) => {
     const [ showCalendar, setShowCalendar ] = useState<boolean>(false);
-    const startDateFormatead = new Date(property.startDate as string).toLocaleDateString('en-GB');
-    const endDateFormatead = new Date(property.endDate as string).toLocaleDateString('en-GB');
+    const startDateFormatead = new Date(startDate as string).toLocaleDateString('en-GB');
+    const endDateFormatead = new Date(endDate as string).toLocaleDateString('en-GB');
     const [ startDay, startMonth, startYear ] = startDateFormatead?.split('-') as string[];
     const [ endDay, endMonth, endYear ] = endDateFormatead?.split('-') as string[];
 
     const currentDate = new Date();
-    const startDate = new Date(`${startYear}/${startMonth}/${startDay}`);
-    const endDate = new Date(`${endYear}/${endMonth}/${endDay}`);
-    const totalTime = endDate.getTime() - startDate.getTime();
-    const completedTime = currentDate.getTime() - startDate.getTime();
+    const startDateTime = new Date(`${startYear}/${startMonth}/${startDay}`);
+    const endDateTime = new Date(`${endYear}/${endMonth}/${endDay}`);
+    const totalTime = endDateTime.getTime() - startDateTime.getTime();
+    const completedTime = currentDate.getTime() - startDateTime.getTime();
     const percentage = Math.round(100 * (completedTime / totalTime));
 
     return (

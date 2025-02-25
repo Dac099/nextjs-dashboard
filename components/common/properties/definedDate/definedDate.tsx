@@ -4,13 +4,17 @@ import styles from './styles.module.css';
 import { LuCalendarClock } from "react-icons/lu";
 import Calendar from 'react-calendar';
 import {useState} from "react";
+import {TableValue} from "@/utils/types/groups";
 
 type Props = {
-    date : string
+    value: TableValue;
+    columnId: string;
+    itemId: string;
 };
 
-export const DefinedDate = ({ date }: Props) => {
+export const DefinedDate = ({ value, columnId, itemId }: Props) => {
     const [ showCalendar, setShowCalendar ] = useState<boolean>(false);
+    let defaultValue: string;
 
     return (
         <article className={styles.container}>
@@ -20,7 +24,7 @@ export const DefinedDate = ({ date }: Props) => {
                     onClick={() => {setShowCalendar(!showCalendar)}}
                 />
             </span>
-            <p>{date}</p>
+            <p>dating</p>
 
             {showCalendar &&
                 <section className={styles['calendar-container']}>

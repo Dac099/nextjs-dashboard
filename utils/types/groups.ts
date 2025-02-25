@@ -35,6 +35,7 @@ export type TableValue = {
     itemId: string;
     groupId: string;
     value: string;
+    columnId: string;
 };
 
 export type ItemValues = Map<string, TableValue[]>;
