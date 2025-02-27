@@ -1,8 +1,6 @@
 .container
 {
-    position: relative;
     width: 100%;
-    min-height: 500px;
-    max-height: 770px;
+    height: calc(95vh - 100px);
     overflow: auto;
 }

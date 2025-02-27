@@ -1,6 +1,11 @@
 import styles from './itemRow.module.css';
 import {Column, Item, TableValue} from "@/utils/types/groups";
 import {ItemValue} from "@/components/common/itemValue/itemValue";
+import { ProgressDial } from '../progressDial/progressDial';
+import { ChatRing } from '../chatRing/chatRing';
+import { ResponseChats } from '@/utils/types/items';
+import { getItemChats } from '@/actions/items';
+import {RowTitle} from "@/components/common/rowTitle/rowTitle";
 
 type Props = {
     item: Item;
@@ -8,7 +13,8 @@ type Props = {
     columns: Column[];
 };
 
-export function ItemRow({ item, values, columns }: Props) {
+export async function ItemRow({ item, values, columns }: Props) {
+    const chatData: ResponseChats = await getItemChats(item.id);
     const valuesByColumn = new Map<Column, TableValue>();
 
     columns.forEach((column) => {
@@ -19,7 +25,18 @@ export function ItemRow({ item, values, columns }: Props) {
     return (
         <>
             <div className={styles.itemTitle}>
-                {item.name}
+                <RowTitle itemId={item.id} title={item.name}/>
+                <article
+                    className={styles.tasksContainer}
+                >
+                    <ProgressDial completed={0} total={10}/>
+                </article>
+
+                <article
+                    className={styles.chatContainer}
+                >
+                    <ChatRing chatData={chatData} />
+                </article>
             </div>
             {
                 columns.map((column) => (

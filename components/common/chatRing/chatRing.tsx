@@ -1,15 +1,14 @@
 import styles from './styles.module.css';
-import {ChatData} from "@/utils/common/types";
 import { BsChatLeftTextFill } from "react-icons/bs";
 import { RiChatNewFill } from "react-icons/ri";
+import {ResponseChats} from "@/utils/types/items";
 
 type Props = {
-    itemId: string;
-    chats: ChatData[];
+    chatData: ResponseChats;
 };
 
-export const ChatRing = ({ itemId, chats }: Props) => {
-    const totalChats = chats.length;
+export const ChatRing = ({ chatData }: Props) => {
+    const totalChats = 0;
     return (
         <article className={styles.container}>
             {totalChats > 0

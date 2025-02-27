@@ -3,7 +3,7 @@
 import styles from './styles.module.css';
 import { LuCalendarClock } from "react-icons/lu";
 import Calendar from 'react-calendar';
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import {TableValue} from "@/utils/types/groups";
 import { setTableValue } from '@/actions/groups';
 import { useParams } from 'next/navigation';
@@ -26,18 +26,42 @@ export const DefinedDate = ({ value, columnId, itemId }: Props) => {
     : new Date();
 
     const [ newDate, setNewDate ] = useState<Value>(defaultValue);
+    const prevDateRef = useRef<Value>(defaultValue);
+    const isInitialMount = useRef(true);
 
+    // Este efecto solo se ejecuta cuando cambia la fecha y el calendario se oculta
     useEffect(() => {
-        setTableValue(
-            boardId as string, 
-            viewId as string, 
-            itemId, 
-            columnId, 
-            JSON.stringify(newDate),
-            value.id
-        )
+        // Ignorar el primer render
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
+        // Solo enviar la actualización si la fecha ha cambiado y el calendario no está visible
+        if (!showCalendar && JSON.stringify(newDate) !== JSON.stringify(prevDateRef.current)) {
+            // Actualizar la referencia para evitar actualizaciones innecesarias
+            prevDateRef.current = newDate;
+            
+            setTableValue(
+                boardId as string, 
+                viewId as string, 
+                itemId, 
+                columnId, 
+                JSON.stringify(newDate),
+                value.id
+            );
+        }
+    }, [newDate, showCalendar, boardId, viewId, itemId, columnId, value.id]);
+
+    const handleCalendarToggle = () => {
+        setShowCalendar(!showCalendar);
+    };
+
+    const handleDateChange = (date: Value) => {
+        setNewDate(date);
+        // Al seleccionar una fecha, cerramos el calendario
         setShowCalendar(false);
-    }, [newDate]);
+    };
 
     function formatDate(date: Value): string
     {
@@ -55,14 +79,14 @@ export const DefinedDate = ({ value, columnId, itemId }: Props) => {
             <span>
                 <LuCalendarClock
                     size={20}
-                    onClick={() => {setShowCalendar(!showCalendar)}}
+                    onClick={handleCalendarToggle}
                 />
             </span>
             <p>{formatDate(newDate)}</p>
 
             {showCalendar &&
                 <section className={styles['calendar-container']}>
-                    <Calendar onChange={setNewDate} value={newDate}/>
+                    <Calendar onChange={handleDateChange} value={newDate}/>
                 </section>
             }
         </article>

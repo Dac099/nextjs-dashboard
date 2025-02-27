@@ -1,7 +1,7 @@
 .layout 
 {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 5vh 95vh;
   height: 100vh;
 }
 
@@ -18,5 +18,5 @@
   padding: 10px;
   border-top-left-radius: 10px;
   position: relative;
-  min-height: 0;
+  height: 95vh;
 }
