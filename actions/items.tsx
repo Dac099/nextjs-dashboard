@@ -87,8 +87,8 @@ export async function getProjectData(projectId: string): Promise<ProjectData[]>
         tp.responsable_ensamblador as assembler
     FROM tb_proyect tp
     LEFT JOIN tb_cliente tc ON tc.id_cliente = tp.id_cliente
-    LEFT JOIN tb_user tu ON tc.user_id = tp_user_id
-    LEFT JOIN tp_pro_tipo tpt ON tpt.id_tipo_pro = tp.id_tipo_pro
+    LEFT JOIN tb_user tu ON tu.id_user = tp.id_user
+    LEFT JOIN tb_pro_tipo tpt ON tpt.id_tipo_pro = tp.id_tipo_pro
     LEFT JOIN tb_eq_estatus tee ON tee.id_estado = tp.id_estado
     LEFT JOIN tb_mach_div tmd ON tmd.id_div = tp.id_sector
     WHERE tp.id_proyect = @projectId
