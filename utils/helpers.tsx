@@ -218,3 +218,9 @@ export function formatBoardData(boardData: BoardData) {
   // Retornar el formato exacto que requiere Google Charts
   return [chartColumns, ...chartRows];
 }
+
+export function formatDate(date: Date): string
+{
+    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+}

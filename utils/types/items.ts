@@ -63,7 +63,7 @@ export type ProjectData = {
 
 export type Item = {
   name: string
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
   project_id: string;
 };

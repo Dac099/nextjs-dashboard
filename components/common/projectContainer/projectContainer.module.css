@@ -1,0 +1,30 @@
+.containerForm
+{
+  width: 100%;
+}
+
+.formAdvice p:first-child
+{
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--action-color);
+  user-select: none;
+}
+
+.formAdvice p:last-child
+{
+  font-size: 1.5rem;
+  font-style: italic;
+  opacity: 0.5;
+  user-select: none;
+}
+
+.selectContainer
+{
+  width: 100%;
+  margin: 30px 0;
+  display: flex;
+  justify-content: center;
+}

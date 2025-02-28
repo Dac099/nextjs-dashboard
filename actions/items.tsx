@@ -121,3 +121,22 @@ export async function getItemDetail(itemId: string): Promise<Item[]>
   
   return result.recordset;
 }
+
+export async function getAllProjects(): Promise<{id: string, name: string}[]>
+{
+  await connection.connect()
+  const query: string = `
+    SELECT 
+      tp.id_proyect as id,
+      tp.nom_proyecto as name
+    FROM tb_proyect tp
+    WHERE tp.id_proyect NOT IN (
+      SELECT project_id 
+      FROM Items
+      WHERE project_id IS NOT NULL
+    )
+  `;
+  const result = await connection.query(query);
+
+  return result.recordset;
+}
