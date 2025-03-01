@@ -1,0 +1,71 @@
+.container
+{
+  width: 700px;
+}
+
+.inputSearcher
+{
+  width: 30%;
+  height: 30px;
+  outline: none;
+  border: 1px solid var(--action-color);
+  border-radius: 5px;
+  font-family: inherit;
+  padding-left: 3px;
+  background: var(--sec-bg-color);
+  color: var(--font-color);
+  display: block;
+  margin: 0 auto;
+}
+
+.resultProjects
+{
+  border: 1px solid var(--accent-color);
+  padding: 5px;
+  border-radius: 5px;
+  width: 100%;
+  margin-top: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  color: var(--font-color);
+  box-shadow: 2px 2px 5px 0px var(--accent-color)
+}
+
+.projectItem
+{
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns:  60px 1fr;
+  gap: 5px;
+  padding: 5px 3px;
+  border-radius: 5px;
+}
+
+.projectItem:hover
+{
+  background-color: var(--accent-color);
+}
+
+.projectItem p 
+{
+  width: 100%;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.projectItem span
+{
+  background-color: var(--action-color);
+  color: var(--bg-color);
+  text-align: center;
+  border-radius: 3px;
+  font-size: 1.3rem;
+}
+
+.projectItemSelected
+{
+  background-color: var(--accent-color);
+  margin-top: 15px;
+}

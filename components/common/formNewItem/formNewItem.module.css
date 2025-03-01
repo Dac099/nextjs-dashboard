@@ -1,0 +1,52 @@
+.header
+{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.7rem;
+  margin-bottom: 20px;
+}
+
+.options
+{
+  display: flex;
+  gap: 10px;
+}
+
+.options p
+{
+  font-size: 1.3rem;
+  padding: 5px;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+}
+
+.options p:hover
+{
+  background-color: var(--accent-color);
+}
+
+.options .selected
+{
+  background-color: var(--action-color);
+  color: var(--bg-color);
+}
+
+.content
+{
+  border-top: 2px solid var(--action-color);
+  padding-top: 10px;
+}
+
+.searcher > p
+{
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--action-color);
+  margin-bottom: 20px;
+}
+
+.searcher > article{
+  display: flex;
+  justify-content: center;
+}

@@ -4,6 +4,7 @@
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: minmax(200px, 2fr) repeat(auto-fit, minmax(60px, 1fr));
+    position: relative;
 }
 
 .containerRow > div
@@ -46,3 +47,38 @@
     padding-left: 5px;
 }
 
+.menuContainer
+{
+    position: absolute;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    background-color: var(--bg-color);
+    border-radius: 5px;
+    padding: 5px;
+    border: var(--accent-color);
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.2);
+    z-index: 2;
+    border: 1px solid var(--accent-color);
+}
+
+.menuContainer button
+{
+    background: none;
+    border: none;
+    outline: none;
+    text-align: left;
+    padding: 5px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.menuContainer button:hover
+{
+    background-color: var(--action-color);
+    color: var(--bg-color);
+    border-radius: 5px;
+}

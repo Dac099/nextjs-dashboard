@@ -67,3 +67,15 @@ export type Item = {
   updated_at: Date;
   project_id: string;
 };
+
+export type Project = {
+  id: string;
+  name: string;
+};
+
+export type Column = {
+  id: string;
+  name: string;
+  type: string;
+  position: number;
+};

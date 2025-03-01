@@ -8,7 +8,7 @@ import {
 } from "react";
 import {Tooltip} from "@/components/common/tooltip/tooltip";
 import {Column} from "@/utils/types/groups";
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {GroupHeaderColumn} from "@/components/common/groupHeaderColumn/groupHeaderColumn";
 import {addItemBoard} from "@/actions/groups";
 
@@ -20,8 +20,10 @@ type Props = {
 export function AddItemSection({ columns, groupId }: Props)
 {
     const { id: boardId, viewId } = useParams();
+    const router = useRouter();
     const inputRef = useRef<HTMLInputElement>(null);
     const [ showItemInput, setShowItemInput ] = useState<boolean>(false);
+    const [showItemMenu, setShowItemMenu] = useState<boolean>(false);
 
     async function handleAddItem(e: KeyboardEvent<HTMLInputElement>){
         if(e.code === 'Escape'){
@@ -36,6 +38,18 @@ export function AddItemSection({ columns, groupId }: Props)
                 setShowItemInput(false);
             }
         }
+    }
+
+    function handleItemInput()
+    {
+        setShowItemMenu(false);
+        setShowItemInput(true);
+    }
+
+    function handleAddProject()
+    {
+        router.push(`?newProject=true&groupId=${groupId}`);
+        setShowItemMenu(false);
     }
 
     return (
@@ -63,12 +77,28 @@ export function AddItemSection({ columns, groupId }: Props)
                 :
                 <span
                     className={styles.addBtn}
-                    onClick={() => setShowItemInput(!showItemInput)}
+                    onClick={() => setShowItemMenu(!showItemMenu)}
                 >
                     <Tooltip text={'Agregar un nuevo item'}>
                         +
                     </Tooltip>
                 </span>
+            }
+            {showItemMenu &&
+                <article className={styles.menuContainer}>
+                    <button 
+                        type='button'
+                        onClick={() => handleAddProject()}
+                    >
+                        Proyecto
+                    </button>
+                    <button 
+                        type='button'
+                        onClick={() => handleItemInput()}
+                    >
+                        Item
+                    </button>
+                </article>
             }
         </div>
     );

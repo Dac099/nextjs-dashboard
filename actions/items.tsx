@@ -1,6 +1,6 @@
 'use server';
 import connection from '@/services/database';
-import type {Item, ProjectData, ResponseChats} from '@/utils/types/items';
+import type {Item, ProjectData, ResponseChats, Column} from '@/utils/types/items';
 
 export async function getItemChats(itemId: string): Promise<ResponseChats>
 {
@@ -137,6 +137,29 @@ export async function getAllProjects(): Promise<{id: string, name: string}[]>
     )
   `;
   const result = await connection.query(query);
+
+  return result.recordset;
+}
+
+export async function getBoardColumns(boardId: string): Promise<Column[]>
+{
+  await connection.connect();
+  const query: string = `
+    SELECT 
+      id,
+      name,
+      type,
+      position
+    FROM Columns
+    WHERE board_id = @boardId
+    ORDER BY position 
+  `;
+
+  const result = await connection
+    .request()
+    .input('boardId', boardId)
+    .query(query);
+
 
   return result.recordset;
 }
