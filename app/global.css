@@ -55,6 +55,11 @@ a
   color: inherit;
 }
 
+.input
+{
+  font-family: inherit;
+}
+
 .react-calendar
 {
   background-color: var(--bg-color);

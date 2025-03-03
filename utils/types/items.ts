@@ -34,9 +34,9 @@ export type ProjectData = {
   description: string;
   initial_budget: number;
   currency: string;
-  beginning_date: string;
-  end_date: string;
-  created_at: string;
+  beginning_date: Date;
+  end_date: Date;
+  created_at: Date;
   note: string;
   num_serie: string;
   num_oc: string;
@@ -52,7 +52,7 @@ export type ProjectData = {
   assembly_dev_hours: number;
   programming_hours: number;
   other_hours: number;
-  kickoff: string;
+  kickoff: Date;
   weeks_count: number;
   project_manager: string;
   mechanical_designer: string;

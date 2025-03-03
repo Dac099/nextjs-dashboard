@@ -18,6 +18,11 @@
   margin: 0 auto;
 }
 
+.inputSearcher::placeholder
+{
+  color: var(--font-colot);
+}
+
 .resultProjects
 {
   border: 1px solid var(--accent-color);

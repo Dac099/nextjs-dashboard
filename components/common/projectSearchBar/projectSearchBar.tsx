@@ -22,7 +22,7 @@ export function ProjectSearchBar({ data, selectedProject, setSelectedProject }: 
     }
   
     const projects = data.filter(project => project.id.toLowerCase().startsWith(inputValue.toLowerCase()));
-    setSelectedProject('');
+    setSelectedProject(null);
     setFilteredProjects(projects);
   }, [inputValue, data, setSelectedProject]);
 

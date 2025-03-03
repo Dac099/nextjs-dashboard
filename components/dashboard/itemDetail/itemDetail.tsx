@@ -44,7 +44,7 @@ export function ItemDetail(){
                 className={styles.container}
             >
                 {itemId && <DetailView itemId={itemId}/>}
-                {isNewProject && <FormNewItem groupId={groupId as string}/>}
+                {isNewProject && <FormNewItem groupId={groupId as string} closeContainer={closeContainer}/>}
             </article>
         );
     }

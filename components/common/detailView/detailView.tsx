@@ -2,7 +2,7 @@ import styles from './detailView.module.css';
 import { useEffect, useState } from 'react';
 import { 
   getItemChats, 
-  getProjectData, 
+  getProjectDataByItem, 
   getItemDetail 
 } from '@/actions/items';
 import { Item, ProjectData, ResponseChats } from '@/utils/types/items';
@@ -22,17 +22,18 @@ type Props = {
 export function DetailView({itemId}: Props)
 {
   const [chatData, setChatData] = useState<ResponseChats>({} as ResponseChats);
-  const [projectData, setProjectData] = useState<ProjectData[]>([]);
+  const [projectData, setProjectData] = useState<ProjectData | null>(null);
   const [itemDetail, setItemDetail] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [onError, setOnError] = useState<boolean>(false);
   const [viewSelected, setViewSelected] = useState<string>('chats');
+  const [isProject, setIsProject] = useState<boolean>(false);
 
   useEffect(() => {
-    async function fetchData(itemId: string): Promise<[ResponseChats, ProjectData[], Item[]]>{
+    async function fetchData(itemId: string): Promise<[ResponseChats, ProjectData, Item[]]>{
         return await Promise.all([
             getItemChats(itemId), 
-            getProjectData(itemId), 
+            getProjectDataByItem(itemId), 
             getItemDetail(itemId)
         ]);            
     }
@@ -43,6 +44,7 @@ export function DetailView({itemId}: Props)
             setChatData(chats);
             setProjectData(project);
             setItemDetail(item);
+            setIsProject(!Object.values(project).every(item => item === null));
         })
         .finally(() => setIsLoading(false))
         .catch(() => setOnError(true));            
@@ -87,13 +89,15 @@ export function DetailView({itemId}: Props)
               Chats
           </article>
 
-          <article 
-              className={`${styles.viewBtn} ${viewSelected == 'projectDetail' ? styles.viewBtnSelected : ''}`}
-              onClick={() => setViewSelected('projectDetail')}
-          >
-              <SiGoogleforms size={20}/>
-              Detalle del proyecto
-          </article>
+          {isProject &&
+            <article 
+                className={`${styles.viewBtn} ${viewSelected == 'projectDetail' ? styles.viewBtnSelected : ''}`}
+                onClick={() => setViewSelected('projectDetail')}
+            >
+                <SiGoogleforms size={20}/>
+                Detalle del proyecto
+            </article>
+          }
 
           <article 
               className={`${styles.viewBtn} ${viewSelected == 'logs' ? styles.viewBtnSelected : ''}`}
@@ -108,7 +112,7 @@ export function DetailView({itemId}: Props)
 
       <section className={styles.loaderContent}>
           {viewSelected === 'chats' && <ChatsContainer />}
-          {viewSelected === 'projectDetail' && <ProjectContainer data={projectData[0]}/>}
+          {viewSelected === 'projectDetail' && <ProjectContainer data={projectData}/>}
           {viewSelected === 'logs' && <LogsContainer />}
       </section>
     </>

@@ -1,30 +1,97 @@
-.containerForm
+.container
 {
   width: 100%;
 }
 
-.formAdvice p:first-child
+.contentData
 {
-  font-size: 2.5rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  /* width: 80%; */
+}
+
+.projectTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--sec-bg-color);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.tableHeader {
+  padding: 12px 15px;
+  text-align: left;
+  color: var(--font-color);
+  font-weight: 600;
+  border-bottom: 1px solid var(--accent-color);
   color: var(--action-color);
-  user-select: none;
+  font-size: 1.3rem;
 }
 
-.formAdvice p:last-child
-{
-  font-size: 1.5rem;
-  font-style: italic;
-  opacity: 0.5;
-  user-select: none;
+.tableRow {
+  border-bottom: 1px solid var(--accent-color);
 }
 
-.selectContainer
-{
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background-color: var(--accent-color);
+}
+
+.fieldName {
+  padding: 12px 15px;
+  text-align: left;
+  color: var(--font-color);
+  font-weight: 500;
+  width: 20%;
+  font-size: 1.2rem;
+}
+
+.fieldValue {
+  padding: 12px 15px;
+  text-align: left;
+  width: 70%;
+}
+
+.sectionHeader {
+  background-color: var(--bg-color);
+  font-weight: bold;
+  color: var(--action-color);
+  padding: 10px 15px;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.sectionHeader td {
+  padding: 10px 15px;
+}
+
+.formInput {
   width: 100%;
-  margin: 30px 0;
-  display: flex;
-  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid var(--action-color);
+  background: none;
+  outline: none;
+  color: var(--font-color);
+  font-family: inherit;
+  border-radius: 4px;
+  font-size: 1.3rem;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.formInput:focus {
+  outline: 0;
+  box-shadow: 0 0 0 3px var(--action-color);
+}
+
+.formInput:disabled {
+  background-color: var(--accent-color);
+  cursor: not-allowed;
+}
+
+.numericInput {
+  text-align: right;
 }
