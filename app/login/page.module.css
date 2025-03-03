@@ -1,0 +1,22 @@
+.container
+{
+  padding: 10px;
+}
+
+.title
+{
+  text-align: center;
+}
+
+.title h1
+{
+  font-size: 3rem;
+  color: var(--action-color);
+}
+
+.title p
+{
+  font-size: 1.4rem;
+  color: var(--accent-color);
+  font-style: italic;
+}
