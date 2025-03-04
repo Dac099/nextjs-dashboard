@@ -20,9 +20,9 @@
   display: flex;
   gap: 10px;
   font-size: 1.5rem;
+}
 
-  svg
-  {
-    cursor: pointer;
-  }
+.mainbar section:last-child svg
+{
+  cursor: pointer;
 }
