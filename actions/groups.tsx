@@ -93,7 +93,7 @@ async function fetchBoardItems(boardId: string): Promise<GroupItem>
         i.position
     FROM Items i
     INNER JOIN Groups g on i.group_id = g.id
-    WHERE g.board_id = @boardId AND g.deleted_at IS NULL
+    WHERE g.board_id = @boardId AND g.deleted_at IS NULL AND i.deleted_at IS NULL
     ORDER BY i.group_id, i.position
   `;
 
@@ -132,7 +132,7 @@ async function fetchColumnsGroups(boardId: string): Promise<ColumnsGroups>
       c.position as columnPosition
     FROM Groups g
     LEFT JOIN Columns c on g.board_id = c.board_id
-    WHERE g.board_id = @boardId AND g.deleted_at IS NULL
+    WHERE g.board_id = @boardId AND g.deleted_at IS NULL AND c.deleted_at IS NULL
     ORDER BY g.position, c.position ASC
   `;
 
@@ -416,6 +416,40 @@ export async function deleteGroup(groupId: string, boardId: string, viewId: stri
       .request()
       .input('groupId', groupId)
       .query(query);
+
+  revalidatePath(`/board/${boardId}/view/${viewId}`);
+}
+
+export async function deleteGroupRow(itemId: string, boardId: string, viewId: string): Promise<void>
+{
+  await connection.connect();
+  const query: string = `
+    UPDATE Items
+    SET deleted_at = GETDATE()
+    WHERE id = @itemId
+  `;
+
+  await connection
+    .request()
+    .input('itemId', itemId)
+    .query(query);
+
+  revalidatePath(`/board/${boardId}/view/${viewId}`);
+}
+
+export async function deleteColumn(columnId: string, boardId: string, viewId: string): Promise<void>
+{
+  await connection.connect();
+  const query: string = `
+    UPDATE Columns
+    SET deleted_at = GETDATE()
+    WHERE id = @colId
+  `;
+
+  await connection
+    .request()
+    .input('colId', columnId)
+    .query(query);
 
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }

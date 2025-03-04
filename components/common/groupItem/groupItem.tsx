@@ -30,10 +30,10 @@ export function GroupItem({ group, columns, items, values }: Props)
                     </div>
                     {
                         columns.map(column => (
-                          <GroupHeaderColumn 
-                            key={column.id} 
-                            column={column}
-                          />
+                            <GroupHeaderColumn 
+                                key={column.id}
+                                column={column}
+                            />
                         ))
                     }
                 </section>

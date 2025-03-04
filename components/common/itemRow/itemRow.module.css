@@ -18,6 +18,7 @@
     gap: 3px;
     align-items: center;
     font-size: 1.2rem;
+    position: relative;
 }
 
 
@@ -35,4 +36,18 @@
     display: grid;
     place-content: center;
     padding-top: 5px;
+}
+
+.deleteRow
+{
+    position: absolute;
+    right: 185px;
+    z-index: 2;
+    display: none;
+    cursor: pointer;
+}
+
+.itemTitle:hover .deleteRow
+{
+    display: block;
 }

@@ -6,6 +6,8 @@ import { ChatRing } from '../chatRing/chatRing';
 import { ResponseChats } from '@/utils/types/items';
 import { getItemChats } from '@/actions/items';
 import {RowTitle} from "@/components/common/rowTitle/rowTitle";
+import { AiOutlineDeleteRow } from "react-icons/ai";
+import { DeleteRowBtn } from '../deleteRowBtn/deleteRowBtn';
 
 type Props = {
     item: Item;
@@ -25,6 +27,9 @@ export async function ItemRow({ item, values, columns }: Props) {
     return (
         <>
             <div className={styles.itemTitle}>
+                <div className={styles.deleteRow}>
+                    <DeleteRowBtn itemId={item.id}/>
+                </div>
                 <RowTitle itemId={item.id} title={item.name}/>
                 <article
                     className={styles.tasksContainer}
