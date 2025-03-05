@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {ChangeEvent, useState} from "react";
 import styles from "./projectContainer.module.css";
 import type { ProjectData } from "@/utils/types/items";
 
@@ -9,10 +9,10 @@ type Props = {
 export function ProjectContainer({ data }: Props) {
   const [formData, setFormData] = useState<ProjectData>(data);
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
 
-    // Manejo especial para campos numéricos y fechas
+
     if (type === "number") {
       setFormData((prev) => ({
         ...prev,

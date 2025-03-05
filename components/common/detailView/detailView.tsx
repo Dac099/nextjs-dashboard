@@ -14,6 +14,8 @@ import { ChatsContainer } from '../chatsContainer/chatsContainer';
 import { ProjectContainer } from '../projectContainer/projectContainer';
 import { LogsContainer } from '../logsContainer/logsContainer';
 import { Skeleton } from '../skeleton/skeleton';
+import { FaMoneyBillWave } from "react-icons/fa";
+import {BillingContainer} from "@/components/common/billingContainer/billingContainer";
 
 type Props = {
   itemId: string;
@@ -106,14 +108,25 @@ export function DetailView({itemId}: Props)
               <LuLogs size={20}/>
               Logs
           </article>
+
+          {isProject &&
+              <article
+                className={`${styles.viewBtn} ${viewSelected == 'billing' ? styles.viewBtnSelected : ''}`}
+                onClick={() => setViewSelected('billing')}
+              >
+                  <FaMoneyBillWave />
+                  Cobranza
+              </article>
+          }
       </section>
       <hr className={styles.division}/>
 
 
       <section className={styles.loaderContent}>
           {viewSelected === 'chats' && <ChatsContainer />}
-          {viewSelected === 'projectDetail' && <ProjectContainer data={projectData}/>}
+          {viewSelected === 'projectDetail' && <ProjectContainer data={projectData as ProjectData} />}
           {viewSelected === 'logs' && <LogsContainer />}
+          {viewSelected === 'billing' && <BillingContainer idProject={projectData!.id} projectName={projectData!.name} />}
       </section>
     </>
   );
