@@ -37,17 +37,17 @@ export function GroupHeaderColumn({ column }: Props)
   function getIconByType(type: string): ReactNode
   {
     return type === 'status' 
-      ? <TagIcon /> 
+      ? <TagIcon size={15}/>
       : type === 'timeline'
-      ? <TimeLineIcon />
+      ? <TimeLineIcon size={15}/>
       : type === 'text'
-      ? <TextIcon />
+      ? <TextIcon size={15}/>
       : type === 'date'
-      ? <DateIcon />
+      ? <DateIcon size={15}/>
       : type === 'number'
-      ? <NumberIcon />
+      ? <NumberIcon size={15}/>
       : type === 'person'
-      ? <PersonIcon />
+      ? <PersonIcon size={15}/>
       : <></>;
   }
 
@@ -77,11 +77,11 @@ export function GroupHeaderColumn({ column }: Props)
 
   return (
     <div className={styles.item}>
-      <AiOutlineDeleteColumn 
-        size={20}
-        className={styles.deleteColBtn}
-        onClick={() => handleDeleteColumn(column.id)}
-      />
+      {/*<AiOutlineDeleteColumn */}
+      {/*  size={20}*/}
+      {/*  className={styles.deleteColBtn}*/}
+      {/*  onClick={() => handleDeleteColumn(column.id)}*/}
+      {/*/>*/}
       {showInput
         ? 
           <input 
@@ -93,14 +93,14 @@ export function GroupHeaderColumn({ column }: Props)
             autoFocus={true}
           />
         :
-          <>
+          <article>
             {getIconByType(column.type)}          
             <p
               onClick={() => setShowInput(true)}
             >
               {columnName}
             </p>
-          </>
+          </article>
       }
     </div>
   );

@@ -18,10 +18,14 @@ export function DeleteRowBtn({itemId}: Props)
   }
 
   return (
-    <AiOutlineDeleteRow 
-        size={20} 
-        className={styles.deleteRow}
-        onClick={() => handleClick()}
-    />
+    <article
+      onClick={() => handleClick()}
+    >
+
+      <AiOutlineDeleteRow
+          size={20}
+          className={styles.deleteRow}
+      />
+    </article>
   );
 }
