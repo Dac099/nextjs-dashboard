@@ -7,18 +7,17 @@ import {
     useEffect,
     useRef,
     RefObject,
+    MouseEvent,
 } from "react";
 import {
-    getBoardStatusList,
     setTableValue,
-    deleteStatusColumn,
     addStatusColumn,
 } from "@/actions/groups";
-import {TbTrashXFilled} from "react-icons/tb";
 import {HexColorPicker} from "react-colorful";
 import {FaAngleDown} from "react-icons/fa";
 import useClickOutside from "@/hooks/useClickOutside";
 import {useParams} from "next/navigation";
+import {Tooltip} from "@/components/common/tooltip/tooltip";
 
 type Props = {
     value: TableValue;
@@ -58,8 +57,9 @@ export function Status({value, itemId, columnId, status}: Props) {
         defaultValue = {color: 'rgba(0,0,0,0.4)', text: 'Sin confirmar', id: ''}
     }
 
-    function handleShowStatusList(e) {
-        if (e.target.classList.contains(styles.container)) {
+    function handleShowStatusList(e: MouseEvent<HTMLElement>) {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains(styles.container)) {
             setShowStatusList(!showStatusList);
         }
     }
@@ -87,13 +87,13 @@ export function Status({value, itemId, columnId, status}: Props) {
         }
     }
 
-    async function handleDeleteTag(indexTag: number) {
-        const tags = [...statusList];
-        const tagId: string = tags[indexTag].id as string;
-        tags.splice(indexTag, 1);
-        setStatusList(tags);
-        await deleteStatusColumn(tagId, boardId as string, viewId as string);
-    }
+    // async function handleDeleteTag(indexTag: number) {
+    //     const tags = [...statusList];
+    //     const tagId: string = tags[indexTag].id as string;
+    //     tags.splice(indexTag, 1);
+    //     setStatusList(tags);
+    //     await deleteStatusColumn(tagId, boardId as string, viewId as string);
+    // }
 
     async function handleAddValue(item:Tag){
         setShowStatusList(false);
@@ -114,7 +114,7 @@ export function Status({value, itemId, columnId, status}: Props) {
         <article
             className={styles.container}
             style={{backgroundColor: defaultValue.color}}
-            onClick={(e) => handleShowStatusList(e)}
+            onClick={handleShowStatusList}
         >
             {defaultValue.text}
             <span className={styles.corner}></span>
@@ -144,32 +144,40 @@ export function Status({value, itemId, columnId, status}: Props) {
                                     +
                                 </button>
                             </section>
-                            <HexColorPicker  onChange={setNewInputColor}/>
+                            <section className={styles.colorPicker}>
+                                <HexColorPicker  onChange={setNewInputColor}/>
+                            </section>
                         </>
                     }
                     {!showInputTag &&
                         <section className={styles.tagsContainer}>
                             {
-                                statusList.map((item, index) => (
-                                    <article 
-                                        className={styles.listItem}
-                                        key={`${item.color}-${item.text}`}
-                                    >
-                                        <article                                            
-                                            style={{backgroundColor: item.color}}
-                                            onClick={() => handleAddValue(item)}
-                                            >
-                                            <p>{item.text}</p>
-                                        </article>
+                                statusList.map((item) => (
+                                    <Tooltip text={item.text} key={`${item.color}-${item.text}`}>
                                         <article
-                                            style={{backgroundColor: item.color}}
+                                            className={styles.listItem}
+                                            key={`${item.color}-${item.text}`}
                                         >
-                                            <TbTrashXFilled
-                                                className={styles.icon}
-                                                onClick={() => handleDeleteTag(index)}
-                                            />
+                                            <article
+                                                style={{backgroundColor: item.color}}
+                                                onClick={() => handleAddValue(item)}
+                                                >
+                                                <p>{item.text}</p>
+                                            </article>
+                                            {/*
+                                                Se comenta botón de eliminar para evitar eliminaciones de etiqueta
+                                                hasta mejorar la lógica de eliminación
+                                            */}
+                                            {/*<article*/}
+                                            {/*    style={{backgroundColor: item.color}}*/}
+                                            {/*>*/}
+                                            {/*    <TbTrashXFilled*/}
+                                            {/*        className={styles.icon}*/}
+                                            {/*        onClick={() => handleDeleteTag(index)}*/}
+                                            {/*    />*/}
+                                            {/*</article>*/}
                                         </article>
-                                    </article>
+                                    </Tooltip>
                                 ))
                             }
                         </section>

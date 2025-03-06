@@ -40,12 +40,14 @@
 .listPreview
 {
     position: absolute;
-    top: 40px;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
     box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    width: 222px;
+    width: max-content;
     height: max-content;
     z-index: 2;
-    background-color: var(--bg-color);
+    background-color: var(--sec-bg-color);
     border: 1px solid var(--accent-color);
     border-radius: 5px;
     padding: 10px;
@@ -80,21 +82,22 @@
     color: var(--font-color);
 }
 
-.tagsContainer
-{
+.tagsContainer {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-auto-rows: 40px;
+    grid-template-rows: repeat(6, 40px);
+    grid-auto-flow: column;
+    grid-auto-columns: 150px;
     gap: 5px;
 }
 
 .listItem
 {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr;
     align-items: center;
     gap: 1px;
     overflow: hidden;
+    height: 100%;
 }
 
 .listItem article
@@ -102,17 +105,22 @@
     height: 100%;
     display: grid;
     place-content: center;
+    color: var(--bg-color);
+    text-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.listItem article:first-child
-{
-    border-radius: 5px 0 0 5px;
-}
+/*Estos estilos se comentan para dejar de estilizar el botón de eliminar etiqueta, ya que de momento se desactiva*/
+/*.listItem article:first-child*/
+/*{*/
+/*    border-radius: 5px 0 0 5px;*/
+/*}*/
 
-.listItem article:last-child
-{
-    border-radius: 0 5px 5px 0;
-}
+/*.listItem article:last-child*/
+/*{*/
+/*    border-radius: 0 5px 5px 0;*/
+/*}*/
 
 .listItem article:hover
 {
@@ -123,6 +131,12 @@
 {
     width: 100%;
     overflow: hidden;
+}
+
+.colorPicker
+{
+    display: grid;
+    place-content: center;
 }
 
 @keyframes expand {
