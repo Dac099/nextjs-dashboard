@@ -14,13 +14,13 @@ import { FaTimeline as TimeLineIcon} from "react-icons/fa6";
 import { LuText as TextIcon} from "react-icons/lu";
 import { IoCalendarNumberSharp as DateIcon} from "react-icons/io5";
 import { GoNumber as NumberIcon} from "react-icons/go";
-import { IoPerson as PersonIcon} from "react-icons/io5";
 import { useParams } from 'next/navigation';
 import { 
   addBoardColumn, 
   updateGroupTitle, 
   updateGroupColor,
   deleteGroup,
+  duplicateGroup,
 } from '@/actions/groups';
 import { HexColorPicker } from 'react-colorful';
 
@@ -102,6 +102,14 @@ export function GroupTitle({ group }: Props)
     setShowSubMenu(!showSubMenu);
   }
 
+  async function handleDuplicateGroup(): Promise<void>
+  {
+    setShowColorInput(false);
+    setShowMenu(false);
+    setShowSubMenu(false);
+    await duplicateGroup(group, viewId as string, boardId as string);
+  }
+
   useEffect(() => {
     if(updateTitle)
     {
@@ -140,6 +148,7 @@ export function GroupTitle({ group }: Props)
       }
       {showMenu &&
         <ul className={styles.groupMenu}>
+          <li onClick={() => handleDuplicateGroup()}>Duplicar</li>
           <li onClick={() => handleChangeTitle()}>Renombrar</li>
           <li onClick={handleShowSubMenu}>Nueva Columna</li>          
           {showSubMenu &&

@@ -2,14 +2,16 @@
 import connection from "@/services/database";
 import {revalidatePath} from "next/cache";
 import {
-  ColumnsGroups, 
+  ColumnsGroups,
   ColumnsGroupsDB,
   GroupItem,
   Item,
   TableValue,
   ItemValues,
-  BoardData,
+  BoardData, Group,
 } from "@/utils/types/groups";
+import sql from "mssql";
+import {buildInsertItemsBatchQuery} from "@/utils/actionsGrups/helpers";
 
 export async function addGroup(boardId: string, name: string, viewId: string, color: string): Promise<void>
 {
@@ -162,7 +164,7 @@ async function fetchColumnsGroups(boardId: string): Promise<ColumnsGroups>
     groups: new Map<string, {id: string, name: string, color: string, position: number}>(), 
     columns: new Map<string, {id: string, name: string, type: string, position: number}>() 
   });
-};
+}
 
 export async function addBoardColumn(boardId: string, viewId: string, columnType: string): Promise<void>
 {
@@ -197,7 +199,7 @@ export async function addBoardColumn(boardId: string, viewId: string, columnType
     WHERE board_id = @boardId AND name = @columnName AND deleted_at IS NULL
   `;
 
-  let result = await connection
+  const result = await connection
     .request()
     .input('boardId', boardId)
     .input('columnName', columnName)
@@ -218,7 +220,7 @@ export async function addBoardColumn(boardId: string, viewId: string, columnType
     )
   `;
 
-  result = await connection
+  await connection
     .request()
     .input('boardId', boardId)
     .input('columnName', columnName)
@@ -452,4 +454,63 @@ export async function deleteColumn(columnId: string, boardId: string, viewId: st
     .query(query);
 
   revalidatePath(`/board/${boardId}/view/${viewId}`);
+}
+
+export async function duplicateGroup(group: Group, viewId: string, boardId: string): Promise<void>{
+  await connection.connect();
+  const transaction = new sql.Transaction(connection);
+
+  const getItemsQuery: string = `
+    SELECT
+      name,
+      position
+    FROM Items
+    WHERE group_id = @groupId
+      AND deleted_at IS NULL
+  `;
+  const insertGroupQuery: string = `
+    INSERT INTO Groups (name, color, board_id, position)
+      OUTPUT inserted.id
+    VALUES (@name, @color, @boardId, (
+      SELECT ISNULL(MAX(position), 0) + 1
+      FROM Groups
+      WHERE deleted_at IS NULL
+      AND board_id = @boardId
+      ))
+  `;
+
+  try {
+    await transaction.begin();
+
+    // Obtener los ítems del grupo original
+    const itemsResponse = await new sql.Request(transaction)
+        .input('groupId', group.id)
+        .query(getItemsQuery);
+    const items = itemsResponse.recordset;
+
+    // Insertar el nuevo grupo y obtener su ID
+    const groupResponse = await new sql.Request(transaction)
+        .input('name', `${group.name} (copia)`)
+        .input('color', group.color)
+        .input('boardId', boardId)
+        .query(insertGroupQuery);
+    const groupId = groupResponse.recordset[0].id;
+
+    // Si hay ítems para duplicar, insertar los ítems en el nuevo grupo
+    if (items.length > 0) {
+      const insertItemsQuery: string = buildInsertItemsBatchQuery(items, groupId);
+      await new sql.Request(transaction).query(insertItemsQuery);
+    }
+
+    // Confirmar la transacción
+    await transaction.commit();
+
+    // Revalidar el path después de confirmar
+    revalidatePath(`/board/${boardId}/view/${viewId}`);
+  } catch (error) {
+    // Revertir la transacción en caso de error
+    await transaction.rollback();
+    console.error('Error duplicating group:', error);
+    throw error;
+  }
 }

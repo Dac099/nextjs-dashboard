@@ -1,3 +1,8 @@
+.container
+{
+    position: relative;
+}
+
 .containerRow
 {
     font-size: 1.4rem;
