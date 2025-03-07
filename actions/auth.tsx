@@ -9,16 +9,30 @@ type LoginResult = {
   error?: string;
 }
 
+type UserData = {
+  id: string;
+  username: string;
+  password: string;
+  access: {
+    read: {
+      workspaces: string[],
+      boards: string[],
+      views: string[],
+    },
+    edit: {
+      workspaces: string[],
+      boards: string[],
+      views: string[],
+    }
+  }
+};
+
 export async function loginAction(formData: FormData): Promise<LoginResult>
 {
   const username = formData.get('username') as string;
   const password = formData.get('password') as string;
   const cookieStore = await cookies();
-  let userInDB: {
-    id: string;
-    username: string;
-    password: string;
-  } | null;
+  let userInDB: UserData | null;
 
   if(!username || !password)
   {
@@ -50,7 +64,8 @@ export async function loginAction(formData: FormData): Promise<LoginResult>
   
   cookieStore.set('user-info', JSON.stringify({
     id: userInDB.id,
-    username: userInDB.username
+    username: userInDB.username,
+    access: userInDB.access
   }), {
     httpOnly: false, 
     secure: false,
@@ -66,7 +81,7 @@ function hashPassword(password: string): string
   return createHash('sha1').update(password).digest('hex').toUpperCase();
 }
 
-async function credentialsInDB(username: string, password: string): Promise<{id: string; username: string, password: string} | null>
+async function credentialsInDB(username: string, password: string): Promise<UserData | null>
 {
   try {
     await connection.connect();
@@ -74,7 +89,8 @@ async function credentialsInDB(username: string, password: string): Promise<{id:
       SELECT 
         id_user as id,
         usuario as username,
-        passwd_user as password
+        passwd_user as password,
+        monday_access as access
       from tb_user
       where usuario = @username AND passwd_user = @password;
     `;
@@ -89,7 +105,12 @@ async function credentialsInDB(username: string, password: string): Promise<{id:
       return null;
     }
     
-    return result.recordset[0];
+    return {
+      id: result.recordset[0].id,
+      username: result.recordset[0].username,
+      password: result.recordset[0].password,
+      access: JSON.parse(result.recordset[0].access)
+    };
   } catch (error) {
     console.error('Error al consultar la base de datos:', error);
     throw error;

@@ -23,10 +23,12 @@ export function ResumedStatus({values, totalItems}: Props){
     values.set(key, percentage);
   });
 
+  const valuesCounterArray = Array.from(valuesCounter.keys());
+
   return (
     <article className={styles.container}>
       {
-        valuesCounter.keys().map((color) => {
+        valuesCounterArray.map((color) => {
           const percentage = valuesCounter.get(color);
           return (
             <div 
