@@ -1,3 +1,4 @@
+'use client';
 import styles from './itemRow.module.css';
 import {Column, Item, TableValue} from "@/utils/types/groups";
 import {ItemValue} from "@/components/common/itemValue/itemValue";
@@ -6,8 +7,8 @@ import { ChatRing } from '../chatRing/chatRing';
 import { ResponseChats } from '@/utils/types/items';
 import { getItemChats } from '@/actions/items';
 import {RowTitle} from "@/components/common/rowTitle/rowTitle";
-// import { AiOutlineDeleteRow } from "react-icons/ai";
 import { DeleteRowBtn } from '../deleteRowBtn/deleteRowBtn';
+import { useEffect, useState } from 'react';
 
 type Props = {
     item: Item;
@@ -15,9 +16,19 @@ type Props = {
     columns: Column[];
 };
 
-export async function ItemRow({ item, values, columns }: Props) {
-    const chatData: ResponseChats = await getItemChats(item.id);
+export function ItemRow({ item, values, columns }: Props) {
+    const [chatData, setChatData] = useState<ResponseChats | null>(null);
     const valuesByColumn = new Map<Column, TableValue>();
+
+    useEffect(() => {
+        async function fetchData(){
+            const chatsResponse = await getItemChats(item.id);
+            setChatData(chatsResponse);
+        }
+
+        fetchData();
+    }, [item.id]);
+
 
     columns.forEach((column) => {
         const value: TableValue = values?.find(value => value.columnId === column.id) || {} as TableValue;
@@ -42,7 +53,7 @@ export async function ItemRow({ item, values, columns }: Props) {
                 <article
                     className={styles.chatContainer}
                 >
-                    <ChatRing chatData={chatData} />
+                    <ChatRing chatData={chatData as ResponseChats} />
                 </article>
             </div>
             {

@@ -8,10 +8,13 @@ import {
     useRef,
     RefObject,
     MouseEvent,
+    useMemo,
+    useCallback,
 } from "react";
 import {
     setTableValue,
     addStatusColumn,
+    getBoardStatusList
 } from "@/actions/groups";
 import {HexColorPicker} from "react-colorful";
 import {FaAngleDown} from "react-icons/fa";
@@ -23,7 +26,6 @@ type Props = {
     value: TableValue;
     itemId: string;
     columnId: string;
-    status: Tag[];
 };
 
 type Tag = {
@@ -32,39 +34,46 @@ type Tag = {
     id: string;
 }
 
-export function Status({value, itemId, columnId, status}: Props) {
-    let defaultValue: Tag;
+export function Status({value, itemId, columnId}: Props) {
+    const defaultValue = useMemo(() => {
+        if (value.value) {
+            return {...JSON.parse(value.value), id: value.id};
+        }
+        return {color: 'rgba(0,0,0,0.4)', text: 'Sin confirmar', id: ''};
+    }, [value]);
     const {id: boardId, viewId} = useParams();
     const containerListRef = useRef<HTMLDivElement | null>(null);
     const [showStatusList, setShowStatusList] = useState<boolean>(false);
-    const [statusList, setStatusList] = useState<Tag[]>(status);
+    const [statusList, setStatusList] = useState<Tag[]>([]);
     const [showInputTag, setShowInputTag] = useState<boolean>(false);
     const [newInputName, setNewInputName] = useState<string>("");
     const [newInputColor, setNewInputColor] = useState<string>("");
 
     useEffect(() => {
-        setStatusList(status);
-    }, [status]);
+        if(showStatusList && !showInputTag){
+            fetchData();            
+        } 
+
+
+        async function fetchData(){
+            const resStatus = await getBoardStatusList(columnId);
+            setStatusList(resStatus);
+        }
+    }, [columnId, showStatusList, showInputTag]);
 
     useClickOutside(containerListRef as RefObject<HTMLDivElement>, () => {
         setShowStatusList(false);
         setShowInputTag(false);
     });
 
-    if (value.value) {
-        defaultValue = {...JSON.parse(value.value), id: value.id};
-    } else {
-        defaultValue = {color: 'rgba(0,0,0,0.4)', text: 'Sin confirmar', id: ''}
-    }
-
-    function handleShowStatusList(e: MouseEvent<HTMLElement>) {
+    const handleShowStatusList = useCallback((e: MouseEvent<HTMLElement>) => {
         const target = e.target as HTMLElement;
         if (target.classList.contains(styles.container)) {
             setShowStatusList(!showStatusList);
         }
-    }
+    }, [showStatusList])
 
-    async function handleAddStatus() {
+    const handleAddStatus= useCallback(async () => {
         if (newInputName.length > 0) {
             const tags = [...statusList];
 
@@ -85,7 +94,7 @@ export function Status({value, itemId, columnId, status}: Props) {
             setStatusList(tags);
             setShowInputTag(false);
         }
-    }
+    }, [boardId, columnId, newInputColor, newInputName, statusList, viewId]);
 
     // async function handleDeleteTag(indexTag: number) {
     //     const tags = [...statusList];
@@ -95,7 +104,7 @@ export function Status({value, itemId, columnId, status}: Props) {
     //     await deleteStatusColumn(tagId, boardId as string, viewId as string);
     // }
 
-    async function handleAddValue(item:Tag){
+    const handleAddValue = useCallback(async (item:Tag) => {
         setShowStatusList(false);
         await setTableValue(
             boardId as string,
@@ -108,7 +117,7 @@ export function Status({value, itemId, columnId, status}: Props) {
             }),
             value.id
         );
-    }
+    }, [boardId, columnId, itemId, value.id, viewId]);
 
     return (
         <article
@@ -119,7 +128,7 @@ export function Status({value, itemId, columnId, status}: Props) {
             {defaultValue.text}
             <span className={styles.corner}></span>
 
-            {showStatusList &&
+            {showStatusList && (
                 <section
                     className={styles.listPreview}
                     ref={containerListRef}
@@ -130,7 +139,8 @@ export function Status({value, itemId, columnId, status}: Props) {
                     >
                         <FaAngleDown size={10}/>
                     </p>
-                    {showInputTag &&
+                    
+                    {showInputTag && (
                         <>
                             <section className={styles.newInput}>
                                 <input
@@ -145,45 +155,32 @@ export function Status({value, itemId, columnId, status}: Props) {
                                 </button>
                             </section>
                             <section className={styles.colorPicker}>
-                                <HexColorPicker  onChange={setNewInputColor}/>
+                                <HexColorPicker onChange={setNewInputColor}/>
                             </section>
                         </>
-                    }
-                    {!showInputTag &&
+                    )}
+                    
+                    {!showInputTag && (
                         <section className={styles.tagsContainer}>
-                            {
-                                statusList.map((item) => (
-                                    <Tooltip text={item.text} key={`${item.color}-${item.text}`}>
+                            {statusList.map((item) => (
+                                <Tooltip text={item.text} key={`${item.color}-${item.text}`}>
+                                    <article
+                                        className={styles.listItem}
+                                        key={`${item.color}-${item.text}`}
+                                    >
                                         <article
-                                            className={styles.listItem}
-                                            key={`${item.color}-${item.text}`}
+                                            style={{backgroundColor: item.color}}
+                                            onClick={() => handleAddValue(item)}
                                         >
-                                            <article
-                                                style={{backgroundColor: item.color}}
-                                                onClick={() => handleAddValue(item)}
-                                                >
-                                                <p>{item.text}</p>
-                                            </article>
-                                            {/*
-                                                Se comenta botón de eliminar para evitar eliminaciones de etiqueta
-                                                hasta mejorar la lógica de eliminación
-                                            */}
-                                            {/*<article*/}
-                                            {/*    style={{backgroundColor: item.color}}*/}
-                                            {/*>*/}
-                                            {/*    <TbTrashXFilled*/}
-                                            {/*        className={styles.icon}*/}
-                                            {/*        onClick={() => handleDeleteTag(index)}*/}
-                                            {/*    />*/}
-                                            {/*</article>*/}
+                                            <p>{item.text}</p>
                                         </article>
-                                    </Tooltip>
-                                ))
-                            }
+                                    </article>
+                                </Tooltip>
+                            ))}
                         </section>
-                    }
+                    )}
                 </section>
-            }
+            )}
         </article>
     );
 }

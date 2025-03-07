@@ -1,6 +1,7 @@
 .container
 {
     position: relative;
+    color: var(--font-color);
 }
 
 .containerRow
@@ -32,6 +33,7 @@
     text-align: center;
     transition: background-color 250ms ease;
     user-select: none;
+    color: var(--font-color);
 }
 
 .addBtn:active
@@ -79,6 +81,7 @@
     padding: 5px;
     font-family: inherit;
     cursor: pointer;
+    color: var(--font-color);
 }
 
 .menuContainer button:hover

@@ -358,6 +358,7 @@ export async function getBoardStatusList(columnId: string): Promise<{color: stri
     WHERE column_id = @columnId 
         AND item_id IS NULL
         AND deleted_at IS NULL
+    ORDER BY created_at DESC
   `;
 
   const result = await connection
