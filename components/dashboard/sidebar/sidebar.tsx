@@ -5,6 +5,8 @@ import { SidebarControls } from '@/components/common/sidebarControls/sidebarCont
 import { getAllWorkspace } from '@/actions/dashboard';
 import type { Dashboard, WorkspaceWithDashboards } from '@/utils/types/dashboard';
 import { WorkspaceItem } from '@/components/common/workspaceItem/workspaceItem';
+import { SiOpenaccess } from "react-icons/si";
+import { getRoleAccess } from '@/utils/userAccess';
 
 export async function SideBar() {
   const response: WorkspaceWithDashboards | Error = await getAllWorkspace();
@@ -13,6 +15,8 @@ export async function SideBar() {
   if(!(response instanceof Error)){
     workspaces = Object.values(response);
   }
+
+  const userRole = await getRoleAccess();
 
   return (
     <aside className={styles.sidebar}>
@@ -28,6 +32,13 @@ export async function SideBar() {
       <SidebarControls />
 
       <hr className={styles.division}/>
+
+      {userRole.name === 'SYSTEMS' && 
+        <SideBarItem url='/access'>
+          <SiOpenaccess size={20}/>
+          Accesos
+        </SideBarItem>
+      }
 
       {workspaces.map(workspace => (
         <WorkspaceItem workspace={workspace} key={workspace[0].workspaceId}/>

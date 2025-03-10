@@ -2,9 +2,11 @@
 
 import styles from './styles.module.css';
 import {TableValue} from "@/utils/types/groups";
-import {useState, KeyboardEvent, useRef} from "react";
+import {useState, KeyboardEvent, useRef, useEffect} from "react";
 import {useParams} from "next/navigation";
 import {setTableValue} from "@/actions/groups";
+import { Actions } from '@/utils/types/roles';
+import { roleAccess } from '@/utils/userAccess';
 
 type Props = {
     value: TableValue;
@@ -21,6 +23,7 @@ export const Primitive = ({ value, type, itemId, columnId }: Props) =>
         ? JSON.parse(value.value) 
         : (type === 'number' ? 0 : '...');
     const [definedValue, setDefinedValue] = useState<string | number>(defaultValue);
+    const [userActions, setUserActions] = useState<Actions[]>([]);
 
     async function handleSubmit(e: KeyboardEvent<HTMLInputElement> )
     {
@@ -51,6 +54,10 @@ export const Primitive = ({ value, type, itemId, columnId }: Props) =>
         }
     }
 
+    useEffect(() => {
+        roleAccess(boardId as string)
+        .then(actions => setUserActions(actions));
+    }, [boardId]);
 
     return (
         <input
@@ -61,6 +68,7 @@ export const Primitive = ({ value, type, itemId, columnId }: Props) =>
             ref={inputRef}
             onChange={e => setDefinedValue(e.target.value)}
             onKeyUp={e => handleSubmit(e)}
+            disabled={!userActions.includes('update')}
         />
     );
 }

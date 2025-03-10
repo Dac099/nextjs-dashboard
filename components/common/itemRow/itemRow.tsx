@@ -9,6 +9,9 @@ import { getItemChats } from '@/actions/items';
 import {RowTitle} from "@/components/common/rowTitle/rowTitle";
 import { DeleteRowBtn } from '../deleteRowBtn/deleteRowBtn';
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { Actions } from '@/utils/types/roles';
+import { roleAccess } from '@/utils/userAccess';
 
 type Props = {
     item: Item;
@@ -17,17 +20,21 @@ type Props = {
 };
 
 export function ItemRow({ item, values, columns }: Props) {
+    const {id: boardId} = useParams();
     const [chatData, setChatData] = useState<ResponseChats | null>(null);
+    const [userActions, setUserActions] = useState<Actions[]>([]);
     const valuesByColumn = new Map<Column, TableValue>();
 
     useEffect(() => {
         async function fetchData(){
             const chatsResponse = await getItemChats(item.id);
+            const actions = await roleAccess(boardId as string);
+            setUserActions(actions);
             setChatData(chatsResponse);
         }
 
         fetchData();
-    }, [item.id]);
+    }, [boardId, item.id]);
 
 
     columns.forEach((column) => {
@@ -42,7 +49,9 @@ export function ItemRow({ item, values, columns }: Props) {
                 <article
                     className={styles.deleteRow}
                 >
-                    <DeleteRowBtn itemId={item.id}/>
+                    {userActions.includes('update') &&                    
+                        <DeleteRowBtn itemId={item.id}/>
+                    }
                 </article>
                 <article
                     className={styles.tasksContainer}

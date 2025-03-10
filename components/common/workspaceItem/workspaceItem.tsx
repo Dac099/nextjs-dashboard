@@ -9,6 +9,8 @@ import { GoPlus } from "react-icons/go";
 import { Tooltip } from '../tooltip/tooltip';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { Role } from '@/utils/types/roles';
+import { getRoleAccess } from '@/utils/userAccess';
 
 type Props = {
   workspace: Dashboard[];
@@ -24,6 +26,17 @@ export function WorkspaceItem({ workspace }: Props){
   const [ workspaceName, setWorkspaceName ] = useState<string>(workspace[0].workspaceName);
   const [ inputDashboard, setInputDashboard ] = useState<boolean>(false);
   const [ dashboards, setDashboards ] = useState<Dashboard[]>(workspace);
+  const [userRole, setUserRole] = useState<Role>();
+
+  useEffect(() => {
+    async function fetchData()
+    {
+      const role = await getRoleAccess();
+      setUserRole(role);
+    }
+
+    fetchData();
+  }, [boardId]);
 
   async function closeInputTitle(e: KeyboardEvent)
   {
@@ -102,7 +115,11 @@ export function WorkspaceItem({ workspace }: Props){
           {!changeName && 
             <Tooltip text='Agregar tablero'>
               <div className={styles.addIcon}>
-                <GoPlus size={20} onClick={() => setInputDashboard(!inputDashboard)}/>
+                <GoPlus size={20} onClick={() => {
+                  if(userRole!.name === 'SYSTEMS'){
+                    setInputDashboard(!inputDashboard)
+                  }
+                }}/>
               </div>
             </Tooltip>
           }

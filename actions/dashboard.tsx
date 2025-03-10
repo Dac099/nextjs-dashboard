@@ -3,6 +3,7 @@ import connection from '@/services/database';
 import { revalidatePath } from 'next/cache';
 import type { Workspace, WorkspaceWithDashboards } from '@/utils/types/dashboard';
 import { cookies } from 'next/headers';
+import { ROLES } from '@/utils/roleDefinition';
 
 export async function addNewWorkspace(name: string) {
   const query: string = `
@@ -28,18 +29,11 @@ export async function addNewWorkspace(name: string) {
 }
 
 export async function getAllWorkspace(): Promise<WorkspaceWithDashboards | Error> {
-  // Obtener información del usuario desde la cookie
   const cookieStore = await cookies();
   const userInfoCookie = cookieStore.get('user-info');
   
   const userInfo = JSON.parse(userInfoCookie!.value);
-  
-  const allowedWorkspaces = userInfo.access.read.workspaces;
-  const allowedBoards = userInfo.access.read.boards;
-  
-  if (allowedWorkspaces.length === 0 && allowedBoards.length === 0) {
-    return {};
-  }
+  const userPermissions = ROLES[userInfo.role].permissions;
   
   const query: string = `
     SELECT
@@ -58,23 +52,23 @@ export async function getAllWorkspace(): Promise<WorkspaceWithDashboards | Error
     const results = (await connection.query(query));
     
     const filteredResults = results.recordset.reduce((acc: WorkspaceWithDashboards, record: Workspace) => {
+      const permission = userPermissions.filter(permission => permission.workspace === record.name);
 
-      const hasWorkspaceAccess = allowedWorkspaces.includes(record.name);
-      const hasBoardAccess = allowedBoards.includes(record.boardName);
-      
-      if (hasWorkspaceAccess && hasBoardAccess) {
+      if(permission.length > 0){
         if (!acc[record.id]) {
           acc[record.id] = [];
         }
         
-        acc[record.id].push({
-          workspaceId: record.id,
-          workspaceName: record.name,
-          boardId: record.boardId,
-          boardName: record.boardName
-        });
+        if(permission[0].boards.includes(record.boardName)){
+          acc[record.id].push({
+            workspaceId: record.id,
+            workspaceName: record.name,
+            boardId: record.boardId,
+            boardName: record.boardName
+          });
+        }
       }
-      
+
       return acc;
     }, {});
     

@@ -7,8 +7,11 @@ import { GroupHeaderColumn } from "../groupHeaderColumn/groupHeaderColumn";
 import { AddItemSection } from "@/components/common/addItemSection/addItemSection";
 import { ItemRow } from "@/components/common/itemRow/itemRow";
 import { LuChevronDown as Arrow } from "react-icons/lu";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CollapsedGroup } from '../collapsedGroup/collapsedGroup';
+import { Actions } from '@/utils/types/roles';
+import { roleAccess } from '@/utils/userAccess';
+import { useParams } from 'next/navigation';
 
 type Props = {
   group: Group;
@@ -18,8 +21,14 @@ type Props = {
 };
 
 export function GroupItem({ group, columns, items, values }: Props) {
+	const {id: boardId} = useParams();
 	const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
-	
+	const [userActions, setUserActions] = useState<Actions[]>([]);
+
+	useEffect(() => {
+		roleAccess(boardId as string)
+		.then(actions => setUserActions(actions));
+	}, [boardId]);
 
 	if(isCollapsed){
 		return <CollapsedGroup 
@@ -62,7 +71,9 @@ export function GroupItem({ group, columns, items, values }: Props) {
 					
 				</section>
 
-				<AddItemSection columns={columns} groupId={group.id} />
+				{userActions.includes('create') && 
+					<AddItemSection columns={columns} groupId={group.id} />
+				}
 
 				{items &&
 					items.length > 0 &&

@@ -21,6 +21,8 @@ import {FaAngleDown} from "react-icons/fa";
 import useClickOutside from "@/hooks/useClickOutside";
 import {useParams} from "next/navigation";
 import {Tooltip} from "@/components/common/tooltip/tooltip";
+import { Actions } from '@/utils/types/roles';
+import { roleAccess } from '@/utils/userAccess';
 
 type Props = {
     value: TableValue;
@@ -48,12 +50,22 @@ export function Status({value, itemId, columnId}: Props) {
     const [showInputTag, setShowInputTag] = useState<boolean>(false);
     const [newInputName, setNewInputName] = useState<string>("");
     const [newInputColor, setNewInputColor] = useState<string>("");
+    const [userActions, setUserActions] = useState<Actions[]>([]);
+
+    useEffect(() => {
+        async function fetchData()
+        {
+            const actions = await roleAccess(boardId as string);
+            setUserActions(actions);
+        }
+
+        fetchData();
+    }, [boardId]);
 
     useEffect(() => {
         if(showStatusList && !showInputTag){
             fetchData();            
         } 
-
 
         async function fetchData(){
             const resStatus = await getBoardStatusList(columnId);
@@ -67,9 +79,11 @@ export function Status({value, itemId, columnId}: Props) {
     });
 
     const handleShowStatusList = useCallback((e: MouseEvent<HTMLElement>) => {
-        const target = e.target as HTMLElement;
-        if (target.classList.contains(styles.container)) {
-            setShowStatusList(!showStatusList);
+        if(userActions.includes('update') || userActions.includes('create')){
+            const target = e.target as HTMLElement;
+            if (target.classList.contains(styles.container)) {
+                setShowStatusList(!showStatusList);
+            }
         }
     }, [showStatusList])
 
@@ -95,14 +109,6 @@ export function Status({value, itemId, columnId}: Props) {
             setShowInputTag(false);
         }
     }, [boardId, columnId, newInputColor, newInputName, statusList, viewId]);
-
-    // async function handleDeleteTag(indexTag: number) {
-    //     const tags = [...statusList];
-    //     const tagId: string = tags[indexTag].id as string;
-    //     tags.splice(indexTag, 1);
-    //     setStatusList(tags);
-    //     await deleteStatusColumn(tagId, boardId as string, viewId as string);
-    // }
 
     const handleAddValue = useCallback(async (item:Tag) => {
         setShowStatusList(false);

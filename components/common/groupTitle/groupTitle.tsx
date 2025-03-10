@@ -23,6 +23,8 @@ import {
   duplicateGroup,
 } from '@/actions/groups';
 import { HexColorPicker } from 'react-colorful';
+import { roleAccess } from '@/utils/userAccess';
+import { Actions } from '@/utils/types/roles';
 
 type Props = {
   group: Group;
@@ -39,6 +41,7 @@ export function GroupTitle({ group }: Props)
   const [ groupName, setGroupName ] = useState<string>(group.name);
   const [ showColorInput, setShowColorInput ] = useState<boolean>(false);
   const [ colorGroup, setColorGroup ] = useState<string>(group.color);
+  const [userActions, setUserActions] = useState<Actions[]>([]);
 
   useClickOutside(containerRef as RefObject<HTMLDivElement>, () => {
     setShowMenu(false);
@@ -122,6 +125,15 @@ export function GroupTitle({ group }: Props)
     setColorGroup(group.color);
   }, [group.color]);
 
+  useEffect(() => {
+    async function fetchData(){
+      const actions = await roleAccess(boardId as string);
+      setUserActions(actions);
+    }
+
+    fetchData();
+  }, [boardId]);
+
   return (
     <section 
       className={styles.control}
@@ -129,7 +141,11 @@ export function GroupTitle({ group }: Props)
     >
       <BsThreeDotsVertical 
         size={20}
-        onClick={() => setShowMenu(!showMenu)}
+        onClick={() => {
+          if(userActions.includes('create') && userActions.includes('update')){
+            setShowMenu(!showMenu)
+          }
+        }}
         style={{ color: colorGroup }}
       />
       {updateTitle

@@ -1,5 +1,4 @@
 'use client';
-
 import styles from './styles.module.css';
 import Link from 'next/link';
 import { IoMdAdd } from "react-icons/io";
@@ -21,6 +20,8 @@ import useClickOutside from "@/hooks/useClickOutside";
 import {addViewBoard} from "@/actions/boards";
 import { useParams} from "next/navigation";
 import {FiltersBar} from "@/components/projects/filtersBar/filtersBar";
+import { Actions } from '@/utils/types/roles';
+import { roleAccess } from '@/utils/userAccess';
 
 type Props = {
     views: ViewWithSettings[];
@@ -42,6 +43,16 @@ export function HeaderBoard({views, boardId}: Props)
         ['gantt.tsx', 'Gantt'],
         ['chart', 'Gráfico'],
     ]);
+    const [userActions, setUserActions] = useState<Actions[]>([]);
+
+    useEffect(() => {
+        async function fetchData(){
+            const actions = await roleAccess(params.id as string);
+            setUserActions(actions);
+        }
+
+        fetchData();
+    }, [params.id]);
 
     useClickOutside(viewMenuRef as RefObject<HTMLDivElement>, () => {
         setShowViewMenu(false);
@@ -123,7 +134,11 @@ export function HeaderBoard({views, boardId}: Props)
                     <Tooltip text={'Nueva vista'}>
                         <div
                             className={styles.addIcon}
-                            onClick={() => handleShowViewMenu()}
+                            onClick={() => {
+                                if(userActions.includes('create')){
+                                    handleShowViewMenu();
+                                }
+                            }}
                         >
                             <IoMdAdd size={20}/>
                         </div>

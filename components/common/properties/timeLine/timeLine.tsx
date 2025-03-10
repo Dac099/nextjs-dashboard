@@ -6,6 +6,8 @@ import { useEffect, useState, useRef } from "react";
 import { TableValue } from '@/utils/types/groups';
 import { useParams } from 'next/navigation';
 import { setTableValue } from '@/actions/groups';
+import { Actions } from '@/utils/types/roles';
+import { roleAccess } from '@/utils/userAccess';
 
 type Props = {
     value: TableValue;
@@ -35,6 +37,16 @@ export const TimeLine = ({ value, columnId, itemId }: Props) => {
     const totalTime = endDateTime - startDateTime;
     const completedTime = currentDate.getTime() - startDateTime;
     const percentage = Math.max(0, Math.min(100, Math.round(100 * (completedTime / totalTime))));
+    const [userActions, setUserActions] = useState<Actions[]>([]);
+
+    useEffect(() => {
+        async function fetchData(){
+            const actions = await roleAccess(boardId as string);
+            setUserActions(actions);
+        }
+
+        fetchData();
+    }, [boardId]);
 
     // Este efecto maneja la actualización solo cuando las fechas cambian realmente
     useEffect(() => {
@@ -61,7 +73,9 @@ export const TimeLine = ({ value, columnId, itemId }: Props) => {
     }, [dates, showCalendar, boardId, viewId, itemId, columnId, value.id]);
 
     const handleCalendarToggle = () => {
-        setShowCalendar(!showCalendar);
+        if(userActions.includes('update')){
+            setShowCalendar(!showCalendar);
+        }
     };
 
     const handleDatesChange = (newDates: Value) => {

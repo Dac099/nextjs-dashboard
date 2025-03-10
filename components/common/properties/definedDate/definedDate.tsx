@@ -7,6 +7,8 @@ import {useState, useEffect, useRef} from "react";
 import {TableValue} from "@/utils/types/groups";
 import { setTableValue } from '@/actions/groups';
 import { useParams } from 'next/navigation';
+import { Actions } from '@/utils/types/roles';
+import { roleAccess } from '@/utils/userAccess';
 
 type Props = {
     value: TableValue;
@@ -28,16 +30,23 @@ export const DefinedDate = ({ value, columnId, itemId }: Props) => {
     const [ newDate, setNewDate ] = useState<Value>(defaultValue);
     const prevDateRef = useRef<Value>(defaultValue);
     const isInitialMount = useRef(true);
+    const [userActions, setUserActions] = useState<Actions[]>([]);
 
-    // Este efecto solo se ejecuta cuando cambia la fecha y el calendario se oculta
     useEffect(() => {
-        // Ignorar el primer render
+        async function fetchData(){
+            const actions = await roleAccess(boardId as string);
+            setUserActions(actions);
+        }
+
+        fetchData();
+    }, [boardId]);
+
+    useEffect(() => {
         if (isInitialMount.current) {
             isInitialMount.current = false;
             return;
         }
 
-        // Solo enviar la actualización si la fecha ha cambiado y el calendario no está visible
         if (!showCalendar && JSON.stringify(newDate) !== JSON.stringify(prevDateRef.current)) {
             // Actualizar la referencia para evitar actualizaciones innecesarias
             prevDateRef.current = newDate;
@@ -54,7 +63,9 @@ export const DefinedDate = ({ value, columnId, itemId }: Props) => {
     }, [newDate, showCalendar, boardId, viewId, itemId, columnId, value.id]);
 
     const handleCalendarToggle = () => {
-        setShowCalendar(!showCalendar);
+        if(userActions.includes('update')){
+            setShowCalendar(!showCalendar);
+        }
     };
 
     const handleDateChange = (date: Value) => {

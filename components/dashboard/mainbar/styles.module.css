@@ -26,3 +26,45 @@
 {
   cursor: pointer;
 }
+
+.userData
+{
+  position: relative;
+}
+
+.userMenu
+{
+  position: absolute;
+  bottom: -45px;
+  right: 0;
+  width: 200px;
+  z-index: 2;
+  border: 1px solid var(--accent-color);
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 2px 2px 4px 0px rgba(0,0,0,0.3);
+  background-color: var(--bg-color);
+}
+
+.menuOption
+{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 5px;
+}
+
+.menuOption:hover
+{
+  background-color: var(--accent-color);
+}
+
+.iconOption
+{
+  display: grid;
+  place-content: center;
+  color: var(--action-color);
+  user-select: none;
+}

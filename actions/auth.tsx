@@ -13,18 +13,7 @@ type UserData = {
   id: string;
   username: string;
   password: string;
-  access: {
-    read: {
-      workspaces: string[],
-      boards: string[],
-      views: string[],
-    },
-    edit: {
-      workspaces: string[],
-      boards: string[],
-      views: string[],
-    }
-  }
+  role: string
 };
 
 export async function loginAction(formData: FormData): Promise<LoginResult>
@@ -65,7 +54,7 @@ export async function loginAction(formData: FormData): Promise<LoginResult>
   cookieStore.set('user-info', JSON.stringify({
     id: userInDB.id,
     username: userInDB.username,
-    access: userInDB.access
+    role: userInDB.role
   }), {
     httpOnly: false, 
     secure: false,
@@ -90,7 +79,7 @@ async function credentialsInDB(username: string, password: string): Promise<User
         id_user as id,
         usuario as username,
         passwd_user as password,
-        monday_access as access
+        monday_access as role
       from tb_user
       where usuario = @username AND passwd_user = @password;
     `;
@@ -105,14 +94,18 @@ async function credentialsInDB(username: string, password: string): Promise<User
       return null;
     }
     
-    return {
-      id: result.recordset[0].id,
-      username: result.recordset[0].username,
-      password: result.recordset[0].password,
-      access: JSON.parse(result.recordset[0].access)
-    };
+    return result.recordset[0];
   } catch (error) {
     console.error('Error al consultar la base de datos:', error);
     throw error;
   }
+}
+
+export async function logoutAction(): Promise<void> {
+  const cookieStore = await cookies();
+  
+  cookieStore.delete('auth-session');
+  cookieStore.delete('user-info');
+  
+  redirect('/login');
 }
