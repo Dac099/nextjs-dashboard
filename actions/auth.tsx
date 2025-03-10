@@ -109,3 +109,21 @@ export async function logoutAction(): Promise<void> {
   
   redirect('/login');
 }
+
+export async function getWorkspaceWithBoard(boardId: string){
+  await connection.connect();
+  const query: string = `
+    SELECT
+      w.name AS workspaceName,
+      b.name AS boardName
+    FROM Boards b
+    LEFT JOIN Workspaces w on b.workspace_id = w.id
+    WHERE b.id = @boardId
+  `;
+  const result = await connection
+    .request()
+    .input('boardId', boardId)
+    .query(query);
+
+  return result.recordset[0];
+}

@@ -6,6 +6,9 @@ import { GroupItem } from "@/components/common/groupItem/groupItem";
 import { getViewType } from "@/actions/boards";
 import { GanttContainer } from "@/components/common/ganttContainer/ganttContainer";
 import { getGanttChartData } from "@/actions/gantt";
+import { getWorkspaceWithBoard } from '@/actions/auth';
+import { getRoleAccess } from '@/utils/userAccess';
+import { redirect } from 'next/navigation';
 
 type Props = {
   params: Promise<{ id: string; viewId: string }>;
@@ -13,6 +16,17 @@ type Props = {
 
 export default async function Page({ params }: Props) {
   const { id: boardId, viewId } = await params;
+  const {workspaceName, boardName} = await getWorkspaceWithBoard(boardId);
+  const userRole = await getRoleAccess();
+  const userWorkspace = userRole.permissions.findIndex(permission => permission.workspace === workspaceName);
+
+  if(
+    userWorkspace < 0 ||
+    !userRole.permissions[userWorkspace].boards.includes(boardName)
+  ){
+    redirect('/');
+  }
+
   const boardData: BoardData = await GetBoardData(boardId);
   const arrayGroups = Array.from(boardData.groups.values());
   const arrayColumns = Array.from(boardData.columns.values());
