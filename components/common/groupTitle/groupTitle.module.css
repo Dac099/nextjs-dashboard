@@ -8,6 +8,9 @@
 .control p
 {
   font-size: 1.8rem;
+  width: 100%;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
 }
 
 .control svg

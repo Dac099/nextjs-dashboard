@@ -79,11 +79,9 @@ export function Status({value, itemId, columnId}: Props) {
     });
 
     const handleShowStatusList = useCallback((e: MouseEvent<HTMLElement>) => {
-        if(userActions.includes('update') || userActions.includes('create')){
-            const target = e.target as HTMLElement;
-            if (target.classList.contains(styles.container)) {
-                setShowStatusList(!showStatusList);
-            }
+        const target = e.target as HTMLElement;
+        if (target.classList.contains(styles.container)) {
+            setShowStatusList(!showStatusList);
         }
     }, [showStatusList])
 
