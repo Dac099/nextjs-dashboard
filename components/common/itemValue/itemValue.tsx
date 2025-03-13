@@ -4,6 +4,7 @@ import {DefinedDate} from "@/components/common/properties/definedDate/definedDat
 import {Primitive} from "@/components/common/properties/primitive/primitive";
 import {Status} from "@/components/common/properties/status/status";
 import {TimeLine} from '@/components/common/properties/timeLine/timeLine';
+import { Percentage } from '../properties/percentage/percentage';
 
 type Props = {
     type: string;
@@ -47,6 +48,16 @@ export function ItemValue({ type, value, itemId, columnId }: Props){
     if(type === 'timeline'){
         return (
             <TimeLine
+                value={value}
+                columnId={columnId}
+                itemId={itemId}
+            />
+        );
+    }
+
+    if(type === 'percentage'){
+        return (
+            <Percentage 
                 value={value}
                 columnId={columnId}
                 itemId={itemId}

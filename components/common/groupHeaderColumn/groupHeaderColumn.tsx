@@ -1,7 +1,7 @@
 'use client';
 import styles from './groupHeaderColumn.module.css';
 import { useState, useRef, ReactNode, useEffect } from 'react';
-import { deleteColumn, updateColumnName } from '@/actions/groups';
+import { updateColumnName } from '@/actions/groups';
 import type { Column } from '@/utils/types/groups';
 import { LuTags as TagIcon} from "react-icons/lu";
 import { FaTimeline as TimeLineIcon} from "react-icons/fa6";
@@ -10,7 +10,8 @@ import { IoCalendarNumberSharp as DateIcon} from "react-icons/io5";
 import { GoNumber as NumberIcon} from "react-icons/go";
 import { IoPerson as PersonIcon} from "react-icons/io5";
 import { useParams } from 'next/navigation';
-import { AiOutlineDeleteColumn } from "react-icons/ai";
+import { MdOutlinePercent as PercentIcon} from "react-icons/md";
+import { MdOutlineRemoveCircle as CircleIcon} from "react-icons/md";
 
 type Props = {
   column: Column
@@ -48,7 +49,9 @@ export function GroupHeaderColumn({ column }: Props)
       ? <NumberIcon size={15}/>
       : type === 'person'
       ? <PersonIcon size={15}/>
-      : <></>;
+      : type === 'percentage'
+      ? <PercentIcon size={15}/>
+      : <CircleIcon size={15} />
   }
 
   async function handleUpdateColumn(e: React.KeyboardEvent<HTMLInputElement> | null = null): Promise<void>{
@@ -71,17 +74,8 @@ export function GroupHeaderColumn({ column }: Props)
     }
   }
 
-  async function handleDeleteColumn(columnId: string){
-    await deleteColumn(columnId, boardId as string, viewId as string);
-  }
-
   return (
     <div className={styles.item}>
-      {/*<AiOutlineDeleteColumn */}
-      {/*  size={20}*/}
-      {/*  className={styles.deleteColBtn}*/}
-      {/*  onClick={() => handleDeleteColumn(column.id)}*/}
-      {/*/>*/}
       {showInput
         ? 
           <input 

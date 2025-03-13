@@ -14,6 +14,7 @@ import { FaTimeline as TimeLineIcon} from "react-icons/fa6";
 import { LuText as TextIcon} from "react-icons/lu";
 import { IoCalendarNumberSharp as DateIcon} from "react-icons/io5";
 import { GoNumber as NumberIcon} from "react-icons/go";
+import { FaPercentage as PercentageIcon} from "react-icons/fa";
 import { useParams } from 'next/navigation';
 import { 
   addBoardColumn, 
@@ -174,6 +175,13 @@ export function GroupTitle({ group }: Props)
               >
                 <TagIcon size={15}/>
                 Estatus
+              </li>
+              
+              <li
+                onClick={() => handleInsertColumn('percentage')}
+              >
+                <PercentageIcon size={15}/>
+                Porcentaje
               </li>
               
               <li

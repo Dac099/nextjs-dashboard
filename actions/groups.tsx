@@ -12,6 +12,7 @@ import {
 } from "@/utils/types/groups";
 import sql from "mssql";
 import {buildInsertItemsBatchQuery} from "@/utils/actionsGrups/helpers";
+import { group } from 'console';
 
 export async function addGroup(boardId: string, name: string, viewId: string, color: string): Promise<void>
 {
@@ -191,6 +192,8 @@ export async function addBoardColumn(boardId: string, viewId: string, columnType
     case 'person':
       columnName = 'Personas'
       break;
+    case 'percentage':
+      columnName = 'Porcentaje'
   }
 
   const findColumnQuery: string = `
@@ -513,5 +516,88 @@ export async function duplicateGroup(group: Group, viewId: string, boardId: stri
     await transaction.rollback();
     console.error('Error duplicating group:', error);
     throw error;
+  }
+}
+
+export async function setPercentageValue(
+  boardId: string, 
+  viewId: string, 
+  itemId: string | undefined, 
+  columnId: string | undefined, 
+  value: number, 
+  valueId: string | undefined
+): Promise<void>
+{
+  
+  if(value < 100){
+    await setTableValue(boardId, viewId, itemId, columnId, JSON.stringify(value), valueId);
+    return;
+  }
+
+  await connection.connect();
+
+  const transaction = new sql.Transaction(connection);
+
+  const getIdGroupQuery: string = `
+    SELECT
+      g.id 
+    FROM Groups g
+    WHERE g.position = (
+      (
+        SELECT position 
+        FROM Groups 
+        WHERE id = (SELECT g.id FROM Items i LEFT JOIN Groups g ON i.group_id = g.id WHERE i.id = @itemId)
+        AND board_id = @boardId
+      ) + 1
+    )
+    AND g.board_id = @boardId
+  `;
+
+  const updateItemGroupQuery: string = `
+    UPDATE Items 
+    SET group_id = @groupId
+    WHERE id = @itemId
+  `;
+
+  const deleteItemValuesQuery: string = `
+    UPDATE TableValues
+    SET 
+      deleted_at = GETDATE(),
+      item_id = null
+    WHERE item_id = @itemId
+  `;
+
+  try
+  {
+    await transaction.begin();
+    
+    const groupResponse = await new sql.Request(transaction)
+      .input('itemId', itemId)
+      .input('boardId', boardId)
+      .query(getIdGroupQuery);
+
+    if(!(groupResponse.recordset[0]?.id))
+    {
+      await transaction.rollback();
+      return;
+    }
+
+    const newItemGroupId = groupResponse.recordset[0].id;
+
+    await new sql.Request(transaction)
+      .input('groupId', newItemGroupId)
+      .input('itemId', itemId)
+      .query(updateItemGroupQuery);
+
+    await new sql.Request(transaction)
+      .input('itemId', itemId)
+      .query(deleteItemValuesQuery);
+
+    await transaction.commit();
+    revalidatePath(`/board/${boardId}/view/${viewId}`);
+  }catch(e)
+  {
+    await transaction.rollback();
+    console.log(e);
   }
 }
