@@ -59,7 +59,7 @@ export async function getAllWorkspace(): Promise<WorkspaceWithDashboards | Error
           acc[record.id] = [];
         }
         
-        if(permission[0].boards.includes(record.boardName)){
+        if(permission[0].boards.includes(record.boardName) || permission[0].boards[0] === '*'){
           acc[record.id].push({
             workspaceId: record.id,
             workspaceName: record.name,

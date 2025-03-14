@@ -38,6 +38,17 @@ export const ROLES: Record<string, Role> = {
       }
     ]
   },
+  LEADPM: {
+    name: 'LEADPM',
+    description: 'Like PM role, but with access to create boards in projects',
+    permissions: [
+      {
+        workspace: 'Proyectos',
+        actions: ['read', 'create', 'update'],
+        boards: ['*']
+      }
+    ]
+  },
   PURCHASES: {
     name: 'PURCHASES',
     description: 'Role with all access in Cobranza and read access in Proyectos',

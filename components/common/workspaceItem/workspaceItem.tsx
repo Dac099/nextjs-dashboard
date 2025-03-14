@@ -116,7 +116,7 @@ export function WorkspaceItem({ workspace }: Props){
             <Tooltip text='Agregar tablero'>
               <div className={styles.addIcon}>
                 <GoPlus size={20} onClick={() => {
-                  if(userRole!.name === 'SYSTEMS'){
+                  if(userRole!.name === 'SYSTEMS' || userRole!.name === 'LEADPM'){
                     setInputDashboard(!inputDashboard)
                   }
                 }}/>

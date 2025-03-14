@@ -18,7 +18,7 @@ export function UsersTable({users}: Props){
     const selectElement = e.currentTarget as HTMLSelectElement;
     const newRole = selectElement.value;
     
-    setUserPermission(newRole, userId);    
+    await setUserPermission(newRole, userId);
   }
 
   return (
@@ -54,6 +54,8 @@ export function UsersTable({users}: Props){
                 <option value="GUEST">Visitante</option>
 
                 <option value="READER">Lector</option>
+
+                <option value="LEADPM">Lead</option>
 
               </select>
             </td>
