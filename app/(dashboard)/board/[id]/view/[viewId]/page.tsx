@@ -22,8 +22,8 @@ export default async function Page({ params }: Props) {
 
   if(
     userWorkspace < 0 ||
-    userRole.permissions[userWorkspace].boards[0] !== '*' ||
-    !userRole.permissions[userWorkspace].boards.includes(boardName)
+    !userRole.permissions[userWorkspace].boards.includes(boardName) &&
+    userRole.permissions[userWorkspace].boards[0] !== '*'
   ){
     redirect('/');
   }
