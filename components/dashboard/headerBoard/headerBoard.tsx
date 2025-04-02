@@ -26,9 +26,10 @@ import { roleAccess } from '@/utils/userAccess';
 type Props = {
     views: ViewWithSettings[];
     boardId: string;
+    userActions: Actions[];
 };
 
-export function HeaderBoard({views, boardId}: Props)
+export function HeaderBoard({views, boardId, userActions}: Props)
 {
     const params = useParams();
     const viewId: string = params.viewId as string || '';
@@ -43,16 +44,7 @@ export function HeaderBoard({views, boardId}: Props)
         ['gantt.tsx', 'Gantt'],
         ['chart', 'Gráfico'],
     ]);
-    const [userActions, setUserActions] = useState<Actions[]>([]);
 
-    useEffect(() => {
-        async function fetchData(){
-            const actions = await roleAccess(params.id as string);
-            setUserActions(actions);
-        }
-
-        fetchData();
-    }, [params.id]);
 
     useClickOutside(viewMenuRef as RefObject<HTMLDivElement>, () => {
         setShowViewMenu(false);

@@ -119,3 +119,24 @@ export async function getViewType(viewId: string): Promise<string>
 
     return result.recordset[0].type;
 }
+
+export async function getWorkspaceAndBoardData(boardId: string) {
+  await connection.connect();
+  const query: string = `
+    SELECT
+      w.id AS workspaceId,
+      w.name AS workspaceName,
+      b.id AS boardId,
+      b.name AS boardName
+    FROM Boards b
+    LEFT JOIN Workspaces w ON b.workspace_id = w.id
+    WHERE b.id = @boardId AND b.deleted_at IS NULL
+  `;
+
+  const result = await connection
+    .request()
+    .input('boardId', boardId)
+    .query(query);
+
+  return result.recordset[0];
+}

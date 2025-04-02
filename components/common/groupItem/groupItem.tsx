@@ -12,6 +12,7 @@ import { CollapsedGroup } from '../collapsedGroup/collapsedGroup';
 import { Actions } from '@/utils/types/roles';
 import { roleAccess } from '@/utils/userAccess';
 import { useParams } from 'next/navigation';
+import { useRoleUserActions } from "@/stores/roleUserActions";
 
 type Props = {
   group: Group;
@@ -23,12 +24,7 @@ type Props = {
 export function GroupItem({ group, columns, items, values }: Props) {
 	const {id: boardId} = useParams();
 	const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
-	const [userActions, setUserActions] = useState<Actions[]>([]);
-
-	useEffect(() => {
-		roleAccess(boardId as string)
-		.then(actions => setUserActions(actions));
-	}, [boardId]);
+	const userActions = useRoleUserActions((state) => state.userActions);
 
 	if(isCollapsed){
 		return <CollapsedGroup 

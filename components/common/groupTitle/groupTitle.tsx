@@ -26,6 +26,7 @@ import {
 import { HexColorPicker } from 'react-colorful';
 import { roleAccess } from '@/utils/userAccess';
 import { Actions } from '@/utils/types/roles';
+import { useRoleUserActions } from '@/stores/roleUserActions';
 
 type Props = {
   group: Group;
@@ -42,7 +43,7 @@ export function GroupTitle({ group }: Props)
   const [ groupName, setGroupName ] = useState<string>(group.name);
   const [ showColorInput, setShowColorInput ] = useState<boolean>(false);
   const [ colorGroup, setColorGroup ] = useState<string>(group.color);
-  const [userActions, setUserActions] = useState<Actions[]>([]);
+  const userActions = useRoleUserActions((state) => state.userActions);
 
   useClickOutside(containerRef as RefObject<HTMLDivElement>, () => {
     setShowMenu(false);
@@ -125,15 +126,6 @@ export function GroupTitle({ group }: Props)
   useEffect(() => {
     setColorGroup(group.color);
   }, [group.color]);
-
-  useEffect(() => {
-    async function fetchData(){
-      const actions = await roleAccess(boardId as string);
-      setUserActions(actions);
-    }
-
-    fetchData();
-  }, [boardId]);
 
   return (
     <section 

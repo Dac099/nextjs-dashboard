@@ -6,8 +6,12 @@ import { addNewWorkspace } from '@/actions/dashboard';
 import { Role } from '@/utils/types/roles';
 import { getRoleAccess } from '@/utils/userAccess';
 
-export function SidebarControls() {
-  const [userRole, setUserRole] = useState<Role>();
+type Props = {
+  userRole: Role;
+}
+
+export function SidebarControls({ userRole }: Props) {
+  
   const [ showInputDashboard, setShowInputDashboard ] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -22,22 +26,13 @@ export function SidebarControls() {
 
   }
 
-  useEffect(() => {
-    async function fetchData()
-    {
-      const role = await getRoleAccess();
-      setUserRole(role);
-    }
-
-    fetchData();
-  }, []);
 
   return (      
     <section className={styles.controls}>
       <span 
         className={styles.control}
         onClick={() => {
-          if(userRole?.name === 'SYSTEMS'){
+          if(userRole.name === 'SYSTEMS'){
             setShowInputDashboard(!showInputDashboard)
           }
         }}

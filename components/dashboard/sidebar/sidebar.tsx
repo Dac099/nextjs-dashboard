@@ -29,7 +29,7 @@ export async function SideBar() {
 
       <hr className={styles.division}/>
 
-      <SidebarControls />
+      <SidebarControls userRole={userRole}/>
 
       <hr className={styles.division}/>
 
@@ -41,7 +41,11 @@ export async function SideBar() {
       }
 
       {workspaces.map(workspace => (
-        <WorkspaceItem workspace={workspace} key={workspace[0].workspaceId}/>
+        <WorkspaceItem 
+          workspace={workspace} 
+          key={workspace[0].workspaceId}
+          userRole={userRole}
+        />
       ))}
     </aside>
   );
