@@ -1,10 +1,12 @@
 'use client'
 
-import { BoardData, Group } from "@/utils/types/groups";
+import type { BoardData, Group, StatusByColumn } from "@/utils/types/groups";
 import { AddGroupSection } from "@/components/common/addGroupSection/addGroupSection";
 import { GroupItem } from "@/components/common/groupItem/groupItem";
 import type { Actions } from "@/utils/types/roles";
 import { useRoleUserActions } from "@/stores/roleUserActions";
+import { useBoardStore } from "@/stores/boardStore";
+import { useEffect } from 'react';
 
 type GroupsViewProps = {
   boardId: string;
@@ -13,6 +15,7 @@ type GroupsViewProps = {
   itemsByGroup: BoardData['itemsByGroup'];
   valuesByItem: BoardData['valuesByItem'];
   userActions: Actions[];
+  boardStatus: StatusByColumn;
 }
 
 const GroupsView = ({
@@ -22,10 +25,17 @@ const GroupsView = ({
   itemsByGroup,
   valuesByItem,
   userActions,
+  boardStatus,
 }: GroupsViewProps) => {
   const arrayColumns = Array.from(columns.values());
   const setUserActions = useRoleUserActions((state) => state.setUserActions);
-  setUserActions(userActions);
+  const setBoardStatus = useBoardStore((state) => state.setBoardStatus);
+
+  
+  useEffect(() => {
+    setUserActions(userActions);
+    setBoardStatus(boardStatus);
+  }, [boardStatus, setBoardStatus, setUserActions, userActions]);
 
   return (
     <>

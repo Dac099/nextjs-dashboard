@@ -42,6 +42,7 @@ export default async function Page({ params }: Props) {
           itemsByGroup={boardData.itemsByGroup}
           valuesByItem={boardData.valuesByItem}
           userActions={allowedUserActions}
+          boardStatus={boardData.statusBoard}
         />
       )}
       {viewType === "gantt" && <GanttContainer boardData={gantData} />}

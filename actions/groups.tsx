@@ -8,11 +8,13 @@ import {
   Item,
   TableValue,
   ItemValues,
-  BoardData, Group,
+  BoardData, 
+  Group,
+  StatusValue,
+  StatusByColumn
 } from "@/utils/types/groups";
 import sql from "mssql";
 import {buildInsertItemsBatchQuery} from "@/utils/actionsGrups/helpers";
-import { group } from 'console';
 
 export async function addGroup(boardId: string, name: string, viewId: string, color: string): Promise<void>
 {
@@ -35,18 +37,52 @@ export async function addGroup(boardId: string, name: string, viewId: string, co
 
 export async function GetBoardData(boardId: string): Promise<BoardData>
 {
-  const [columnsGroups, boardItems, boardValues] = await Promise.all([
+  const [columnsGroups, boardItems, boardValues, statusValues] = await Promise.all([
     fetchColumnsGroups(boardId),
     fetchBoardItems(boardId),
-    fetchBoardValues(boardId)
+    fetchBoardValues(boardId),
+    fetchStatusBoard(boardId)
   ]);
 
   return {
     columns: columnsGroups.columns || new Map(),
     groups: columnsGroups.groups || new Map(),
     itemsByGroup: boardItems || new Map(),
-    valuesByItem: boardValues || new Map()
+    valuesByItem: boardValues || new Map(),
+    statusBoard: statusValues || new Map(),
   };
+}
+
+async function fetchStatusBoard(boardId: string): Promise<StatusByColumn>{
+  const query: string = `
+    SELECT 
+      tv.id,
+      tv.value,
+      tv.column_id AS columnId
+    FROM TableValues tv
+    LEFT JOIN Columns c ON c.id = tv.column_id
+    WHERE tv.deleted_at IS NULL
+      AND c.board_id = @boardId
+      AND tv.item_id IS NULL;
+  `;
+
+  await connection.connect();
+  const result = await connection
+    .request()
+    .input('boardId', boardId)
+    .query(query);
+
+  const groupedResult = result.recordset.reduce((acc: StatusByColumn, cv: StatusValue) => {
+    if(!acc.has(cv.columnId)){
+      acc.set(cv.columnId, []);
+    }
+
+    acc.get(cv.columnId)!.push(cv);
+
+    return acc;
+  }, new Map<string, StatusValue[]>);
+
+  return groupedResult;
 }
 
 async function fetchBoardValues(boardId: string): Promise<ItemValues>

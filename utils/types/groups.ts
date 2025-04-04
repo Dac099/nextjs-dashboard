@@ -38,6 +38,14 @@ export type TableValue = {
     columnId: string;
 };
 
+export type StatusValue = {
+    id: string;
+    value: string;
+    columnId: string;
+};
+
+export type StatusByColumn = Map<string, StatusValue[]>;
+
 export type ItemValues = Map<string, TableValue[]>;
 
 export type BoardData = {
@@ -45,4 +53,5 @@ export type BoardData = {
     groups: Groups;
     itemsByGroup: GroupItem;
     valuesByItem: ItemValues;
+    statusBoard: StatusByColumn;
 };
