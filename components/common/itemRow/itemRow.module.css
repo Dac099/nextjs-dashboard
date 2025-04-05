@@ -11,6 +11,29 @@
     border-right: 1px solid var(--accent-color);
 }
 
+.groupRow > div
+{
+  border-right: 1px solid var(--accent-color);
+  border-top: 1px solid var(--accent-color);
+  height: 35px;
+}
+
+.groupRow > div:last-child
+{
+  border-right: none;
+}
+
+.groupBody .groupRow:first-child div
+{
+  border-top: none;
+  border-bottom: 1px solid var(--accent-color);
+}
+
+.groupBody .groupRow:last-child div
+{
+  border-bottom: none;
+}
+
 .itemTitle
 {
     display: grid;
@@ -49,3 +72,30 @@
     padding-top: 5px;
     padding-left: 7px;
 }
+
+.contextMenu
+{
+    position: absolute;
+    z-index: 2;
+    background-color: var(--sec-bg-color);
+    border: 1px solid var(--accent-color);
+    padding: 5px 2px;
+    border-radius: 5px;
+    left: 50%;
+    bottom: -45px;
+    transform: translateX(-50%);
+    box-shadow: 1px 1px 2px 0px var(--accent-color);
+}
+
+.menuOption
+{
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.menuOption:hover
+{
+    background-color: var(--accent-color);
+}
+

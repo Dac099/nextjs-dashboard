@@ -7,11 +7,8 @@ import { GroupHeaderColumn } from "../groupHeaderColumn/groupHeaderColumn";
 import { AddItemSection } from "@/components/common/addItemSection/addItemSection";
 import { ItemRow } from "@/components/common/itemRow/itemRow";
 import { LuChevronDown as Arrow } from "react-icons/lu";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CollapsedGroup } from '../collapsedGroup/collapsedGroup';
-import { Actions } from '@/utils/types/roles';
-import { roleAccess } from '@/utils/userAccess';
-import { useParams } from 'next/navigation';
 import { useRoleUserActions } from "@/stores/roleUserActions";
 
 type Props = {
@@ -22,7 +19,6 @@ type Props = {
 };
 
 export function GroupItem({ group, columns, items, values }: Props) {
-	const {id: boardId} = useParams();
 	const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
 	const userActions = useRoleUserActions((state) => state.userActions);
 
@@ -74,13 +70,12 @@ export function GroupItem({ group, columns, items, values }: Props) {
 				{items &&
 					items.length > 0 &&
 					items.map((item) => (
-						<section className={styles.groupRow} key={item.id}>
 						<ItemRow
 							item={item}
 							values={values.get(item.id)}
 							columns={columns}
+							key={item.id}
 						/>
-						</section>
 					))
 				}
 			</section>			
