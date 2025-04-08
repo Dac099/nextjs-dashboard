@@ -345,45 +345,58 @@ export async function addItemBoard(groupId: string, viewId: string, boardId: str
   revalidatePath(`board/${boardId}/view/${viewId}`);
 }
 
+/**
+ * @returns true if the item was created, false if the item was updated
+ */
 export async function setTableValue(
-    boardId: string,
-    viewId: string,
-    itemId: string | undefined,
-    columnId: string | undefined,
-    value: string,
-    valueId: string | undefined
-): Promise<void> {
+  boardId: string,
+  viewId: string,
+  itemId: string | undefined,
+  columnId: string | undefined,
+  value: string
+): Promise<boolean> {
   await connection.connect();
+  let itemCreated: boolean = false;
 
   const updateValueQuery: string = `
-    UPDATE TableValues
+    UPDATE tv
     SET 
-        value = @value,
-        updated_at = GETDATE()
-    WHERE id = @valueId
+        tv.value = @value,
+        tv.updated_at = GETDATE()
+    FROM TableValues tv
+    LEFT JOIN Items i ON i.id = tv.item_id
+    LEFT JOIN SubItems s ON s.id = tv.item_id
+    WHERE i.id = @itemId OR s.id = @itemId
+    AND tv.column_id = @columnId;
+    
+    SELECT @@ROWCOUNT AS affected;
   `;
 
-  if(!valueId)
-  {
+  const updateResult = await connection
+    .request()
+    .input('itemId', itemId) 
+    .input('value', value)
+    .input('columnId', columnId)
+    .query(updateValueQuery);
+
+  if (updateResult.recordset[0].affected === 0) {
     const setValueQuery: string = `
         INSERT INTO TableValues (item_id, column_id, value)
         VALUES (@itemId, @columnId, @value);
     `;
+    
     await connection
-        .request()
-        .input('itemId', itemId)
-        .input('columnId', columnId)
-        .input('value', value)
-        .query(setValueQuery);
+      .request()
+      .input('itemId', itemId)
+      .input('columnId', columnId)
+      .input('value', value)
+      .query(setValueQuery);
+    
+    itemCreated = true;
   }
 
-  await connection
-      .request()
-      .input('valueId', valueId)
-      .input('value', value)
-      .query(updateValueQuery);
-
   revalidatePath(`/board/${boardId}/view/${viewId}`);
+  return itemCreated;
 }
 
 export async function getBoardStatusList(columnId: string): Promise<{color: string, text: string, id: string}[]> {

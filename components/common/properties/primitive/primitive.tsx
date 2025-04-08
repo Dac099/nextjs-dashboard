@@ -1,12 +1,13 @@
 'use client';
 
 import styles from './styles.module.css';
-import {TableValue} from "@/utils/types/groups";
-import {useState, KeyboardEvent, useRef, useEffect} from "react";
-import {useParams} from "next/navigation";
-import {setTableValue} from "@/actions/groups";
-import { Actions } from '@/utils/types/roles';
-import { roleAccess } from '@/utils/userAccess';
+import { TableValue } from "@/utils/types/groups";
+import { useState, KeyboardEvent, useRef } from "react";
+import { useParams } from "next/navigation";
+import { setTableValue } from "@/actions/groups";
+import { useRoleUserActions } from '@/stores/roleUserActions';
+import { useItemStore } from '@/stores/useItemStore';
+import { findParentKeyBySubItemId } from '@/utils/helpers';
 
 type Props = {
     value: TableValue;
@@ -15,49 +16,62 @@ type Props = {
     columnId: string;
 };
 
-export const Primitive = ({ value, type, itemId, columnId }: Props) =>
-{
-    const {id: boardId, viewId} = useParams();
+export const Primitive = ({ value, type, itemId, columnId }: Props) => {
+    const userActions = useRoleUserActions(state => state.userActions);
+    const { id: boardId, viewId } = useParams();
     const inputRef = useRef<HTMLInputElement>(null);
-    const defaultValue:string | number = value.value 
-        ? JSON.parse(value.value) 
+    const defaultValue: string | number = value.value
+        ? JSON.parse(value.value)
         : (type === 'number' ? 0 : '...');
     const [definedValue, setDefinedValue] = useState<string | number>(defaultValue);
-    const [userActions, setUserActions] = useState<Actions[]>([]);
 
-    async function handleSubmit(e: KeyboardEvent<HTMLInputElement> )
-    {
-        if(e.code === 'Escape') {
+
+    async function handleSubmit(e: KeyboardEvent<HTMLInputElement>) {
+        if (e.code === 'Escape') {
             setDefinedValue(defaultValue);
             inputRef.current?.blur();
             return;
         }
 
 
-        if(e.code === 'Enter')
-        {
-            if(definedValue === defaultValue)
-            {
+        if (e.code === 'Enter') {
+            if (definedValue === defaultValue) {
                 setDefinedValue(defaultValue);
                 return;
             }
-            await setTableValue(
+
+            const valueString = JSON.stringify(definedValue);
+
+            const wasCreated = await setTableValue(
                 boardId as string,
                 viewId as string,
                 itemId,
                 columnId,
-                JSON.stringify(definedValue),
-                value.id
+                valueString
             );
+
+            const itemStore = useItemStore.getState();
+            const parentKey = findParentKeyBySubItemId(itemStore.subItemsMap, itemId);
+
+            if (parentKey) {
+                if (!wasCreated) {
+                    itemStore.updateSubItemValue(parentKey, itemId, columnId, valueString);
+                    return;
+                }
+
+                itemStore.addSubItemValue(parentKey, itemId, {
+                    id: value.id,
+                    itemId: itemId,
+                    groupId: '',
+                    value: valueString,
+                    columnId: columnId
+                })
+            }
+
             inputRef.current?.blur();
             return;
         }
     }
-
-    useEffect(() => {
-        roleAccess(boardId as string)
-        .then(actions => setUserActions(actions));
-    }, [boardId]);
 
     return (
         <input

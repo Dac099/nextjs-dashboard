@@ -1,4 +1,5 @@
 import {Item, ValueDB} from "@/utils/types/projectDetail";
+import { SubItem, TableValue } from './types/groups';
 
 export function formatDate(date: Date): string
 {
@@ -68,4 +69,44 @@ export function groupItemsByType(data: ValueDB[]): Item[]
       lastUpdate: item.lastUpdate || new Date(),
     } as Item;
   });
+}
+export function subItemValueByColumnId(columnId: string, subItem: SubItem): TableValue
+{
+  const tableValue = subItem
+    .values
+    .find((value) => value && value.columnId === columnId) as TableValue;
+
+  return tableValue ?? {
+    id: '',
+    itemId: subItem.id,
+    columnId: columnId,
+    value: '',
+    groupId: ''
+  };
+}
+
+export function findParentKeyBySubItemId(
+  subItemsMap: Map<string, SubItem[]>,
+  subItemId: string
+): string | null {
+  for (const [key, subItems] of subItemsMap) {
+    if (subItems.some(subItem => subItem.id === subItemId)) {
+      return key;
+    }
+  }
+  return null;
+}
+
+export function findParentKeyByValueId(
+  subItemsMap: Map<string, SubItem[]>,
+  valueId: string
+): string | null {
+  for (const [key, subItems] of subItemsMap) {
+    for (const subItem of subItems) {
+      if (subItem.values.some(value => value.id === valueId)) {
+        return key;
+      }
+    }
+  }
+  return null;
 }

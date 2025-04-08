@@ -1,42 +1,40 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import styles from './rowTitle.module.css';
 import {useRouter} from "next/navigation";
-import {updateItemName} from "@/actions/items";
-import { Actions } from '@/utils/types/roles';
-import { roleAccess } from '@/utils/userAccess';
-import { useParams } from 'next/navigation';
+import {updateItemName, updateSubItemName} from "@/actions/items";
+import { useRoleUserActions } from '@/stores/roleUserActions';
 
 type Props = {
     title: string;
     itemId: string;
+    isSubItem?: boolean;
 };
 
-export function RowTitle({title, itemId}: Props) {
-    const {id: boardId} = useParams();
+export function RowTitle({title, itemId, isSubItem = false}: Props) {
+    const userActions = useRoleUserActions(state => state.userActions);
     const router = useRouter();
     const [itemName, setItemName] = useState<string>(title);
-    const [userActions, setUserActions] = useState<Actions[]>([]);
 
     function handleDoubleClick(e){
+        if(isSubItem) return;
+
         e.target.blur();
         router.push(`?itemId=${itemId}`);
     }
 
     async function submit(){
+        if(itemName === title) return;
+
         if(itemName !== title){
+            if(isSubItem){
+                await updateSubItemName(itemId, itemName);
+                return;
+            }
+
             await updateItemName(itemId, itemName);
         }
     }
-
-    useEffect(() => {
-        async function fetchData(){
-            const actions = await roleAccess(boardId as string);
-            setUserActions(actions);
-        }
-
-        fetchData();
-    }, [boardId]);
 
     return (
         <input
@@ -50,6 +48,13 @@ export function RowTitle({title, itemId}: Props) {
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
             disabled={!userActions.includes('update')}
+            onKeyUp={e =>  {
+                const target = e.target as HTMLInputElement;
+                if(e.key === 'Enter'){
+                    submit();
+                    target.blur();
+                }
+            }}
         />
     );
 }

@@ -55,3 +55,10 @@ export type BoardData = {
     valuesByItem: ItemValues;
     statusBoard: StatusByColumn;
 };
+
+export type SubItem = {
+    id: string; 
+    name: string; 
+    itemParent: string;
+    values: TableValue[];
+};

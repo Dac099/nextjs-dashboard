@@ -11,6 +11,8 @@ import { useParams } from "next/navigation";
 import { Tooltip } from "@/components/common/tooltip/tooltip";
 import { useBoardStore } from "@/stores/boardStore";
 import { useRoleUserActions } from '@/stores/roleUserActions';
+import { useItemStore } from '@/stores/useItemStore';
+import { findParentKeyBySubItemId } from '@/utils/helpers';
 
 type Props = {
   value: TableValue;
@@ -25,17 +27,19 @@ type Tag = {
 };
 
 export function Status({ value, itemId, columnId }: Props) {
-	const userActions = useRoleUserActions((state) => state.userActions);
+  const userActions = useRoleUserActions((state) => state.userActions);
   const boardStatus = useBoardStore((state) => state.boardStatus);
-	const addBoardStatus = useBoardStore((state) => state.addStatus);
+  const addBoardStatus = useBoardStore((state) => state.addStatus);
   const statusList: Tag[] = boardStatus!.get(columnId)!.map((item) => ({
     id: item.id,
     ...JSON.parse(item.value),
   }));
 
-  const defaultValue = value.value
-    ? { ...JSON.parse(value.value), id: value.id }
-    : { color: "rgba(0,0,0,0.4)", text: "Sin confirmar", id: "" };
+  const [defaultValue, setDefaultValue] = useState<Tag>(() =>
+    value.value
+      ? { ...JSON.parse(value.value), id: value.id }
+      : { color: "rgba(0,0,0,0.4)", text: "Sin confirmar", id: "" }
+  );
 
   const { id: boardId, viewId } = useParams();
   const containerListRef = useRef<HTMLDivElement | null>(null);
@@ -44,19 +48,20 @@ export function Status({ value, itemId, columnId }: Props) {
   const [newInputName, setNewInputName] = useState<string>("");
   const [newInputColor, setNewInputColor] = useState<string>("");
 
+
   useClickOutside(containerListRef as RefObject<HTMLDivElement>, () => {
     setShowStatusList(false);
     setShowInputTag(false);
   });
 
   const handleShowStatusList = (e: MouseEvent<HTMLElement>) => {
-		if(!userActions.includes('update') || !userActions.includes('create')) return;
+    if (!userActions.includes('update') || !userActions.includes('create')) return;
 
-		const target = e.target as HTMLElement;
-		if (target.classList.contains(styles.container)) {
-			setShowStatusList(!showStatusList);
-		}
-	};
+    const target = e.target as HTMLElement;
+    if (target.classList.contains(styles.container)) {
+      setShowStatusList(!showStatusList);
+    }
+  };
 
   const handleAddStatus = async () => {
     if (newInputName.length > 0) {
@@ -71,31 +76,52 @@ export function Status({ value, itemId, columnId }: Props) {
       );
 
       addBoardStatus({
-				columnId: columnId,
-				id: valueId,
-				value: JSON.stringify({
-					color: newInputColor,
-					text: newInputName,
-				}),
-			})
+        columnId: columnId,
+        id: valueId,
+        value: JSON.stringify({
+          color: newInputColor,
+          text: newInputName,
+        }),
+      })
       setShowInputTag(false);
     }
-	}
+  }
 
   const handleSetValue = async (item: Tag) => {
-      setShowStatusList(false);
-      await setTableValue(
-        boardId as string,
-        viewId as string,
-        itemId,
-        columnId,
-        JSON.stringify({
-          color: item.color,
-          text: item.text,
-        }),
-        value.id
-      );
+    setShowStatusList(false);
+    setDefaultValue(item);
+
+    const valueString = JSON.stringify({
+      color: item.color,
+      text: item.text
+    })
+
+    const wasCreated = await setTableValue(
+      boardId as string,
+      viewId as string,
+      itemId,
+      columnId,
+      valueString
+    );
+
+    const itemStore = useItemStore.getState();
+    const parentKey = findParentKeyBySubItemId(itemStore.subItemsMap, itemId);
+
+    if (parentKey) {
+      if (!wasCreated) {
+        itemStore.updateSubItemValue(parentKey, itemId, columnId, valueString);
+        return;
+      }
+
+      itemStore.addSubItemValue(parentKey, itemId, {
+        id: item.id,
+        itemId: itemId,
+        groupId: '',
+        value: valueString,
+        columnId: columnId
+      })
     }
+  }
 
   return (
     <article
@@ -109,7 +135,7 @@ export function Status({ value, itemId, columnId }: Props) {
       {showStatusList && (
         <section className={styles.listPreview} ref={containerListRef}>
 
-					{/* Render button to active input */}
+          {/* Render button to active input */}
           <p
             className={styles.showInput}
             onClick={() => setShowInputTag(!showInputTag)}
@@ -117,7 +143,7 @@ export function Status({ value, itemId, columnId }: Props) {
             <FaAngleDown size={10} />
           </p>
 
-					{/* Render input to add Tag */}
+          {/* Render input to add Tag */}
           {showInputTag && (
             <>
               <section className={styles.newInput}>
@@ -134,7 +160,7 @@ export function Status({ value, itemId, columnId }: Props) {
             </>
           )}
 
-					{/* Render the status list */}
+          {/* Render the status list */}
           {!showInputTag && (
             <section className={styles.tagsContainer}>
               {statusList.map((item) => (

@@ -1,56 +1,83 @@
 "use client";
 import styles from "./itemRow.module.css";
-import { Column, Item, TableValue } from "@/utils/types/groups";
+import type { Column, Item, TableValue } from "@/utils/types/groups";
 import { ItemValue } from "@/components/common/itemValue/itemValue";
 import { ProgressDial } from "../progressDial/progressDial";
 import { ChatRing } from "../chatRing/chatRing";
 import { ResponseChats } from "@/utils/types/items";
-import { getItemChats } from "@/actions/items";
+import { getItemChats, getSubItems, addSubItem } from "@/actions/items";
 import { RowTitle } from "@/components/common/rowTitle/rowTitle";
 import { DeleteRowBtn } from "../deleteRowBtn/deleteRowBtn";
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useRef, useState, KeyboardEvent } from "react";
 import { useRoleUserActions } from "@/stores/roleUserActions";
 import useClickOutside from "@/hooks/useClickOutside";
+import { subItemValueByColumnId } from '@/utils/helpers';
+import { useItemStore } from "@/stores/useItemStore";
 
 type Props = {
-  item: Item;
-  values: TableValue[] | undefined;
-  columns: Column[];
+	item: Item;
+	values: TableValue[] | undefined;
+	columns: Column[];
 };
 
 export function ItemRow({ item, values, columns }: Props) {
-  const { id: boardId } = useParams();
-  const rowRef = useRef<HTMLDivElement>(null);
-  const userActions = useRoleUserActions((state) => state.userActions);
-  const [chatData, setChatData] = useState<ResponseChats | null>(null);
-  const valuesByColumn = new Map<Column, TableValue>();
-  const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
+	const setSubItemsValues = useItemStore(state => state.setSubItems);
+	const subItems = useItemStore(state => state.subItemsMap);
+	const addSubItemStore = useItemStore(state => state.addSubItem);
+	const rowRef = useRef<HTMLDivElement>(null);
+	const subItemInputRef = useRef<HTMLInputElement>(null);
+	const userActions = useRoleUserActions((state) => state.userActions);
+	const [chatData, setChatData] = useState<ResponseChats | null>(null);
+	const valuesByColumn = new Map<Column, TableValue>();
+	const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
 	const [showSubItems, setShowSubItems] = useState<boolean>(false);
-	const subItems = new Array(5).fill('subItem');
+	const [newSubItem, setNewSubItem] = useState<boolean>(false);
 
-  useClickOutside(rowRef as React.RefObject<HTMLDivElement>, () => {
-    setShowContextMenu(false);
-  });
+	useClickOutside(rowRef as React.RefObject<HTMLDivElement>, () => {
+		setShowContextMenu(false);
+	});
 
-  useEffect(() => {
-    async function fetchData() {
-      const chatsResponse = await getItemChats(item.id);
-      setChatData(chatsResponse);
-    }
+	useEffect(() => {
+		if (newSubItem) {
+			subItemInputRef.current?.focus();
+		}
+	}, [newSubItem]);
 
-    fetchData();
-  }, [boardId, item.id]);
+	useEffect(() => {
+		async function fetchData() {
+			const [chatsResponse, subItemsResponse] = await Promise.all([
+				getItemChats(item.id),
+				getSubItems(item.id)
+			]);
 
-  columns.forEach((column) => {
-    const value: TableValue =
-      values?.find((value) => value.columnId === column.id) ||
-      ({} as TableValue);
-    valuesByColumn.set(column, value);
-  });
+			setChatData(chatsResponse);
+			setSubItemsValues(item.id, subItemsResponse);
+		}
 
-  return (
-		<section>
+		fetchData();
+	}, [item.id, setSubItemsValues]);
+
+	columns.forEach((column) => {
+		const value: TableValue =
+			values?.find((value) => value.columnId === column.id) ||
+			({} as TableValue);
+		valuesByColumn.set(column, value);
+	});
+
+	const handleAddSubItem = async (itemName: string) => {
+		const subItemId = await addSubItem(itemName, item.id);
+		addSubItemStore(item.id, {
+			id: subItemId,
+			name: itemName,
+			itemParent: item.id,
+			values: []
+		});
+	}
+
+	return (
+		<section
+			className={showSubItems ? styles.rowContainer : ''}
+		>
 			<section className={styles.groupRow}>
 				<div
 					className={styles.itemTitle}
@@ -74,9 +101,9 @@ export function ItemRow({ item, values, columns }: Props) {
 						<ChatRing chatData={chatData as ResponseChats} />
 					</article>
 
-					{showContextMenu && 
+					{showContextMenu &&
 						<article className={styles.contextMenu} ref={rowRef}>
-							<div 
+							<div
 								className={styles.menuOption}
 								onClick={() => {
 									setShowContextMenu(false);
@@ -85,6 +112,18 @@ export function ItemRow({ item, values, columns }: Props) {
 							>
 								{showSubItems ? 'Ocultar' : 'Mostrar'} Sub-Items
 							</div>
+							{userActions.includes('create') &&
+								<div
+									className={styles.menuOption}
+									onClick={() => {
+										setShowContextMenu(false);
+										setShowSubItems(true);
+										setNewSubItem(true);
+									}}
+								>
+									Agregar Sub-Item
+								</div>
+							}
 						</article>
 					}
 				</div>
@@ -101,24 +140,81 @@ export function ItemRow({ item, values, columns }: Props) {
 			</section>
 
 			<section className={styles.subItemsContainer}>
-				{showSubItems && subItems.length > 0 &&
-					subItems.map((subItem, index) => (
-						<section key={index} className={`${styles.groupRow} ${styles.subItem}`}>
-							<div>{subItem}</div>
-							{columns.map((column) => (
-								<div key={column.id}>
-									<ItemValue
-										value={valuesByColumn.get(column) as TableValue}
-										type={column.type}
-										columnId={column.id}
-										itemId={item.id}
+				{showSubItems &&
+					<>
+						<div
+							className={styles.addSubItemBtn}
+							onClick={() => setNewSubItem(!newSubItem)}
+						>
+							+
+						</div>
+						{newSubItem && userActions.includes("create") &&
+							<section className={styles.groupRow}>
+								<div>
+									<input
+										type="text"
+										placeholder="Nombre del sub-item"
+										className={styles.subItemInput}
+										ref={subItemInputRef}
+										onKeyDown={async (e: KeyboardEvent<HTMLInputElement>) => {
+											if (e.key === 'Enter' || e.key === 'Enter') {
+												e.preventDefault();
+												const element = e.target as HTMLInputElement;
+												const itemName = element.value.trim();
+												console.log(itemName);
+
+												if (itemName.length > 0) {
+													setNewSubItem(false);
+													await handleAddSubItem(itemName);
+												}
+											}
+										}}
 									/>
 								</div>
-							))}
-						</section>
-					))
+								{columns.map((column) => (
+									<div key={column.id}></div>
+								))}
+							</section>
+						}
+						{subItems.has(item.id) && subItems.get(item.id)!.length > 0 &&
+							<section className={styles.subItemsList}>
+								{
+									subItems.get(item.id)!.map((subItem) => (
+										<section key={subItem.id} className={`${styles.groupRow} ${styles.subItem}`}>
+											<div className={styles.subItemTitle}>
+												<RowTitle
+													isSubItem={true}
+													title={subItem.name}
+													itemId={subItem.id}
+												/>
+
+												<section className={styles.itemOperations}>
+													<div className={styles.deleteBtn}>
+														<DeleteRowBtn
+															itemId={subItem.id}
+															isSubItem={true}
+														/>
+													</div>
+												</section>
+											</div>
+											{columns.map((column) => (
+												<div key={column.id}>
+													<ItemValue
+														value={subItemValueByColumnId(column.id, subItem) as TableValue}
+														type={column.type}
+														columnId={column.id}
+														itemId={subItem.id}
+													/>
+												</div>
+											))}
+										</section>
+									))
+								}
+							</section>
+						}
+					</>
 				}
 			</section>
 		</section>
-  );
+	);
 }

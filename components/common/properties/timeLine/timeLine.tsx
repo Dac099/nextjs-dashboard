@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation';
 import { setTableValue } from '@/actions/groups';
 import { Actions } from '@/utils/types/roles';
 import { roleAccess } from '@/utils/userAccess';
+import { useRoleUserActions } from '@/stores/roleUserActions';
 
 type Props = {
     value: TableValue;
@@ -19,6 +20,7 @@ type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 export const TimeLine = ({ value, columnId, itemId }: Props) => {
+    const userActions = useRoleUserActions((state) => state.userActions);
     const {id: boardId, viewId} = useParams();
     const [ showCalendar, setShowCalendar ] = useState<boolean>(false);
 
@@ -37,16 +39,6 @@ export const TimeLine = ({ value, columnId, itemId }: Props) => {
     const totalTime = endDateTime - startDateTime;
     const completedTime = currentDate.getTime() - startDateTime;
     const percentage = Math.max(0, Math.min(100, Math.round(100 * (completedTime / totalTime))));
-    const [userActions, setUserActions] = useState<Actions[]>([]);
-
-    useEffect(() => {
-        async function fetchData(){
-            const actions = await roleAccess(boardId as string);
-            setUserActions(actions);
-        }
-
-        fetchData();
-    }, [boardId]);
 
     // Este efecto maneja la actualización solo cuando las fechas cambian realmente
     useEffect(() => {
@@ -66,8 +58,7 @@ export const TimeLine = ({ value, columnId, itemId }: Props) => {
                 viewId as string,
                 itemId,
                 columnId,
-                JSON.stringify(dates),
-                value.id
+                JSON.stringify(dates)
             );
         }
     }, [dates, showCalendar, boardId, viewId, itemId, columnId, value.id]);

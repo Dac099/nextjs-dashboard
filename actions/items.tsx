@@ -1,5 +1,6 @@
 'use server';
 import connection from '@/services/database';
+import { SubItem } from '@/utils/types/groups';
 import type {Item, ProjectData, ResponseChats, Column} from '@/utils/types/items';
 import { revalidatePath } from 'next/cache';
 
@@ -244,4 +245,120 @@ export async function addItemByProject(groupId: string, viewId: string, boardId:
 
   revalidatePath(`board/${boardId}/view/${viewId}`);
   return result.recordset[0].id;
+}
+
+export async function getSubItems(itemId: string): Promise<SubItem[]>
+{
+  await connection.connect();
+
+  type QueryItem = {
+    id: string;
+    name: string;
+    itemParent: string;
+    valueId: string;
+    columnId: string;
+    value: string;
+  };
+
+  const query: string = `
+    SELECT 
+      si.id,
+      si.name,
+      si.item_parent as itemParent,
+      tv.id as valueId,
+      tv.column_id as columnId, 
+      tv.value
+    FROM TableValues tv
+    RIGHT JOIN SubItems si ON tv.item_id = si.id
+    WHERE si.item_parent = @itemId
+    AND si.deleted_at IS NULL
+    AND tv.deleted_at IS NULL
+    ORDER BY si.created_at
+  `;
+
+  
+  const result = await connection
+  .request()
+  .input('itemId', itemId)
+  .query(query);
+  
+  return result.recordset.reduce((acc: SubItem[], itemData: QueryItem) => {
+    const existingSubItem = acc.find(subItem => subItem.id === itemData.id);
+    if (existingSubItem) {
+      existingSubItem.values.push({
+        id: itemData.valueId,
+        value: itemData.value,
+        columnId: itemData.columnId,
+        itemId: itemData.id,
+        groupId: ''
+      });
+    } else {
+      acc.push({
+        id: itemData.id,
+        name: itemData.name,
+        itemParent: itemData.itemParent,
+        values: [{
+          id: itemData.valueId,
+          value: itemData.value,
+          columnId: itemData.columnId,
+          itemId: itemData.id,
+          groupId: ''
+        }]
+      });
+    }
+    return acc;
+  }, [] as SubItem[]);
+}
+
+export async function addSubItem(name: string, parentId: string): Promise<string>
+{
+  await connection.connect();
+  const query: string = `
+    INSERT INTO SubItems (name, item_parent)
+    OUTPUT INSERTED.id
+    VALUES (@name, @parentId)
+  `;
+
+  const result = await connection
+    .request()
+    .input('name', name)
+    .input('parentId', parentId)
+    .query(query);
+  
+    return result.recordset[0].id;
+}
+
+export async function updateSubItemName(subItemId: string, newName: string): Promise<void>
+{
+  await connection.connect();
+  const query:string = `
+    UPDATE SubItems
+    SET 
+      name = @name,
+      updated_at = GETDATE()
+    WHERE id = @subItemId
+  `;
+
+  await connection
+    .request()
+    .input('name', newName)
+    .input('subItemId', subItemId)
+    .query(query);
+}
+
+export async function deleteSubItem(subItemId: string, boardId: string, viewId: string): Promise<void>
+{
+  await connection.connect();
+  const query: string = `
+    UPDATE SubItems
+    SET deleted_at = GETDATE()
+    WHERE id = @subItemId
+  `;
+
+  await connection
+    .request()
+    .input('subItemId', subItemId)
+    .query(query);
+
+  revalidatePath(`board/${boardId}/view/${viewId}`);
 }

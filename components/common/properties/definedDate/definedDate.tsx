@@ -7,8 +7,7 @@ import {useState, useEffect, useRef} from "react";
 import {TableValue} from "@/utils/types/groups";
 import { setTableValue } from '@/actions/groups';
 import { useParams } from 'next/navigation';
-import { Actions } from '@/utils/types/roles';
-import { roleAccess } from '@/utils/userAccess';
+import { useRoleUserActions } from '@/stores/roleUserActions';
 
 type Props = {
     value: TableValue;
@@ -20,6 +19,7 @@ type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
 export const DefinedDate = ({ value, columnId, itemId }: Props) => {
+    const userActions = useRoleUserActions((state) => state.userActions);
     const {id: boardId, viewId} = useParams();
     const [ showCalendar, setShowCalendar ] = useState<boolean>(false);
     
@@ -30,16 +30,6 @@ export const DefinedDate = ({ value, columnId, itemId }: Props) => {
     const [ newDate, setNewDate ] = useState<Value>(defaultValue);
     const prevDateRef = useRef<Value>(defaultValue);
     const isInitialMount = useRef(true);
-    const [userActions, setUserActions] = useState<Actions[]>([]);
-
-    useEffect(() => {
-        async function fetchData(){
-            const actions = await roleAccess(boardId as string);
-            setUserActions(actions);
-        }
-
-        fetchData();
-    }, [boardId]);
 
     useEffect(() => {
         if (isInitialMount.current) {
@@ -56,8 +46,7 @@ export const DefinedDate = ({ value, columnId, itemId }: Props) => {
                 viewId as string, 
                 itemId, 
                 columnId, 
-                JSON.stringify(newDate),
-                value.id
+                JSON.stringify(newDate)
             );
         }
     }, [newDate, showCalendar, boardId, viewId, itemId, columnId, value.id]);

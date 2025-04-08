@@ -7,6 +7,7 @@
   --action-color: #6246ea;
   --progress-color: #55c577;
   --invalid-color: #f7f8ff77;
+  --subitem-bg-color: rgba(14, 14, 14, 0.15);
 }
 
 [data-theme="dark"]
@@ -18,6 +19,7 @@
   --action-color: #B0ADFF;
   --progress-color: #68e287;
   --invalid-color: #23294659;
+  --subitem-bg-color: rgba(189, 189, 189, 0.15);
 }
 
 *
