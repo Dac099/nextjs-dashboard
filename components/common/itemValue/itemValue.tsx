@@ -30,7 +30,6 @@ export function ItemValue({
     const subItemsMap = useItemStore(state => state.subItemsMap);
 
     useEffect(() => {
-        console.log('Actualizando.....')
         const subItems = subItemsMap.get(itemId);
 
         if (subItems && subItems.length > 0) {

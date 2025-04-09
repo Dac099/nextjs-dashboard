@@ -50,6 +50,8 @@ export function ItemRow({ item, values, columns }: Props) {
 				getSubItems(item.id)
 			]);
 
+			console.log(subItemsResponse)
+
 			setChatData(chatsResponse);
 			setSubItemsValues(item.id, subItemsResponse);
 		}

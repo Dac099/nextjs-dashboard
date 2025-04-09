@@ -1,6 +1,6 @@
 'use server';
 import connection from "@/services/database";
-import {revalidatePath} from "next/cache";
+import { revalidatePath } from "next/cache";
 import {
   ColumnsGroups,
   ColumnsGroupsDB,
@@ -8,16 +8,15 @@ import {
   Item,
   TableValue,
   ItemValues,
-  BoardData, 
+  BoardData,
   Group,
   StatusValue,
   StatusByColumn
 } from "@/utils/types/groups";
 import sql from "mssql";
-import {buildInsertItemsBatchQuery} from "@/utils/actionsGrups/helpers";
+import { buildInsertItemsBatchQuery } from "@/utils/actionsGrups/helpers";
 
-export async function addGroup(boardId: string, name: string, viewId: string, color: string): Promise<void>
-{
+export async function addGroup(boardId: string, name: string, viewId: string, color: string): Promise<void> {
   await connection.connect();
   const query: string = `
     INSERT INTO Groups (board_id, name, position, color)
@@ -26,17 +25,16 @@ export async function addGroup(boardId: string, name: string, viewId: string, co
     , @color)
   `;
   await connection
-      .request()
-      .input('boardId', boardId)
-      .input('name', name)
-      .input('color', color)
-      .query(query);
+    .request()
+    .input('boardId', boardId)
+    .input('name', name)
+    .input('color', color)
+    .query(query);
 
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
 
-export async function GetBoardData(boardId: string): Promise<BoardData>
-{
+export async function GetBoardData(boardId: string): Promise<BoardData> {
   const [columnsGroups, boardItems, boardValues, statusValues] = await Promise.all([
     fetchColumnsGroups(boardId),
     fetchBoardItems(boardId),
@@ -53,7 +51,7 @@ export async function GetBoardData(boardId: string): Promise<BoardData>
   };
 }
 
-async function fetchStatusBoard(boardId: string): Promise<StatusByColumn>{
+async function fetchStatusBoard(boardId: string): Promise<StatusByColumn> {
   const query: string = `
     SELECT 
       tv.id,
@@ -73,7 +71,7 @@ async function fetchStatusBoard(boardId: string): Promise<StatusByColumn>{
     .query(query);
 
   const groupedResult = result.recordset.reduce((acc: StatusByColumn, cv: StatusValue) => {
-    if(!acc.has(cv.columnId)){
+    if (!acc.has(cv.columnId)) {
       acc.set(cv.columnId, []);
     }
 
@@ -85,8 +83,7 @@ async function fetchStatusBoard(boardId: string): Promise<StatusByColumn>{
   return groupedResult;
 }
 
-async function fetchBoardValues(boardId: string): Promise<ItemValues>
-{
+async function fetchBoardValues(boardId: string): Promise<ItemValues> {
   const valuesQuery: string = `
     SELECT 
       tv.id,
@@ -121,8 +118,7 @@ async function fetchBoardValues(boardId: string): Promise<ItemValues>
   }, new Map<string, TableValue[]>());
 }
 
-async function fetchBoardItems(boardId: string): Promise<GroupItem>
-{
+async function fetchBoardItems(boardId: string): Promise<GroupItem> {
   await connection.connect();
   const query: string = `
     SELECT 
@@ -156,8 +152,7 @@ async function fetchBoardItems(boardId: string): Promise<GroupItem>
   }, new Map<string, Item[]>());
 }
 
-async function fetchColumnsGroups(boardId: string): Promise<ColumnsGroups>
-{
+async function fetchColumnsGroups(boardId: string): Promise<ColumnsGroups> {
   await connection.connect();
   const boardQuery: string = `
     SELECT 
@@ -179,7 +174,7 @@ async function fetchColumnsGroups(boardId: string): Promise<ColumnsGroups>
     .request()
     .input('boardId', boardId)
     .query(boardQuery);
-  
+
   return result.recordset.reduce((acc: ColumnsGroups, curr: ColumnsGroupsDB) => {
     acc.groups.set(curr.groupId, {
       id: curr.groupId,
@@ -194,22 +189,20 @@ async function fetchColumnsGroups(boardId: string): Promise<ColumnsGroups>
       type: curr.columnType,
       position: curr.columnPosition
     });
-    
+
     return acc;
-  }, 
-  { 
-    groups: new Map<string, {id: string, name: string, color: string, position: number}>(), 
-    columns: new Map<string, {id: string, name: string, type: string, position: number}>() 
-  });
+  },
+    {
+      groups: new Map<string, { id: string, name: string, color: string, position: number }>(),
+      columns: new Map<string, { id: string, name: string, type: string, position: number }>()
+    });
 }
 
-export async function addBoardColumn(boardId: string, viewId: string, columnType: string): Promise<void>
-{
+export async function addBoardColumn(boardId: string, viewId: string, columnType: string): Promise<void> {
   await connection.connect();
   let columnName: string = '';
 
-  switch(columnType)
-  {
+  switch (columnType) {
     case 'text':
       columnName = 'Textos';
       break;
@@ -244,8 +237,7 @@ export async function addBoardColumn(boardId: string, viewId: string, columnType
     .input('columnName', columnName)
     .query(findColumnQuery);
 
-  if(result.recordset[0].total > 0)
-  {
+  if (result.recordset[0].total > 0) {
     columnName = `${columnName} ${result.recordset[0].total}`;
   }
 
@@ -265,12 +257,11 @@ export async function addBoardColumn(boardId: string, viewId: string, columnType
     .input('columnName', columnName)
     .input('columnType', columnType)
     .query(insertColumnQuery);
-  
+
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
 
-export async function updateColumnName(columnId: string, name: string, boardId: string, viewId: string): Promise<void>
-{
+export async function updateColumnName(columnId: string, name: string, boardId: string, viewId: string): Promise<void> {
   await connection.connect();
   const query: string = `
     UPDATE Columns 
@@ -283,12 +274,11 @@ export async function updateColumnName(columnId: string, name: string, boardId: 
     .input('columnId', columnId)
     .input('name', name)
     .query(query);
-  
+
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
 
-export async function updateGroupTitle(groupId: string, name: string): Promise<void>
-{
+export async function updateGroupTitle(groupId: string, name: string): Promise<void> {
   await connection.connect();
   const query: string = `
     UPDATE Groups 
@@ -304,8 +294,7 @@ export async function updateGroupTitle(groupId: string, name: string): Promise<v
     .query(query);
 }
 
-export async function updateGroupColor(groupId: string, color: string, boardId: string, viewId: string): Promise<void>
-{
+export async function updateGroupColor(groupId: string, color: string, boardId: string, viewId: string): Promise<void> {
   await connection.connect();
 
   const query: string = `
@@ -325,8 +314,7 @@ export async function updateGroupColor(groupId: string, color: string, boardId: 
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
 
-export async function addItemBoard(groupId: string, viewId: string, boardId: string, itemName: string): Promise<void>
-{
+export async function addItemBoard(groupId: string, viewId: string, boardId: string, itemName: string): Promise<void> {
   const addItemQuery: string = `
     INSERT INTO Items (group_id, name, position)
     VALUES (@groupId, @name,
@@ -337,10 +325,10 @@ export async function addItemBoard(groupId: string, viewId: string, boardId: str
 
   await connection.connect();
   await connection
-      .request()
-      .input('groupId', groupId)
-      .input('name', itemName)
-      .query(addItemQuery);
+    .request()
+    .input('groupId', groupId)
+    .input('name', itemName)
+    .query(addItemQuery);
 
   revalidatePath(`board/${boardId}/view/${viewId}`);
 }
@@ -366,7 +354,7 @@ export async function setTableValue(
     FROM TableValues tv
     LEFT JOIN Items i ON i.id = tv.item_id
     LEFT JOIN SubItems s ON s.id = tv.item_id
-    WHERE i.id = @itemId OR s.id = @itemId
+    WHERE tv.item_id = @itemId
     AND tv.column_id = @columnId;
     
     SELECT @@ROWCOUNT AS affected;
@@ -374,7 +362,7 @@ export async function setTableValue(
 
   const updateResult = await connection
     .request()
-    .input('itemId', itemId) 
+    .input('itemId', itemId)
     .input('value', value)
     .input('columnId', columnId)
     .query(updateValueQuery);
@@ -384,14 +372,14 @@ export async function setTableValue(
         INSERT INTO TableValues (item_id, column_id, value)
         VALUES (@itemId, @columnId, @value);
     `;
-    
+
     await connection
       .request()
       .input('itemId', itemId)
       .input('columnId', columnId)
       .input('value', value)
       .query(setValueQuery);
-    
+
     itemCreated = true;
   }
 
@@ -399,7 +387,7 @@ export async function setTableValue(
   return itemCreated;
 }
 
-export async function getBoardStatusList(columnId: string): Promise<{color: string, text: string, id: string}[]> {
+export async function getBoardStatusList(columnId: string): Promise<{ color: string, text: string, id: string }[]> {
   await connection.connect();
 
   const selectQuery: string = `
@@ -414,18 +402,17 @@ export async function getBoardStatusList(columnId: string): Promise<{color: stri
   `;
 
   const result = await connection
-      .request()
-      .input('columnId', columnId)
-      .query(selectQuery);
+    .request()
+    .input('columnId', columnId)
+    .query(selectQuery);
 
-  return result.recordset.map((res): {color: string, text: string, id: string} => ({
+  return result.recordset.map((res): { color: string, text: string, id: string } => ({
     ...JSON.parse(res.value),
     id: res.id
   }));
 }
 
-export async function addStatusColumn(columnId: string, value: string, boardId: string, viewId: string): Promise<string>
-{
+export async function addStatusColumn(columnId: string, value: string, boardId: string, viewId: string): Promise<string> {
   await connection.connect();
   const query: string = `
     INSERT INTO TableValues (column_id, value)
@@ -434,10 +421,10 @@ export async function addStatusColumn(columnId: string, value: string, boardId: 
   `;
 
   const result = await connection
-      .request()
-      .input('columnId', columnId)
-      .input('value', value)
-      .query(query);
+    .request()
+    .input('columnId', columnId)
+    .input('value', value)
+    .query(query);
 
   revalidatePath(`/board/${boardId}/view/${viewId}`);
   return result.recordset[0].id;
@@ -452,14 +439,13 @@ export async function deleteStatusColumn(itemId: string, boardId: string, viewId
   `;
 
   await connection
-      .request()
-      .input('itemId', itemId)
-      .query(query);
+    .request()
+    .input('itemId', itemId)
+    .query(query);
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
 
-export async function deleteGroup(groupId: string, boardId: string, viewId: string): Promise<void>
-{
+export async function deleteGroup(groupId: string, boardId: string, viewId: string): Promise<void> {
   await connection.connect();
   const query: string = `
     UPDATE Groups 
@@ -468,15 +454,14 @@ export async function deleteGroup(groupId: string, boardId: string, viewId: stri
   `;
 
   await connection
-      .request()
-      .input('groupId', groupId)
-      .query(query);
+    .request()
+    .input('groupId', groupId)
+    .query(query);
 
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
 
-export async function deleteGroupRow(itemId: string, boardId: string, viewId: string): Promise<void>
-{
+export async function deleteGroupRow(itemId: string, boardId: string, viewId: string): Promise<void> {
   await connection.connect();
   const query: string = `
     UPDATE Items
@@ -492,8 +477,7 @@ export async function deleteGroupRow(itemId: string, boardId: string, viewId: st
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
 
-export async function deleteColumn(columnId: string, boardId: string, viewId: string): Promise<void>
-{
+export async function deleteColumn(columnId: string, boardId: string, viewId: string): Promise<void> {
   await connection.connect();
   const query: string = `
     UPDATE Columns
@@ -509,7 +493,7 @@ export async function deleteColumn(columnId: string, boardId: string, viewId: st
   revalidatePath(`/board/${boardId}/view/${viewId}`);
 }
 
-export async function duplicateGroup(group: Group, viewId: string, boardId: string): Promise<void>{
+export async function duplicateGroup(group: Group, viewId: string, boardId: string): Promise<void> {
   await connection.connect();
   const transaction = new sql.Transaction(connection);
 
@@ -537,16 +521,16 @@ export async function duplicateGroup(group: Group, viewId: string, boardId: stri
 
     // Obtener los ítems del grupo original
     const itemsResponse = await new sql.Request(transaction)
-        .input('groupId', group.id)
-        .query(getItemsQuery);
+      .input('groupId', group.id)
+      .query(getItemsQuery);
     const items = itemsResponse.recordset;
 
     // Insertar el nuevo grupo y obtener su ID
     const groupResponse = await new sql.Request(transaction)
-        .input('name', `${group.name} (copia)`)
-        .input('color', group.color)
-        .input('boardId', boardId)
-        .query(insertGroupQuery);
+      .input('name', `${group.name} (copia)`)
+      .input('color', group.color)
+      .input('boardId', boardId)
+      .query(insertGroupQuery);
     const groupId = groupResponse.recordset[0].id;
 
     // Si hay ítems para duplicar, insertar los ítems en el nuevo grupo
@@ -569,17 +553,15 @@ export async function duplicateGroup(group: Group, viewId: string, boardId: stri
 }
 
 export async function setPercentageValue(
-  boardId: string, 
-  viewId: string, 
-  itemId: string | undefined, 
-  columnId: string | undefined, 
-  value: number, 
-  valueId: string | undefined
-): Promise<void>
-{
-  
-  if(value < 100){
-    await setTableValue(boardId, viewId, itemId, columnId, JSON.stringify(value), valueId);
+  boardId: string,
+  viewId: string,
+  itemId: string | undefined,
+  columnId: string | undefined,
+  value: number,
+): Promise<void> {
+
+  if (value < 100) {
+    await setTableValue(boardId, viewId, itemId, columnId, JSON.stringify(value));
     return;
   }
 
@@ -616,17 +598,15 @@ export async function setPercentageValue(
     WHERE item_id = @itemId
   `;
 
-  try
-  {
+  try {
     await transaction.begin();
-    
+
     const groupResponse = await new sql.Request(transaction)
       .input('itemId', itemId)
       .input('boardId', boardId)
       .query(getIdGroupQuery);
 
-    if(!(groupResponse.recordset[0]?.id))
-    {
+    if (!(groupResponse.recordset[0]?.id)) {
       await transaction.rollback();
       return;
     }
@@ -644,8 +624,7 @@ export async function setPercentageValue(
 
     await transaction.commit();
     revalidatePath(`/board/${boardId}/view/${viewId}`);
-  }catch(e)
-  {
+  } catch (e) {
     await transaction.rollback();
     console.log(e);
   }

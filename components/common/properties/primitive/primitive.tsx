@@ -25,6 +25,43 @@ export const Primitive = ({ value, type, itemId, columnId }: Props) => {
         : (type === 'number' ? 0 : '...');
     const [definedValue, setDefinedValue] = useState<string | number>(defaultValue);
 
+    async function submitValue(){
+        if (definedValue === defaultValue) {
+            setDefinedValue(defaultValue);
+            return;
+        }
+
+        const valueString = JSON.stringify(definedValue);
+
+        const wasCreated = await setTableValue(
+            boardId as string,
+            viewId as string,
+            itemId,
+            columnId,
+            valueString
+        );
+
+        const itemStore = useItemStore.getState();
+        const parentKey = findParentKeyBySubItemId(itemStore.subItemsMap, itemId);
+
+        if (parentKey) {
+            if (!wasCreated) {
+                itemStore.updateSubItemValue(parentKey, itemId, columnId, valueString);
+                return;
+            }
+
+            itemStore.addSubItemValue(parentKey, itemId, {
+                id: value.id,
+                itemId: itemId,
+                groupId: '',
+                value: valueString,
+                columnId: columnId
+            })
+        }
+
+        inputRef.current?.blur();
+        return;
+    }
 
     async function handleSubmit(e: KeyboardEvent<HTMLInputElement>) {
         if (e.code === 'Escape') {
@@ -35,41 +72,7 @@ export const Primitive = ({ value, type, itemId, columnId }: Props) => {
 
 
         if (e.code === 'Enter') {
-            if (definedValue === defaultValue) {
-                setDefinedValue(defaultValue);
-                return;
-            }
-
-            const valueString = JSON.stringify(definedValue);
-
-            const wasCreated = await setTableValue(
-                boardId as string,
-                viewId as string,
-                itemId,
-                columnId,
-                valueString
-            );
-
-            const itemStore = useItemStore.getState();
-            const parentKey = findParentKeyBySubItemId(itemStore.subItemsMap, itemId);
-
-            if (parentKey) {
-                if (!wasCreated) {
-                    itemStore.updateSubItemValue(parentKey, itemId, columnId, valueString);
-                    return;
-                }
-
-                itemStore.addSubItemValue(parentKey, itemId, {
-                    id: value.id,
-                    itemId: itemId,
-                    groupId: '',
-                    value: valueString,
-                    columnId: columnId
-                })
-            }
-
-            inputRef.current?.blur();
-            return;
+            await submitValue();
         }
     }
 
@@ -83,6 +86,7 @@ export const Primitive = ({ value, type, itemId, columnId }: Props) => {
             onChange={e => setDefinedValue(e.target.value)}
             onKeyUp={e => handleSubmit(e)}
             disabled={!userActions.includes('update')}
+            onBlur={() => submitValue()}
         />
     );
 }
