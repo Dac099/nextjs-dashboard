@@ -18,12 +18,12 @@ export default async function Page({ params }: Props) {
   const userRole = await getRoleAccess();
   const userWorkspace = userRole.permissions.findIndex(permission => permission.workspace === workspaceName);
 
-  if(
-      userWorkspace < 0 ||
-      !userRole.permissions[userWorkspace].boards.includes(boardName) &&
-      userRole.permissions[userWorkspace].boards[0] !== '*'
-  ){
-      redirect('/');
+  if (
+    userWorkspace < 0 ||
+    !userRole.permissions[userWorkspace].boards.includes(boardName) &&
+    userRole.permissions[userWorkspace].boards[0] !== '*'
+  ) {
+    redirect('/');
   }
 
   const boardData: BoardData = await GetBoardData(boardId);

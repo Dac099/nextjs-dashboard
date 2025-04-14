@@ -12,21 +12,21 @@ import { CollapsedGroup } from '../collapsedGroup/collapsedGroup';
 import { useRoleUserActions } from "@/stores/roleUserActions";
 
 type Props = {
-  group: Group;
-  columns: Column[];
-  items: Item[];
-  values: ItemValues;
+	group: Group;
+	columns: Column[];
+	items: Item[];
+	values: ItemValues;
 };
 
 export function GroupItem({ group, columns, items, values }: Props) {
 	const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
 	const userActions = useRoleUserActions((state) => state.userActions);
 
-	if(isCollapsed){
-		return <CollapsedGroup 
-			group={group} 
-			columns={columns} 
-			items={items} 
+	if (isCollapsed) {
+		return <CollapsedGroup
+			group={group}
+			columns={columns}
+			items={items}
 			values={values}
 			setIsCollapsed={setIsCollapsed}
 			isCollapsed={isCollapsed}
@@ -35,7 +35,7 @@ export function GroupItem({ group, columns, items, values }: Props) {
 	return (
 		<article className={styles.groupItem}>
 			<section className={styles.headerItemSection}>
-				<Arrow 
+				<Arrow
 					size={20}
 					className={isCollapsed ? styles.downBtn : ''}
 					onClick={() => setIsCollapsed(!isCollapsed)}
@@ -44,9 +44,9 @@ export function GroupItem({ group, columns, items, values }: Props) {
 						color: group.color
 					}}
 				/>
-				<GroupTitle group={group} />			
+				<GroupTitle group={group} />
 			</section>
-			
+
 			<section
 				className={styles.groupBody}
 				style={{ borderLeftColor: group.color }}
@@ -60,10 +60,10 @@ export function GroupItem({ group, columns, items, values }: Props) {
 					{columns.map((column) => (
 						<GroupHeaderColumn key={column.id} column={column} />
 					))}
-					
+
 				</section>
 
-				{userActions.includes('create') && 
+				{userActions.includes('create') &&
 					<AddItemSection columns={columns} groupId={group.id} />
 				}
 
@@ -78,7 +78,7 @@ export function GroupItem({ group, columns, items, values }: Props) {
 						/>
 					))
 				}
-			</section>			
+			</section>
 		</article>
 	);
 }

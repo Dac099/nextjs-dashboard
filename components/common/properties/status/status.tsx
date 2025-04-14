@@ -30,11 +30,10 @@ export function Status({ value, itemId, columnId }: Props) {
   const userActions = useRoleUserActions((state) => state.userActions);
   const boardStatus = useBoardStore((state) => state.boardStatus);
   const addBoardStatus = useBoardStore((state) => state.addStatus);
-  const statusList: Tag[] = boardStatus!.get(columnId)!.map((item) => ({
+  const statusList: Tag[] = boardStatus?.get(columnId)?.map((item) => ({
     id: item.id,
     ...JSON.parse(item.value),
-  }));
-
+  })) || [];
   const [defaultValue, setDefaultValue] = useState<Tag>(() =>
     value.value
       ? { ...JSON.parse(value.value), id: value.id }
