@@ -1,14 +1,14 @@
-import {Item, ValueDB} from "@/utils/types/projectDetail";
+import { Item, ValueDB } from "@/utils/types/projectDetail";
 import { SubItem, TableValue } from './types/groups';
+import { Task } from './types/items';
+import { v4 as uuidV4 } from 'uuid';
 
-export function formatDate(date: Date): string
-{
-    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
+export function formatDate(date: Date): string {
+  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
+  return date.toLocaleDateString('en-US', options);
 }
 
-export function groupItemsByType(data: ValueDB[]): Item[]
-{
+export function groupItemsByType(data: ValueDB[]): Item[] {
   const groupedByItemId: Record<string, Partial<Item>> = {};
 
   data.forEach(item => {
@@ -70,8 +70,7 @@ export function groupItemsByType(data: ValueDB[]): Item[]
     } as Item;
   });
 }
-export function subItemValueByColumnId(columnId: string, subItem: SubItem): TableValue
-{
+export function subItemValueByColumnId(columnId: string, subItem: SubItem): TableValue {
   const tableValue = subItem
     .values
     .find((value) => value && value.columnId === columnId) as TableValue;
@@ -109,4 +108,25 @@ export function findParentKeyByValueId(
     }
   }
   return null;
+}
+
+export function extractTasksFromHTML(htmlString: string): Task[] {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = htmlString;
+
+  const taskItems = tempDiv.querySelectorAll('li[data-type="taskItem"]');
+
+  const tasks = Array.from(taskItems).map((item) => {
+    const completed = item.getAttribute('data-checked') === 'true';
+    const message = item.querySelector('div p')?.textContent || '';
+    const id = uuidV4();
+
+    return {
+      id,
+      message,
+      completed
+    };
+  });
+
+  return tasks;
 }

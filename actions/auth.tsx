@@ -16,33 +16,30 @@ type UserData = {
   role: string
 };
 
-export async function loginAction(formData: FormData): Promise<LoginResult>
-{
+export async function loginAction(formData: FormData): Promise<LoginResult> {
   const username = formData.get('username') as string;
   const password = formData.get('password') as string;
   const cookieStore = await cookies();
   let userInDB: UserData | null;
 
-  if(!username || !password)
-  {
-    return {error: 'Nombre de usuario y contraseña obligatorios'};
+  if (!username || !password) {
+    return { error: 'Nombre de usuario y contraseña obligatorios' };
   }
 
   try {
     userInDB = await credentialsInDB(username, hashPassword(password));
 
-    if(!userInDB)
-    {
-      return {error: 'Credenciales incorrectas'};
+    if (!userInDB) {
+      return { error: 'Credenciales incorrectas' };
     }
-    
+
   } catch (error) {
     console.log(error);
-    return {error: 'Error del servidor. Inténtalo más tarde.'};
+    return { error: 'Error del servidor. Inténtalo más tarde.' };
   }
 
   const sessionId = randomBytes(16).toString('hex');
-    
+
   cookieStore.set('auth-session', sessionId, {
     httpOnly: true,
     secure: false,
@@ -50,28 +47,26 @@ export async function loginAction(formData: FormData): Promise<LoginResult>
     path: '/',
     sameSite: 'strict'
   });
-  
+
   cookieStore.set('user-info', JSON.stringify({
     id: userInDB.id,
     username: userInDB.username,
     role: userInDB.role
   }), {
-    httpOnly: false, 
+    httpOnly: false,
     secure: false,
     maxAge: 60 * 60 * 24 * 7,
     path: '/',
   });
-  
+
   redirect('/');
 }
 
-function hashPassword(password: string): string
-{
+function hashPassword(password: string): string {
   return createHash('sha1').update(password).digest('hex').toUpperCase();
 }
 
-async function credentialsInDB(username: string, password: string): Promise<UserData | null>
-{
+async function credentialsInDB(username: string, password: string): Promise<UserData | null> {
   try {
     await connection.connect();
     const query: string = `
@@ -84,7 +79,7 @@ async function credentialsInDB(username: string, password: string): Promise<User
       where usuario = @username AND passwd_user = @password;
     `;
 
-    const result = await connection 
+    const result = await connection
       .request()
       .input('username', username)
       .input('password', password)
@@ -93,7 +88,7 @@ async function credentialsInDB(username: string, password: string): Promise<User
     if (result.recordset.length === 0) {
       return null;
     }
-    
+
     return result.recordset[0];
   } catch (error) {
     console.error('Error al consultar la base de datos:', error);
@@ -103,14 +98,14 @@ async function credentialsInDB(username: string, password: string): Promise<User
 
 export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies();
-  
+
   cookieStore.delete('auth-session');
   cookieStore.delete('user-info');
-  
+
   redirect('/login');
 }
 
-export async function getWorkspaceWithBoard(boardId: string){
+export async function getWorkspaceWithBoard(boardId: string) {
   await connection.connect();
   const query: string = `
     SELECT
@@ -126,4 +121,25 @@ export async function getWorkspaceWithBoard(boardId: string){
     .query(query);
 
   return result.recordset[0];
+}
+
+export async function getUserInfo(): Promise<string> {
+  let userId: string = "";
+
+  try {
+    const cookieStore = await cookies();
+    const userInfo = cookieStore.get('user-info');
+
+    if (!userInfo) {
+      throw new Error("Error on get user info cookies");
+    }
+
+    const parsedInfo = JSON.parse(userInfo.value);
+
+    userId = parsedInfo.id;
+  } catch {
+    console.log("Error on get user info cookies");
+  }
+
+  return userId;
 }

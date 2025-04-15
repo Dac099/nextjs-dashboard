@@ -1,29 +1,25 @@
 import styles from './detailView.module.css';
 import { useEffect, useState } from 'react';
-import { 
-  getItemChats, 
-  getProjectDataByItem, 
-  getItemDetail 
+import {
+  getProjectDataByItem,
+  getItemDetail
 } from '@/actions/items';
-import { Item, ProjectData, ResponseChats } from '@/utils/types/items';
+import { Item, ProjectData } from '@/utils/types/items';
 import { formatDate } from '@/utils/helpers';
 import { PiChatsFill } from 'react-icons/pi';
-import { SiGoogleforms } from 'react-icons/si';
 import { LuLogs } from 'react-icons/lu';
-import { ChatsContainer } from '../chatsContainer/chatsContainer';
+import { ChatsContainer } from '@/components/common/chatsContainer/chatsContainer';
 import { ProjectContainer } from '../projectContainer/projectContainer';
 import { LogsContainer } from '../logsContainer/logsContainer';
 import { Skeleton } from '../skeleton/skeleton';
 import { FaMoneyBillWave } from "react-icons/fa";
-import {BillingContainer} from "@/components/common/billingContainer/billingContainer";
+import { BillingContainer } from "@/components/common/billingContainer/billingContainer";
 
 type Props = {
   itemId: string;
 }
 
-export function DetailView({itemId}: Props)
-{
-  const [chatData, setChatData] = useState<ResponseChats>({} as ResponseChats);
+export function DetailView({ itemId }: Props) {
   const [projectData, setProjectData] = useState<ProjectData | null>(null);
   const [itemDetail, setItemDetail] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -32,44 +28,41 @@ export function DetailView({itemId}: Props)
   const [isProject, setIsProject] = useState<boolean>(false);
 
   useEffect(() => {
-    async function fetchData(itemId: string): Promise<[ResponseChats, ProjectData, Item[]]>{
-        return await Promise.all([
-            getItemChats(itemId), 
-            getProjectDataByItem(itemId), 
-            getItemDetail(itemId)
-        ]);            
+    async function fetchData(itemId: string): Promise<[ProjectData, Item[]]> {
+      return await Promise.all([
+        getProjectDataByItem(itemId),
+        getItemDetail(itemId)
+      ]);
     }
 
-    if(itemId){
-        fetchData(itemId)
-        .then(([chats, project, item]) => {
-            setChatData(chats);
-            setProjectData(project);
-            setItemDetail(item);
-            setIsProject(!Object.values(project).every(item => item === null));
+    if (itemId) {
+      fetchData(itemId)
+        .then(([project, item]) => {
+          setProjectData(project);
+          setItemDetail(item);
+          setIsProject(!Object.values(project).every(item => item === null));
         })
         .finally(() => setIsLoading(false))
-        .catch(() => setOnError(true));            
+        .catch(() => setOnError(true));
     }
   }, [itemId]);
 
-  if(isLoading)
-  {
+  if (isLoading) {
     return (
       <>
         <section className={styles.loaderHeader}>
-          <Skeleton width='100%' height='100%' rounded='5px'/>
-          <Skeleton width='100%' height='100%' rounded='5px'/>
+          <Skeleton width='100%' height='100%' rounded='5px' />
+          <Skeleton width='100%' height='100%' rounded='5px' />
         </section>
         <section className={styles.loaderViews}>
-          <Skeleton width='120px' height='35px' rounded='5px'/>
-          <Skeleton width='120px' height='35px' rounded='5px'/>
-          <Skeleton width='120px' height='35px' rounded='5px'/>
+          <Skeleton width='120px' height='35px' rounded='5px' />
+          <Skeleton width='120px' height='35px' rounded='5px' />
+          <Skeleton width='120px' height='35px' rounded='5px' />
         </section>
         <section className={styles.loaderContent}>
-          <Skeleton width='700px' height='200px' rounded='5px'/>
-          <Skeleton width='700px' height='200px' rounded='5px'/>
-          <Skeleton width='700px' height='200px' rounded='5px'/>
+          <Skeleton width='700px' height='200px' rounded='5px' />
+          <Skeleton width='700px' height='200px' rounded='5px' />
+          <Skeleton width='700px' height='200px' rounded='5px' />
         </section>
       </>
     );
@@ -78,55 +71,54 @@ export function DetailView({itemId}: Props)
   return (
     <>
       <section className={styles.loaderHeader}>
-          <p>{itemDetail[0].name}</p>
-          <p>{formatDate(itemDetail[0].created_at)}</p>
+        <p>{itemDetail[0].name}</p>
+        <p>{formatDate(itemDetail[0].created_at)}</p>
       </section>
 
       <section className={styles.loaderViews}>
-          <article 
-              className={`${styles.viewBtn} ${viewSelected == 'chats' ? styles.viewBtnSelected : ''}`}
-              onClick={() => setViewSelected('chats')}
+        <article
+          className={`${styles.viewBtn} ${viewSelected == 'chats' ? styles.viewBtnSelected : ''}`}
+          onClick={() => setViewSelected('chats')}
+        >
+          <PiChatsFill size={20} />
+          Chats
+        </article>
+
+        {isProject &&
+          <article
+            className={`${styles.viewBtn} ${viewSelected == 'projectDetail' ? styles.viewBtnSelected : ''}`}
+            onClick={() => setViewSelected('projectDetail')}
           >
-              <PiChatsFill size={20}/>
-              Chats
+            Detalle del proyecto
           </article>
+        }
 
-          {isProject &&
-            <article 
-                className={`${styles.viewBtn} ${viewSelected == 'projectDetail' ? styles.viewBtnSelected : ''}`}
-                onClick={() => setViewSelected('projectDetail')}
-            >
-                <SiGoogleforms size={20}/>
-                Detalle del proyecto
-            </article>
-          }
+        <article
+          className={`${styles.viewBtn} ${viewSelected == 'logs' ? styles.viewBtnSelected : ''}`}
+          onClick={() => setViewSelected('logs')}
+        >
+          <LuLogs size={20} />
+          Logs
+        </article>
 
-          <article 
-              className={`${styles.viewBtn} ${viewSelected == 'logs' ? styles.viewBtnSelected : ''}`}
-              onClick={() => setViewSelected('logs')}
+        {isProject &&
+          <article
+            className={`${styles.viewBtn} ${viewSelected == 'billing' ? styles.viewBtnSelected : ''}`}
+            onClick={() => setViewSelected('billing')}
           >
-              <LuLogs size={20}/>
-              Logs
+            <FaMoneyBillWave />
+            Cobranza
           </article>
-
-          {isProject &&
-              <article
-                className={`${styles.viewBtn} ${viewSelected == 'billing' ? styles.viewBtnSelected : ''}`}
-                onClick={() => setViewSelected('billing')}
-              >
-                  <FaMoneyBillWave />
-                  Cobranza
-              </article>
-          }
+        }
       </section>
-      <hr className={styles.division}/>
+      <hr className={styles.division} />
 
 
       <section className={styles.loaderContent}>
-          {viewSelected === 'chats' && <ChatsContainer />}
-          {viewSelected === 'projectDetail' && <ProjectContainer data={projectData as ProjectData} />}
-          {viewSelected === 'logs' && <LogsContainer />}
-          {viewSelected === 'billing' && <BillingContainer idProject={projectData!.id} projectName={projectData!.name} />}
+        {viewSelected === 'chats' && <ChatsContainer />}
+        {viewSelected === 'projectDetail' && <ProjectContainer data={projectData as ProjectData} />}
+        {viewSelected === 'logs' && <LogsContainer />}
+        {viewSelected === 'billing' && <BillingContainer idProject={projectData!.id} projectName={projectData!.name} />}
       </section>
     </>
   );

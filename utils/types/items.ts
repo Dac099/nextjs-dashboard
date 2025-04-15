@@ -18,7 +18,7 @@ export type Task = {
   completed: boolean;
 };
 
-export type ResponseChats = Chat & {
+export type ResponseChat = Chat & {
   responses: Response[];
   tasks: Task[];
 };
