@@ -1,13 +1,19 @@
 export type Chat = {
   id: string;
   message: string;
-  author: string;
+  author: {
+    name: string;
+    id: string;
+  };
   updated_at: string;
 };
 
 export type Response = {
   id: string;
-  author: string;
+  author: {
+    id: string;
+    name: string;
+  };
   message: string;
   updated_at: string;
 };

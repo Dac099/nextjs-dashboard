@@ -123,8 +123,11 @@ export async function getWorkspaceWithBoard(boardId: string) {
   return result.recordset[0];
 }
 
-export async function getUserInfo(): Promise<string> {
-  let userId: string = "";
+export async function getUserInfo(): Promise<{id: string; name: string;}> {
+  const userData = {
+    id: '',
+    name: '',
+  };
 
   try {
     const cookieStore = await cookies();
@@ -136,10 +139,25 @@ export async function getUserInfo(): Promise<string> {
 
     const parsedInfo = JSON.parse(userInfo.value);
 
-    userId = parsedInfo.id;
+    userData.id = parsedInfo.id;
+
+    await connection.connect();
+
+    const query: string = `
+      SELECT nom_user AS username
+      FROM tb_user
+      WHERE id_user = @idUser
+    `;
+
+    const result = await connection 
+      .request()
+      .input('idUser', parsedInfo.id)
+      .query(query);
+
+    userData.name = result.recordset[0].username;
   } catch {
-    console.log("Error on get user info cookies");
+    throw new Error('Ocurrió un error al obtener la información del usuario');
   }
 
-  return userId;
+  return userData;
 }

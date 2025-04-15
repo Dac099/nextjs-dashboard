@@ -5,9 +5,13 @@ import type { ResponseChat } from '@/utils/types/items';
 import { getUserInfo } from '@/actions/auth';
 import Chat from '../chat/chat';
 
-export function ChatsContainer() {
-  const [chats, setChats] = useState<ResponseChat[]>([]);
-  const [userId, setUserId] = useState<string>('');
+type Props = {
+  itemChats: ResponseChat[];
+  setItemChats: React.Dispatch<React.SetStateAction<ResponseChat[]>>;
+};
+
+export function ChatsContainer({ itemChats, setItemChats }: Props) {
+  const [userId, setUserId] = useState<{ id: string; name: string }>({} as { id: string; name: string });
 
   useEffect(() => {
     async function fetchData() {
@@ -19,7 +23,7 @@ export function ChatsContainer() {
   }, []);
 
   function addNewChat(chat: ResponseChat) {
-    setChats((prev) => [...prev, chat]);
+    setItemChats((prev) => [chat, ...prev]);
   }
 
   return (
@@ -28,11 +32,11 @@ export function ChatsContainer() {
         <RichText addNewChat={addNewChat} />
       </section>
       <section className={styles.tasks}>
-        {chats.map((chat) => (
-          <Chat 
+        {itemChats.map((chat) => (
+          <Chat
             key={chat.id}
             chat={chat}
-            userId={userId}
+            userData={userId}
           />
         ))}
       </section>

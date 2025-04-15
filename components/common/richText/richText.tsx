@@ -15,13 +15,18 @@ import { v4 as uuidV4 } from 'uuid';
 import { getUserInfo } from '@/actions/auth';
 import { useState } from 'react';
 import { extractTasksFromHTML } from '@/utils/helpers';
+import { addItemChat } from '@/actions/projectDetail';
+import { useSearchParams } from 'next/navigation';
 
 type Props = {
   addNewChat: (chat: ResponseChat) => void;
 }
 
 export const RichText = ({ addNewChat }: Props) => {
+  const searchParams = useSearchParams();
+  const itemId = searchParams.get('itemId');
   const [error, setError] = useState<{ status: boolean; message: string; }>({ status: false, message: '' });
+  const defaultTextValue = 'Comparte tu opinión...';
 
   const editor = useEditor({
     autofocus: 'end',
@@ -33,21 +38,36 @@ export const RichText = ({ addNewChat }: Props) => {
         nested: true,
       })
     ],
-    content: 'Comparte tu opinión ... ',
+    content: defaultTextValue,
   });
 
-  const handleSubmitContent = async() => {
-    const userId: string = await getUserInfo();
-    const htmlContent = editor?.getHTML();
+  if (error.status) {
+    alert(error.message);
+  }
 
-    if (userId.length === 0) {
-      setError({ status: true, message: 'No se ha podido obtener la información del usuario' });
+  const handleSubmitContent = async () => {
+    const userData: { id: string; name: string } = { id: '', name: '' };
+
+    if (editor?.getText() === defaultTextValue) {
       return;
     }
 
+    try {
+      const { id, name } = await getUserInfo();
+      userData.id = id;
+      userData.name = name;
+    } catch (error) {
+      if (error instanceof Error) {
+        setError({ status: true, message: error.message });
+        return;
+      }
+    }
+
+    const htmlContent = editor?.getHTML();
+
     const newChat: ResponseChat = {
       id: uuidV4(),
-      author: userId,
+      author: userData,
       message: htmlContent || '',
       responses: [],
       tasks: extractTasksFromHTML(htmlContent || ''),
@@ -55,7 +75,8 @@ export const RichText = ({ addNewChat }: Props) => {
     };
 
     addNewChat(newChat);
-    editor?.commands.clearContent();
+    editor?.commands.setContent(defaultTextValue);
+    await addItemChat(newChat, itemId as string);
   }
 
   return (

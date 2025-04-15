@@ -4,7 +4,7 @@ import {
   getProjectDataByItem,
   getItemDetail
 } from '@/actions/items';
-import { Item, ProjectData } from '@/utils/types/items';
+import { Item, ProjectData, ResponseChat } from '@/utils/types/items';
 import { formatDate } from '@/utils/helpers';
 import { PiChatsFill } from 'react-icons/pi';
 import { LuLogs } from 'react-icons/lu';
@@ -14,6 +14,7 @@ import { LogsContainer } from '../logsContainer/logsContainer';
 import { Skeleton } from '../skeleton/skeleton';
 import { FaMoneyBillWave } from "react-icons/fa";
 import { BillingContainer } from "@/components/common/billingContainer/billingContainer";
+import { getItemChats } from '@/actions/projectDetail';
 
 type Props = {
   itemId: string;
@@ -26,26 +27,34 @@ export function DetailView({ itemId }: Props) {
   const [onError, setOnError] = useState<boolean>(false);
   const [viewSelected, setViewSelected] = useState<string>('chats');
   const [isProject, setIsProject] = useState<boolean>(false);
+  const [itemChats, setItemChats] = useState<ResponseChat[]>([]);
 
   useEffect(() => {
-    async function fetchData(itemId: string): Promise<[ProjectData, Item[]]> {
+    async function fetchData(itemId: string): Promise<[ProjectData, Item[], ResponseChat[]]> {
       return await Promise.all([
         getProjectDataByItem(itemId),
-        getItemDetail(itemId)
+        getItemDetail(itemId),
+        getItemChats(itemId)
       ]);
     }
 
     if (itemId) {
       fetchData(itemId)
-        .then(([project, item]) => {
+        .then(([project, item, itemChats]) => {
           setProjectData(project);
           setItemDetail(item);
           setIsProject(!Object.values(project).every(item => item === null));
+          setItemChats(itemChats);
+          console.log(itemChats);
         })
         .finally(() => setIsLoading(false))
         .catch(() => setOnError(true));
     }
   }, [itemId]);
+
+  if (onError) {
+    alert('Ha ocurrido un error');
+  }
 
   if (isLoading) {
     return (
@@ -115,7 +124,7 @@ export function DetailView({ itemId }: Props) {
 
 
       <section className={styles.loaderContent}>
-        {viewSelected === 'chats' && <ChatsContainer />}
+        {viewSelected === 'chats' && <ChatsContainer itemChats={itemChats} setItemChats={setItemChats} />}
         {viewSelected === 'projectDetail' && <ProjectContainer data={projectData as ProjectData} />}
         {viewSelected === 'logs' && <LogsContainer />}
         {viewSelected === 'billing' && <BillingContainer idProject={projectData!.id} projectName={projectData!.name} />}

@@ -4,8 +4,7 @@ import type { Column, Item, TableValue } from "@/utils/types/groups";
 import { ItemValue } from "@/components/common/itemValue/itemValue";
 import { ProgressDial } from "../progressDial/progressDial";
 import { ChatRing } from "../chatRing/chatRing";
-import { ResponseChats } from "@/utils/types/items";
-import { getItemChats, getSubItems, addSubItem } from "@/actions/items";
+import { getSubItems, addSubItem } from "@/actions/items";
 import { RowTitle } from "@/components/common/rowTitle/rowTitle";
 import { DeleteRowBtn } from "../deleteRowBtn/deleteRowBtn";
 import { useEffect, useRef, useState, KeyboardEvent } from "react";
@@ -27,7 +26,6 @@ export function ItemRow({ item, values, columns }: Props) {
 	const rowRef = useRef<HTMLDivElement>(null);
 	const subItemInputRef = useRef<HTMLInputElement>(null);
 	const userActions = useRoleUserActions((state) => state.userActions);
-	const [chatData, setChatData] = useState<ResponseChats | null>(null);
 	const valuesByColumn = new Map<Column, TableValue>();
 	const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
 	const [showSubItems, setShowSubItems] = useState<boolean>(false);
@@ -45,14 +43,9 @@ export function ItemRow({ item, values, columns }: Props) {
 
 	useEffect(() => {
 		async function fetchData() {
-			const [chatsResponse, subItemsResponse] = await Promise.all([
-				getItemChats(item.id),
+			const [subItemsResponse] = await Promise.all([
 				getSubItems(item.id)
 			]);
-
-			console.log(subItemsResponse)
-
-			setChatData(chatsResponse);
 			setSubItemsValues(item.id, subItemsResponse);
 		}
 
@@ -100,7 +93,7 @@ export function ItemRow({ item, values, columns }: Props) {
 					</article>
 
 					<article className={styles.chatContainer}>
-						<ChatRing chatData={chatData as ResponseChats} />
+						{/* <ChatRing chatData={chatData as ResponseChats} /> */}
 					</article>
 
 					{showContextMenu &&

@@ -1,38 +1,10 @@
 'use server';
 import connection from '@/services/database';
 import { SubItem } from '@/utils/types/groups';
-import type {Item, ProjectData, ResponseChats, Column} from '@/utils/types/items';
+import type { Item, ProjectData, Column } from '@/utils/types/items';
 import { revalidatePath } from 'next/cache';
 
-export async function getItemChats(itemId: string): Promise<ResponseChats>
-{
-  const query: string = `
-    SELECT
-      c.id,
-      c.message,
-      c.responses, 
-      c.tasks,
-      c.updated_at,
-      ISNULL(tu.nom_user, 'Anónimo') as author
-    FROM Chats c
-    LEFT JOIN tb_user tu ON c.created_by = tu
-    .id_user
-    WHERE c.deleted_at IS NULL AND item_id = @itemId
-    ORDER BY c.created_at
-  `;
-
-  await connection.connect();
-
-  const result = (await connection
-    .request()
-    .input('itemId', itemId)
-    .query(query)).recordset[0];
-
-  return result ? result : {};
-}
-
-export async function updateItemName(itemId: string, itemName: string): Promise<void>
-{
+export async function updateItemName(itemId: string, itemName: string): Promise<void> {
   await connection.connect();
   const query: string = `
     UPDATE Items
@@ -41,14 +13,13 @@ export async function updateItemName(itemId: string, itemName: string): Promise<
   `;
 
   await connection
-      .request()
-      .input('name', itemName)
-      .input('itemId', itemId)
-      .query(query);
+    .request()
+    .input('name', itemName)
+    .input('itemId', itemId)
+    .query(query);
 }
 
-export async function getProjectData(projectId: string): Promise<ProjectData[]>
-{
+export async function getProjectData(projectId: string): Promise<ProjectData[]> {
   await connection.connect();
   const query: string = `
     SELECT 
@@ -104,8 +75,7 @@ export async function getProjectData(projectId: string): Promise<ProjectData[]>
   return result.recordset;
 }
 
-export async function getProjectDataByItem(itemId: string): Promise<ProjectData>
-{
+export async function getProjectDataByItem(itemId: string): Promise<ProjectData> {
   await connection.connect();
   const query: string = `
     SELECT 
@@ -162,8 +132,7 @@ export async function getProjectDataByItem(itemId: string): Promise<ProjectData>
   return result.recordset[0];
 }
 
-export async function getItemDetail(itemId: string): Promise<Item[]>
-{
+export async function getItemDetail(itemId: string): Promise<Item[]> {
   await connection.connect()
   const query: string = `
     SELECT 
@@ -178,12 +147,11 @@ export async function getItemDetail(itemId: string): Promise<Item[]>
     .request()
     .input('itemId', itemId)
     .query(query);
-  
+
   return result.recordset;
 }
 
-export async function getAllProjects(): Promise<{id: string, name: string}[]>
-{
+export async function getAllProjects(): Promise<{ id: string, name: string }[]> {
   await connection.connect()
   const query: string = `
     SELECT 
@@ -201,8 +169,7 @@ export async function getAllProjects(): Promise<{id: string, name: string}[]>
   return result.recordset;
 }
 
-export async function getBoardColumns(boardId: string): Promise<Column[]>
-{
+export async function getBoardColumns(boardId: string): Promise<Column[]> {
   await connection.connect();
   const query: string = `
     SELECT 
@@ -224,8 +191,7 @@ export async function getBoardColumns(boardId: string): Promise<Column[]>
   return result.recordset;
 }
 
-export async function addItemByProject(groupId: string, viewId: string, boardId: string, itemName: string, projectId: string): Promise<string>
-{
+export async function addItemByProject(groupId: string, viewId: string, boardId: string, itemName: string, projectId: string): Promise<string> {
   const addItemQuery: string = `
   INSERT INTO Items (group_id, name, position, project_id)
   OUTPUT INSERTED.id
@@ -237,18 +203,17 @@ export async function addItemByProject(groupId: string, viewId: string, boardId:
 
   await connection.connect();
   const result = await connection
-      .request()
-      .input('groupId', groupId)
-      .input('name', itemName)
-      .input('projectId', projectId)
-      .query(addItemQuery);
+    .request()
+    .input('groupId', groupId)
+    .input('name', itemName)
+    .input('projectId', projectId)
+    .query(addItemQuery);
 
   revalidatePath(`board/${boardId}/view/${viewId}`);
   return result.recordset[0].id;
 }
 
-export async function getSubItems(itemId: string): Promise<SubItem[]>
-{
+export async function getSubItems(itemId: string): Promise<SubItem[]> {
   await connection.connect();
 
   type QueryItem = {
@@ -276,12 +241,12 @@ export async function getSubItems(itemId: string): Promise<SubItem[]>
     ORDER BY si.created_at
   `;
 
-  
+
   const result = await connection
-  .request()
-  .input('itemId', itemId)
-  .query(query);
-  
+    .request()
+    .input('itemId', itemId)
+    .query(query);
+
   return result.recordset.reduce((acc: SubItem[], itemData: QueryItem) => {
     const existingSubItem = acc.find(subItem => subItem.id === itemData.id);
     if (existingSubItem) {
@@ -310,8 +275,7 @@ export async function getSubItems(itemId: string): Promise<SubItem[]>
   }, [] as SubItem[]);
 }
 
-export async function addSubItem(name: string, parentId: string): Promise<string>
-{
+export async function addSubItem(name: string, parentId: string): Promise<string> {
   await connection.connect();
   const query: string = `
     INSERT INTO SubItems (name, item_parent)
@@ -324,14 +288,13 @@ export async function addSubItem(name: string, parentId: string): Promise<string
     .input('name', name)
     .input('parentId', parentId)
     .query(query);
-  
-    return result.recordset[0].id;
+
+  return result.recordset[0].id;
 }
 
-export async function updateSubItemName(subItemId: string, newName: string): Promise<void>
-{
+export async function updateSubItemName(subItemId: string, newName: string): Promise<void> {
   await connection.connect();
-  const query:string = `
+  const query: string = `
     UPDATE SubItems
     SET 
       name = @name,
@@ -346,8 +309,7 @@ export async function updateSubItemName(subItemId: string, newName: string): Pro
     .query(query);
 }
 
-export async function deleteSubItem(subItemId: string, boardId: string, viewId: string): Promise<void>
-{
+export async function deleteSubItem(subItemId: string, boardId: string, viewId: string): Promise<void> {
   await connection.connect();
   const query: string = `
     UPDATE SubItems
