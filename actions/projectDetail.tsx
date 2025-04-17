@@ -65,21 +65,27 @@ export async function addItemToGroup(groupId: string): Promise<string> {
 export async function getItemsForBilling(groupId: string): Promise<Item[]> {
     await connection.connect();
     const getDataQuery: string = `
-        SELECT
-            tv.value,
-            c.name as columnName,
+        SELECT 
+            i.id as itemId,
             i.name as itemName,
-            i.id as itemId
-        FROM TableValues tv
-        LEFT JOIN Columns c ON tv.column_id = c.id
-        LEFT JOIN Items i ON i.id = tv.item_id
-        WHERE i.group_id = @groupId AND tv.deleted_at IS NULL;
+            tv.value,
+            c.name as columnName
+        FROM Items i
+        LEFT JOIN TableValues tv ON tv.item_id = i.id
+        LEFT JOIN Columns c on c.id = tv.column_id
+        WHERE i.group_id = @groupId 
+            AND tv.deleted_at IS NULL
+            AND i.deleted_at IS NULL
+            AND c.deleted_at IS NULL
+        ORDER BY i.created_at ASC, i.position ASC
     `;
 
     const result = await connection
         .request()
         .input('groupId', groupId)
         .query(getDataQuery);
+
+    console.log(result.recordset)
 
     return groupItemsByType(result.recordset);
 }

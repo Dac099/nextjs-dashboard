@@ -1,34 +1,35 @@
 'use client';
 import styles from './billingContainer.module.css';
-import {useState, useEffect} from "react";
-import {addGroupToBillingBoard, addItemToGroup, getItemsForBilling} from "@/actions/projectDetail";
-import {Skeleton} from "@/components/common/skeleton/skeleton";
-import type {Item} from '@/utils/types/projectDetail';
-import {BillingItemRow} from "@/components/common/billinItemRow/billingItemRow";
+import { useState, useEffect } from "react";
+import { addGroupToBillingBoard, addItemToGroup, getItemsForBilling } from "@/actions/projectDetail";
+import { Skeleton } from "@/components/common/skeleton/skeleton";
+import type { Item } from '@/utils/types/projectDetail';
+import { BillingItemRow } from "@/components/common/billinItemRow/billingItemRow";
 
 type Props = {
     idProject: string;
     projectName: string;
 };
 
-export function BillingContainer({idProject, projectName}: Props){
+export function BillingContainer({ idProject, projectName }: Props) {
     const [items, setItems] = useState<Item[]>([]);
     const [groupId, setGroupId] = useState<string>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        async function fetchData(): Promise<void>{
+        async function fetchData(): Promise<void> {
             const id: string = await addGroupToBillingBoard(`${idProject} | ${projectName}`);
             const itemsRes: Item[] = await getItemsForBilling(id);
             setGroupId(id);
             setItems(itemsRes);
+            console.log(itemsRes)
         }
 
         fetchData()
-            .finally(()=>setIsLoading(false));
-    }, []);
+            .finally(() => setIsLoading(false));
+    }, [idProject, projectName]);
 
-    async function handleAddBillingItem(): Promise<void>{
+    async function handleAddBillingItem(): Promise<void> {
         const itemId: string = await addItemToGroup(groupId as string);
 
         const newItem: Item = {
@@ -49,7 +50,7 @@ export function BillingContainer({idProject, projectName}: Props){
         setItems([...items, newItem]);
     }
 
-    if(isLoading){
+    if (isLoading) {
         return (
             <article className={styles.container}>
                 <Skeleton width={'500px'} height={'35px'} rounded={'5px'} />

@@ -15,6 +15,7 @@ import { Skeleton } from '../skeleton/skeleton';
 import { FaMoneyBillWave } from "react-icons/fa";
 import { BillingContainer } from "@/components/common/billingContainer/billingContainer";
 import { getItemChats } from '@/actions/projectDetail';
+import { FaToolbox } from "react-icons/fa6";
 
 type Props = {
   itemId: string;
@@ -98,6 +99,7 @@ export function DetailView({ itemId }: Props) {
             className={`${styles.viewBtn} ${viewSelected == 'projectDetail' ? styles.viewBtnSelected : ''}`}
             onClick={() => setViewSelected('projectDetail')}
           >
+            <FaToolbox />
             Detalle del proyecto
           </article>
         }
