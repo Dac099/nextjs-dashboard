@@ -1,8 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, MouseEvent } from 'react';
 import styles from './rowTitle.module.css';
-import {useRouter} from "next/navigation";
-import {updateItemName, updateSubItemName} from "@/actions/items";
+import { useRouter } from "next/navigation";
+import { updateItemName, updateSubItemName } from "@/actions/items";
 import { useRoleUserActions } from '@/stores/roleUserActions';
 
 type Props = {
@@ -11,23 +11,23 @@ type Props = {
     isSubItem?: boolean;
 };
 
-export function RowTitle({title, itemId, isSubItem = false}: Props) {
+export function RowTitle({ title, itemId, isSubItem = false }: Props) {
     const userActions = useRoleUserActions(state => state.userActions);
     const router = useRouter();
     const [itemName, setItemName] = useState<string>(title);
 
-    function handleDoubleClick(e){
-        if(isSubItem) return;
-
-        e.target.blur();
+    function handleDoubleClick(e: MouseEvent<HTMLInputElement>) {
+        if (isSubItem) return;
+        const element = e.target as HTMLInputElement;
+        element.blur();
         router.push(`?itemId=${itemId}`);
     }
 
-    async function submit(){
-        if(itemName === title) return;
+    async function submit() {
+        if (itemName === title) return;
 
-        if(itemName !== title){
-            if(isSubItem){
+        if (itemName !== title) {
+            if (isSubItem) {
                 await updateSubItemName(itemId, itemName);
                 return;
             }
@@ -48,9 +48,9 @@ export function RowTitle({title, itemId, isSubItem = false}: Props) {
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
             disabled={!userActions.includes('update')}
-            onKeyUp={e =>  {
+            onKeyUp={e => {
                 const target = e.target as HTMLInputElement;
-                if(e.key === 'Enter'){
+                if (e.key === 'Enter') {
                     submit();
                     target.blur();
                 }

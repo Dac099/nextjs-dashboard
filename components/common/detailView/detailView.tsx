@@ -46,7 +46,6 @@ export function DetailView({ itemId }: Props) {
           setItemDetail(item);
           setIsProject(!Object.values(project).every(item => item === null));
           setItemChats(itemChats);
-          console.log(itemChats);
         })
         .finally(() => setIsLoading(false))
         .catch(() => setOnError(true));

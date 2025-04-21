@@ -17,12 +17,14 @@ import { useState } from 'react';
 import { extractTasksFromHTML } from '@/utils/helpers';
 import { addItemChat } from '@/actions/projectDetail';
 import { useSearchParams } from 'next/navigation';
+import { useChatStore } from '@/stores/chatStore';
 
 type Props = {
   addNewChat: (chat: ResponseChat) => void;
 }
 
 export const RichText = ({ addNewChat }: Props) => {
+  const setTasks = useChatStore((state) => state.setTasks);
   const searchParams = useSearchParams();
   const itemId = searchParams.get('itemId');
   const [error, setError] = useState<{ status: boolean; message: string; }>({ status: false, message: '' });
@@ -64,19 +66,21 @@ export const RichText = ({ addNewChat }: Props) => {
     }
 
     const htmlContent = editor?.getHTML();
+    const chatTasks = extractTasksFromHTML(htmlContent || '');
 
     const newChat: ResponseChat = {
       id: uuidV4(),
       author: userData,
       message: htmlContent || '',
       responses: [],
-      tasks: extractTasksFromHTML(htmlContent || ''),
+      tasks: chatTasks,
       updated_at: new Date().toISOString().split('T')[0],
     };
 
     addNewChat(newChat);
     editor?.commands.setContent(defaultTextValue);
     await addItemChat(newChat, itemId as string);
+    setTasks(chatTasks);
   }
 
   return (

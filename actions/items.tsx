@@ -1,7 +1,7 @@
 'use server';
 import connection from '@/services/database';
 import { SubItem } from '@/utils/types/groups';
-import type { Item, ProjectData, Column } from '@/utils/types/items';
+import type { Item, ProjectData, Column, ChatTask } from '@/utils/types/items';
 import { revalidatePath } from 'next/cache';
 
 export async function updateItemName(itemId: string, itemName: string): Promise<void> {
@@ -323,4 +323,42 @@ export async function deleteSubItem(subItemId: string, boardId: string, viewId: 
     .query(query);
 
   revalidatePath(`board/${boardId}/view/${viewId}`);
+}
+
+export async function getChatTasks(itemId: string): Promise<ChatTask[]> {
+  const tasks: ChatTask[] = [];
+  const queryString: string = `
+    SELECT 
+      tasks
+    FROM Chats
+    WHERE item_id = @itemId
+  `;
+
+  try {
+    await connection.connect();
+    try {
+      const result = await connection
+        .request()
+        .input('itemId', itemId)
+        .query(queryString);
+
+      result.recordset.forEach((row) => {
+        tasks.push(...JSON.parse(row.tasks));
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+
+      }
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      console.log('Error on get chat tasks');
+      console.log(`ERROR MESSAGE: ${e.message}`);
+    }
+
+    console.log('Error on get chat tasks');
+    console.log(`ERROR MESSAGE: ${e}`);
+  }
+
+  return tasks;
 }

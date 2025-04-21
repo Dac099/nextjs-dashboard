@@ -85,3 +85,9 @@ export type Column = {
   type: string;
   position: number;
 };
+
+export type ChatTask = {
+  id: string;
+  message: string;
+  completed: boolean;
+};

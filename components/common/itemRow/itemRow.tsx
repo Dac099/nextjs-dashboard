@@ -4,7 +4,7 @@ import type { Column, Item, TableValue } from "@/utils/types/groups";
 import { ItemValue } from "@/components/common/itemValue/itemValue";
 import { ProgressDial } from "../progressDial/progressDial";
 import { ChatRing } from "../chatRing/chatRing";
-import { getSubItems, addSubItem } from "@/actions/items";
+import { getSubItems, addSubItem, getChatTasks } from "@/actions/items";
 import { RowTitle } from "@/components/common/rowTitle/rowTitle";
 import { DeleteRowBtn } from "../deleteRowBtn/deleteRowBtn";
 import { useEffect, useRef, useState, KeyboardEvent } from "react";
@@ -12,6 +12,7 @@ import { useRoleUserActions } from "@/stores/roleUserActions";
 import useClickOutside from "@/hooks/useClickOutside";
 import { subItemValueByColumnId } from '@/utils/helpers';
 import { useItemStore } from "@/stores/useItemStore";
+import { useChatStore } from '@/stores/chatStore';
 
 type Props = {
 	item: Item;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function ItemRow({ item, values, columns }: Props) {
+	const chatStore = useChatStore();
 	const setSubItemsValues = useItemStore(state => state.setSubItems);
 	const subItems = useItemStore(state => state.subItemsMap);
 	const addSubItemStore = useItemStore(state => state.addSubItem);
@@ -30,22 +32,35 @@ export function ItemRow({ item, values, columns }: Props) {
 	const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
 	const [showSubItems, setShowSubItems] = useState<boolean>(false);
 	const [newSubItem, setNewSubItem] = useState<boolean>(false);
+	const [tasksData, setTasksData] = useState<{ completed: number, total: number }>({ completed: 0, total: 0 });
 
 	useClickOutside(rowRef as React.RefObject<HTMLDivElement>, () => {
 		setShowContextMenu(false);
 	});
 
+	// Fetch tasks data for the ring task graph
+	useEffect(() => {
+		async function fetchData() {
+			const taskResponse = await getChatTasks(item.id);
+			const completedTasks = taskResponse.filter((task) => task.completed).length;
+			const totalTasks = taskResponse.length;
+			setTasksData({ completed: completedTasks, total: totalTasks });
+		}
+
+		fetchData();
+	}, [item.id, chatStore.tasks]);
+
+	// Focus input to insert new subItem
 	useEffect(() => {
 		if (newSubItem) {
 			subItemInputRef.current?.focus();
 		}
 	}, [newSubItem]);
 
+	// Fetch subItems data when insert a new value to keep the UI updated
 	useEffect(() => {
 		async function fetchData() {
-			const [subItemsResponse] = await Promise.all([
-				getSubItems(item.id)
-			]);
+			const subItemsResponse = await getSubItems(item.id);;
 			setSubItemsValues(item.id, subItemsResponse);
 		}
 
@@ -89,11 +104,11 @@ export function ItemRow({ item, values, columns }: Props) {
 					</article>
 
 					<article className={styles.tasksContainer}>
-						<ProgressDial completed={0} total={10} />
+						<ProgressDial completed={tasksData.completed} total={tasksData.total} />
 					</article>
 
 					<article className={styles.chatContainer}>
-						{/* <ChatRing chatData={chatData as ResponseChats} /> */}
+						<ChatRing itemId={item.id} />
 					</article>
 
 					{showContextMenu &&

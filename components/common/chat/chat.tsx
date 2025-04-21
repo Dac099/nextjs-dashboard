@@ -13,6 +13,7 @@ import { getUserInfo } from '@/actions/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { RiMailSendFill as SendMsgIcon } from "react-icons/ri";
 import { updateChat, addChatResponse } from '@/actions/projectDetail';
+import { useChatStore } from '@/stores/chatStore';
 
 type Props = {
   chat: ResponseChat;
@@ -20,6 +21,7 @@ type Props = {
 }
 
 export default function Chat({ chat, userData }: Props) {
+  const setTasks = useChatStore((state) => state.setTasks);
   const [editContainer, setEditContainer] = useState<boolean>(false);
   const [responses, setResponses] = useState<ResponseItem[]>(chat.responses);
   const [showInputResponse, setShowInputResponse] = useState<boolean>(false);
@@ -43,10 +45,12 @@ export default function Chat({ chat, userData }: Props) {
     }
 
     const newMsg = editor?.getHTML();
+    const tasks = extractTasksFromHTML(newMsg || '');
+    setTasks(tasks);
     const updatedChat: ResponseChat = {
       ...chat,
       message: newMsg || '',
-      tasks: extractTasksFromHTML(newMsg || '')
+      tasks: tasks,
     };
     updateChat(updatedChat);
     setEditContainer(false);
