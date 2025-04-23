@@ -1,0 +1,79 @@
+.groupTemplate {
+  margin: 20px 0;
+}
+
+.groupTemplateHeader {
+  user-select: none;
+  border-radius: 5px 0 0 5px;
+  border: 1px solid var(--accent-color);
+  border-left: 10px solid;
+  font-size: 1.4rem;
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: minmax(200px, 2fr) repeat(auto-fit, minmax(60px, 1fr));
+}
+
+.groupTemplateHeader div {
+  padding: 5px 2px;
+  border-right: 1px solid var(--accent-color);
+}
+
+.groupInput {
+  border: 1px solid;
+  height: 30px;
+  outline: none;
+  border-radius: 5px;
+  font-family: inherit;
+  padding-left: 3px;
+  background-color: var(--bg-color);
+}
+
+.groupInputSection {
+  display: flex;
+  gap: 10px;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.groupInputSection button {
+  width: 80px;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid var(--action-color);
+}
+
+.colorBtn {
+  position: relative;
+  color: var(--font-color);
+  background-color: var(--accent-color);
+}
+
+.colorBtn:hover {
+  background-color: var(--action-color);
+  color: var(--bg-color);
+}
+
+.colorPicker {
+  position: absolute;
+  right: 0;
+  transform: translateX(100%) translateY(105%);
+  bottom: 0;
+  z-index: 2;
+}
+
+.submitBtn {
+  background-color: var(--action-color);
+  color: var(--bg-color);
+}
+
+.shakeElement {
+  animation: shake 0.5s linear infinite alternate-reverse;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}

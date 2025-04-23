@@ -1,7 +1,7 @@
 'use client'
 
 import type { BoardData, Group, StatusByColumn } from "@/utils/types/groups";
-import { AddGroupSection } from "@/components/common/addGroupSection/addGroupSection";
+import { BoardControllers } from "@/components/common/boardControllers/boardControllers";
 import { GroupItem } from "@/components/common/groupItem/groupItem";
 import type { Actions } from "@/utils/types/roles";
 import { useRoleUserActions } from "@/stores/roleUserActions";
@@ -31,7 +31,7 @@ const GroupsView = ({
   const setUserActions = useRoleUserActions((state) => state.setUserActions);
   const setBoardStatus = useBoardStore((state) => state.setBoardStatus);
 
-  
+
   useEffect(() => {
     setUserActions(userActions);
     setBoardStatus(boardStatus);
@@ -39,13 +39,12 @@ const GroupsView = ({
 
   return (
     <>
-      {userActions.includes('create') &&
-        <AddGroupSection
-          boardId={boardId}
-          columns={columns}
-          groupsCount={groups.length}
-        />
-      }
+      <BoardControllers
+        boardId={boardId}
+        columns={columns}
+        groupsCount={groups.length}
+      />
+
       {groups.length > 0 &&
         groups.map((group) => (
           <GroupItem

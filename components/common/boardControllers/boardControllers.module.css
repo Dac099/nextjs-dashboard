@@ -1,0 +1,50 @@
+.container {
+  margin: 10px 0;
+}
+
+.actionBtn {
+  cursor: pointer;
+  display: flex;
+  align-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid var(--action-color);
+  background-color: var(--accent-color);
+  color: var(--font-color);
+}
+
+.actionBtn:hover {
+  background-color: var(--action-color);
+  color: var(--bg-color);
+}
+
+.btnIcon {
+  display: block;
+}
+
+.actionBtn p {
+  font-size: 1.4rem;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  padding-bottom: 3px;
+}
+.emptyGroupsTitle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-weight: bold;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  color: var(--action-color);
+  user-select: none;
+}
+
+.buttonsContainer
+{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}

@@ -1,7 +1,7 @@
 'use server';
-import {ViewWithSettings} from "@/utils/types/views";
+import { ViewWithSettings } from "@/utils/types/views";
 import connection from '@/services/database';
-import {redirect} from "next/navigation";
+import { redirect } from "next/navigation";
 
 type ViewsDB = {
     id: string;
@@ -16,8 +16,7 @@ type ViewsDB = {
 type ReduceAcc = {
     [key: string]: ViewWithSettings;
 };
-export async function getBoardViews(boardId: string): Promise<ViewWithSettings[]>
-{
+export async function getBoardViews(boardId: string): Promise<ViewWithSettings[]> {
     await connection.connect();
     const query: string = `
         SELECT
@@ -37,9 +36,8 @@ export async function getBoardViews(boardId: string): Promise<ViewWithSettings[]
         .input('boardId', boardId)
         .query(query);
 
-    const resultByView: ReduceAcc =  result.recordset.reduce((acc: ReduceAcc, curr: ViewsDB) => {
-        if(!acc[curr.id])
-        {
+    const resultByView: ReduceAcc = result.recordset.reduce((acc: ReduceAcc, curr: ViewsDB) => {
+        if (!acc[curr.id]) {
             acc[curr.id] = {
                 view: {
                     type: '',
@@ -69,8 +67,7 @@ export async function getBoardViews(boardId: string): Promise<ViewWithSettings[]
     return Object.values(resultByView);
 }
 
-export async function addViewBoard(boardId: string, view: ViewWithSettings): Promise<void>
-{
+export async function addViewBoard(boardId: string, view: ViewWithSettings): Promise<void> {
     const { type, name, is_default } = view.view;
     await connection.connect();
     const viewQuery: string = `
@@ -103,8 +100,7 @@ export async function addViewBoard(boardId: string, view: ViewWithSettings): Pro
     redirect(`/board/${boardId}/view/${viewId}`);
 }
 
-export async function getViewType(viewId: string): Promise<string>
-{
+export async function getViewType(viewId: string): Promise<string> {
     await connection.connect()
     const query: string = `
         SELECT type
@@ -121,8 +117,8 @@ export async function getViewType(viewId: string): Promise<string>
 }
 
 export async function getWorkspaceAndBoardData(boardId: string) {
-  await connection.connect();
-  const query: string = `
+    await connection.connect();
+    const query: string = `
     SELECT
       w.id AS workspaceId,
       w.name AS workspaceName,
@@ -133,10 +129,10 @@ export async function getWorkspaceAndBoardData(boardId: string) {
     WHERE b.id = @boardId AND b.deleted_at IS NULL
   `;
 
-  const result = await connection
-    .request()
-    .input('boardId', boardId)
-    .query(query);
+    const result = await connection
+        .request()
+        .input('boardId', boardId)
+        .query(query);
 
-  return result.recordset[0];
+    return result.recordset[0];
 }
