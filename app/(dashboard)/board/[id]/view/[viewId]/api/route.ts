@@ -1,7 +1,6 @@
-// Inside app/(dashboard)/board/[id]/view/[viewId]/api/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import connection from "@/services/database";
 import ExcelJS from 'exceljs';
+import { getBoardItemsGrouped } from "@/actions/dashboard";
 
 export async function GET(
   request: NextRequest,
@@ -10,133 +9,73 @@ export async function GET(
   const boardId = (await params).id;
 
   try {
-    await connection.connect();
-    
     const workBook = new ExcelJS.Workbook();
-    const mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    const sheetName = `Tablero-${new Date().getTime()}`
+    const sheet = workBook.addWorksheet(sheetName);
 
-    const boardGroupsQuery: string = `
-      SELECT 
-        g.name as groupName,
-        g.id as groupId,
-        b.name as boardName,
-        g.color as groupColor
-      FROM Groups g
-      RIGHT JOIN Boards b ON b.id = g.board_id
-      WHERE g.deleted_at IS NULL AND b.id = @boardId
-      ORDER BY g.position;
-    `;
-
-    type BoardGroup = {
-      groupName: string;
-      groupId: string;
-      boardName: string;
-      groupColor: string;
-    };
-
-    type ColumnGroup = {
-      columnName: string;
-      columnType: string;
-      columnId: string;
-    };
-
-    const boardGroupsResult = await connection
-      .request()
-      .input("boardId", boardId)
-      .query(boardGroupsQuery);
-
-    const boardColumnsResult = await connection
-      .request()
-      .input('boardId', boardId)
-      .query(`
-        SELECT 
-          c.name as columnName,
-          c.type as columnType,
-          c.id as columnId
-        FROM Columns c
-        LEFT JOIN Boards b on b.id = c.board_id 
-        WHERE b.id = @boardId
-          AND c.deleted_at IS NULL
-        ORDER BY c.position ASC  
-      `);
-
-    if (boardGroupsResult.recordset.length === 0 || boardColumnsResult.recordset.length === 0) {
-      await connection.close();
-      return NextResponse.json(
-        { error: "Empty board cannot be exported" },
-        { status: 400 }
-      );
-    }
-
-    const sheet = workBook.addWorksheet(
-      boardGroupsResult.recordset[0].boardName
-    );
-
+    
     const firstColumn = sheet.getColumn(1); //This is the column for the item name
-    const secondColumn = sheet.getColumn(2); //This is the column for the subItems
+    const secondColumn = sheet.getColumn(2); //This is the column for the subItems name
     firstColumn.width = 100;
-    secondColumn.width = 100;
+    secondColumn.width = 70;
+    
+    // Obtener los datos agrupados desde la función helper
+    const groupedData = await getBoardItemsGrouped(boardId);
+    
+    // TODO: Style the rows
+    groupedData.entries().forEach(([groupName, items]) => {      
+      const defaultRecordKeys = ['itemId', 'itemName', 'itemGroupId', 'groupName', 'subItemId', 'subItemName', 'parentId', 'subItems'];
+      const columnsName = Object.keys(items[0]).filter(key => !defaultRecordKeys.includes(key));
+      
+      sheet.addRow([groupName]);
+      sheet.addRow(['Name', 'Subitems', ...columnsName]);
 
-    boardColumnsResult.recordset.forEach((col: ColumnGroup, index: number) => {
-      const sheetColumn = sheet.getColumn(index + 3);
-      sheetColumn.width = 25;
+      items.forEach(item => {
+        const itemCopy = {...item};
+        const itemName = item.itemName;
+
+        delete itemCopy.subItems;
+        delete itemCopy.itemId;
+        delete itemCopy.itemGroupId;
+        delete itemCopy.groupName;
+        delete itemCopy.itemName;
+
+        //Construir el row de forma manual conforme a los valores del objeto y al final insertar el row
+        // sheet.addRow([itemName, '', ...Object.values(itemCopy)]);
+      });
+
+      const divisionRow = sheet.addRow(['']);
+      divisionRow.height = 30;
     });
-
-    boardGroupsResult.recordset.forEach((group: BoardGroup) => {
-      const groupTitleRow = sheet.addRow([group.groupName]);
-      groupTitleRow.font = {
-        bold: true,
-        color: { argb: group.groupColor ? `FF${group.groupColor.replace('#', '')}` : 'FF000000' },
-        size: 18,
-      };
-
-      const columnsName = boardColumnsResult.recordset.map((column: ColumnGroup) => column.columnName);
-      columnsName.unshift('Subitems');
-      columnsName.unshift('Item Name');
-      const columnsRow = sheet.addRow(columnsName);
-      columnsRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'ffe7e6e6' },
-        bgColor: { argb: 'ff000000' }
-      };
-      columnsRow.font = {
-        bold: true,
-        size: 13
-      };
-      columnsRow.eachCell(cell => cell.alignment = { horizontal: 'center' });
-
-      const finalRow = sheet.addRow([]);
-      finalRow.height = 50;
-    });
-
+    
+    // Generar el buffer del archivo Excel
     const buffer = await workBook.xlsx.writeBuffer();
     
-    await connection.close();
-
-    return new NextResponse(buffer, {
+    // Crear una respuesta con el buffer y las cabeceras adecuadas para descarga
+    const response = new NextResponse(buffer, {
       status: 200,
       headers: {
-        'Content-Type': mimeType,
-        'Content-Disposition': `attachment; filename="${boardGroupsResult.recordset[0].boardName}.xlsx"`,
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="Tablero-${boardId}-${Date.now()}.xlsx"`,
+      },
     });
-  } catch (error) {
-    // Make sure to close the connection on error
-    try {
-      await connection.close();
-    } catch (closeError) {
-      console.error("Error closing connection:", closeError);
-    }
-
-    console.error("Error generating Excel file:", error);
     
+    return response;
+  } catch (error) {
+    console.error("Error en la API:", error);
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error occurred" },
+      { error: error instanceof Error ? error.message : "Error desconocido" },
       { status: 500 }
     );
   }
 }
+
+/**
+ * 1. Clear fila e insertar el nombre del grupo
+ * 2. Obtener las columnas del item
+ * 3. Crear fila con los nombres de las columnas (insertar empezando la columna 3)
+ * 4. Para la primer columna insertar el nombre del item
+ * 5. Para la segunda columna insertar las filas de los subItems
+ * 6. Isertar los valores de las columnas
+ */

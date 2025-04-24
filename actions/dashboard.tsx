@@ -149,3 +149,61 @@ export async function addDashboard(name: string, workspaceId: string): Promise<s
     throw new Error(errorMsg)
   }
 }
+
+export async function getBoardItemsGrouped(boardId: string) {
+  try {
+    await connection.connect();
+    
+    const spNameForSubItemsData = 'GetSubItemsWithPivotedColumns';
+    const spNameForItemsData = 'GetItemsWithPivotedColumns';
+    
+    // Ejecutar los SPs para obtener datos
+    const itemsPromise = connection
+      .request()
+      .input('BoardId', boardId)
+      .execute(spNameForItemsData);
+      
+    const subItemsPromise = connection
+      .request()
+      .input('BoardId', boardId)
+      .execute(spNameForSubItemsData);
+    
+    // Esperar a que ambas consultas se completen
+    const [itemsData, subItemsData] = await Promise.all([itemsPromise, subItemsPromise]);
+    
+    // Procesar y agrupar los datos
+    const groupedData: Map<string, any[]> = new Map();
+    
+    itemsData.recordset.forEach((item: any) => {
+      const groupName = item.groupName ?? 'Sin grupo';
+      
+      if(!groupedData.has(groupName)){
+        groupedData.set(groupName, []);
+      }
+      
+      const ownedSubItems = subItemsData.recordset.filter(
+        (subItem: any) => subItem.parentId === item.itemId
+      );
+      
+      groupedData.get(groupName)!.push({
+        ...item,
+        subItems: ownedSubItems
+      });
+    });
+    
+    // Cerrar la conexión
+    await connection.close();
+    
+    return groupedData;
+  } catch (error) {
+    // Asegurarse de cerrar la conexión en caso de error
+    try {
+      await connection.close();
+    } catch (closeError) {
+      console.error("Error al cerrar la conexión:", closeError);
+    }
+    
+    console.error("Error al obtener los datos del tablero:", error);
+    throw error;
+  }
+}
