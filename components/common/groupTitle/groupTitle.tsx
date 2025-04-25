@@ -144,6 +144,7 @@ export function GroupTitle({ group }: Props) {
       }
       {showMenu &&
         <ul className={styles.groupMenu}>
+          <li><a href={`/board/${boardId}/view/${viewId}/api?groupId=${group.id}`}>Exportar grupo</a></li>
           <li onClick={() => handleDuplicateGroup()}>Duplicar</li>
           <li onClick={() => handleChangeTitle()}>Renombrar</li>
           <li onClick={handleShowSubMenu}>Nueva Columna</li>
