@@ -126,17 +126,15 @@
     justify-content: space-between;
 }
 
-.deleteBtn
-{
-    width: 40px;
-    border-left: 1px solid var(--accent-color);
-    display: grid;
-    place-content: center;
-}
-
 .rowContainer
 {
     margin: 20px 0px;
     box-shadow: 0px 5px 10px 0px var(--subitem-bg-color);
     position: relative;
+}
+
+.subItemsIcon 
+{
+    color: rgb(255, 73, 73);
+    cursor: pointer;
 }

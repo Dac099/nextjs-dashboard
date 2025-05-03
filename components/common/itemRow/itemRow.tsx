@@ -4,15 +4,19 @@ import type { Column, Item, TableValue } from "@/utils/types/groups";
 import { ItemValue } from "@/components/common/itemValue/itemValue";
 import { ProgressDial } from "../progressDial/progressDial";
 import { ChatRing } from "../chatRing/chatRing";
-import { getSubItems, addSubItem, getChatTasks } from "@/actions/items";
+import { getSubItems, addSubItem, getChatTasks, deleteSubItem } from "@/actions/items";
 import { RowTitle } from "@/components/common/rowTitle/rowTitle";
 import { DeleteRowBtn } from "../deleteRowBtn/deleteRowBtn";
 import { useEffect, useRef, useState, KeyboardEvent } from "react";
 import { useRoleUserActions } from "@/stores/roleUserActions";
 import useClickOutside from "@/hooks/useClickOutside";
-import { subItemValueByColumnId } from '@/utils/helpers';
+import { findParentKeyBySubItemId, subItemValueByColumnId } from '@/utils/helpers';
 import { useItemStore } from "@/stores/useItemStore";
 import { useChatStore } from '@/stores/chatStore';
+import { GrList as SubItemsIcon} from "react-icons/gr";
+import { Tooltip } from '../tooltip/tooltip';
+import { useParams } from 'next/navigation';
+import { deleteGroupRow } from '@/actions/groups';
 
 type Props = {
 	item: Item;
@@ -21,6 +25,8 @@ type Props = {
 };
 
 export function ItemRow({ item, values, columns }: Props) {
+	const { id: boardId, viewId } = useParams();
+	const deleteSubItemStore = useItemStore(state => state.removeSubItem);
 	const chatStore = useChatStore();
 	const setSubItemsValues = useItemStore(state => state.setSubItems);
 	const subItems = useItemStore(state => state.subItemsMap);
@@ -84,6 +90,11 @@ export function ItemRow({ item, values, columns }: Props) {
 		});
 	}
 
+	const deleteRow = async(itemId: string) => {
+		deleteGroupRow(itemId, boardId as string, viewId as string);
+		setShowContextMenu(false);
+	}
+
 	return (
 		<section
 			className={showSubItems ? styles.rowContainer : ''}
@@ -100,7 +111,15 @@ export function ItemRow({ item, values, columns }: Props) {
 					<RowTitle itemId={item.id} title={item.name} />
 
 					<article className={styles.deleteRow}>
-						{userActions.includes("update") && <DeleteRowBtn itemId={item.id} />}
+						<Tooltip text='Mostrar subitems'>
+							<SubItemsIcon 
+								size={20} 
+								className={styles.subItemsIcon}
+								onClick={() => {
+									setShowSubItems(!showSubItems);
+								}}
+							/>
+						</Tooltip>
 					</article>
 
 					<article className={styles.tasksContainer}>
@@ -123,16 +142,25 @@ export function ItemRow({ item, values, columns }: Props) {
 								{showSubItems ? 'Ocultar' : 'Mostrar'} Sub-Items
 							</div>
 							{userActions.includes('create') &&
-								<div
-									className={styles.menuOption}
-									onClick={() => {
-										setShowContextMenu(false);
-										setShowSubItems(true);
-										setNewSubItem(true);
-									}}
-								>
-									Agregar Sub-Item
-								</div>
+								<>
+									<div
+										className={styles.menuOption}
+										onClick={() => {
+											setShowContextMenu(false);
+											setShowSubItems(true);
+											setNewSubItem(true);
+										}}
+									>
+										Agregar Sub-Item
+									</div>
+
+									<div
+										className={styles.menuOption}
+										onClick={() => deleteRow(item.id)}
+									>
+										Eliminar Item
+									</div>
+								</>
 							}
 						</article>
 					}
