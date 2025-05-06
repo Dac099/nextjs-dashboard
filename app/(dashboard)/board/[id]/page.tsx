@@ -1,23 +1,23 @@
-import { getRoleAccess } from "@/utils/userAccess";
+import { verifySession } from '@/utils/dal';
 import { getWorkspaceAndBoardData } from "@/actions/boards";
+import { ROLES } from '@/utils/roleDefinition';
 import { redirect } from 'next/navigation';
 
 type Props = {
     params: Promise<{ id: string }>
 }
 
-export default async function Page({ params }: Props)
-{
+export default async function Page({ params }: Props) {
     const { id: boardId } = await params;
     const { workspaceName, boardName } = await getWorkspaceAndBoardData(boardId);
-    const userRole = await getRoleAccess();
-    const userWorkspace = userRole.permissions.findIndex(permission => permission.workspace === workspaceName);
+    const { role } = await verifySession();
+    const userWorkspace = ROLES[role].permissions.find(permission => permission.workspace === workspaceName);
 
-    if(
-        userWorkspace < 0 ||
-        !userRole.permissions[userWorkspace].boards.includes(boardName) &&
-        userRole.permissions[userWorkspace].boards[0] !== '*'
-    ){
+    if (
+        !userWorkspace ||
+        !userWorkspace.boards.includes(boardName) &&
+        !userWorkspace.boards.includes('*')
+    ) {
         redirect('/');
     }
 

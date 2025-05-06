@@ -1,13 +1,8 @@
-'use server';
+'use server'
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import connection from '@/services/database';
-import { createHash, randomBytes } from 'crypto';
-
-type LoginResult = {
-  success?: boolean;
-  error?: string;
-}
+import { getIronSession, IronSession } from 'iron-session';
 
 type UserData = {
   id: string;
@@ -16,57 +11,22 @@ type UserData = {
   role: string
 };
 
-export async function loginAction(formData: FormData): Promise<LoginResult> {
-  const username = formData.get('username') as string;
-  const password = formData.get('password') as string;
-  const cookieStore = await cookies();
-  let userInDB: UserData | null;
-
-  if (!username || !password) {
-    return { error: 'Nombre de usuario y contraseña obligatorios' };
-  }
-
-  try {
-    userInDB = await credentialsInDB(username, hashPassword(password));
-
-    if (!userInDB) {
-      return { error: 'Credenciales incorrectas' };
-    }
-
-  } catch (error) {
-    console.log(error);
-    return { error: 'Error del servidor. Inténtalo más tarde.' };
-  }
-
-  const sessionId = randomBytes(16).toString('hex');
-
-  cookieStore.set('auth-session', sessionId, {
-    httpOnly: true,
-    secure: false,
-    maxAge: 60 * 60 * 24 * 7, // 1 semana
-    path: '/',
-    sameSite: 'strict'
-  });
-
-  cookieStore.set('user-info', JSON.stringify({
-    id: userInDB.id,
-    username: userInDB.username,
-    role: userInDB.role
-  }), {
-    httpOnly: false,
-    secure: false,
-    maxAge: 60 * 60 * 24 * 7,
-    path: '/',
-  });
-
-  redirect('/');
+/**
+ * 
+ * @param password String password to hash
+ * @description Hashes the password using SHA-1 algorithm
+ * @returns The hashed password in hexadecimal format
+ */
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex.toUpperCase();
 }
 
-function hashPassword(password: string): string {
-  return createHash('sha1').update(password).digest('hex').toUpperCase();
-}
-
-async function credentialsInDB(username: string, password: string): Promise<UserData | null> {
+async function getUserDataByCredentials(username: string, password: string): Promise<UserData | null> {
   try {
     await connection.connect();
     const query: string = `
@@ -97,67 +57,86 @@ async function credentialsInDB(username: string, password: string): Promise<User
 }
 
 export async function logoutAction(): Promise<void> {
-  const cookieStore = await cookies();
-
-  cookieStore.delete('auth-session');
-  cookieStore.delete('user-info');
-
+  const session = await getSession();
+  session.destroy();
   redirect('/login');
 }
 
-export async function getWorkspaceWithBoard(boardId: string) {
-  await connection.connect();
-  const query: string = `
-    SELECT
-      w.name AS workspaceName,
-      b.name AS boardName
-    FROM Boards b
-    LEFT JOIN Workspaces w on b.workspace_id = w.id
-    WHERE b.id = @boardId
-  `;
-  const result = await connection
-    .request()
-    .input('boardId', boardId)
-    .query(query);
-
-  return result.recordset[0];
-}
-
-export async function getUserInfo(): Promise<{id: string; name: string;}> {
+export async function getUserInfo(): Promise<{ id: string; name: string; }> {
   const userData = {
     id: '',
     name: '',
   };
 
   try {
-    const cookieStore = await cookies();
-    const userInfo = cookieStore.get('user-info');
-
-    if (!userInfo) {
-      throw new Error("Error on get user info cookies");
-    }
-
-    const parsedInfo = JSON.parse(userInfo.value);
-
-    userData.id = parsedInfo.id;
-
-    await connection.connect();
-
-    const query: string = `
-      SELECT nom_user AS username
-      FROM tb_user
-      WHERE id_user = @idUser
-    `;
-
-    const result = await connection 
-      .request()
-      .input('idUser', parsedInfo.id)
-      .query(query);
-
-    userData.name = result.recordset[0].username;
+    const session = await getSession();
+    userData.id = session.id;
+    userData.name = session.username;
   } catch {
     throw new Error('Ocurrió un error al obtener la información del usuario');
   }
 
   return userData;
+}
+
+export async function loginUser(formData: FormData) {
+  const username = formData.get('username') as string;
+  const password = formData.get('password') as string;
+  const hashedPassword = await hashPassword(password);
+  let userData: UserData | null = null;
+  let userSession: IronSession<{
+    id: string;
+    username: string;
+    role: string,
+    isLoggedIn: boolean
+  }> | null = null;
+
+  try {
+    userData = await getUserDataByCredentials(username, hashedPassword);
+  } catch (e) {
+    console.log(`Error on validate user credentials: ${e}`);
+  }
+
+  if (!userData) {
+    redirect('/login?badCredentials=true');
+  }
+
+  try {
+    userSession = await getSession();
+  } catch (e) {
+    console.log(`Error on get session: ${e}`);
+  }
+
+  if (!userSession) {
+    redirect('/login?error=Error al validar credenciales');
+  }
+
+  userSession.id = userData.id;
+  userSession.username = userData.username;
+  userSession.role = userData.role;
+  userSession.isLoggedIn = true;
+  await userSession.save();
+
+  redirect('/');
+}
+
+/**
+ * @description Get the session user data
+ * @returns An object with id: string, username: string, role: string, isLoggedIn: boolean
+ */
+export async function getSession() {
+  const session = await getIronSession<{ id: string; username: string; role: string, isLoggedIn: boolean }>(await cookies(), {
+    password: 'hw57Bp7NGo39BvBvtYKT3r0fcJCy29Fn', // Required by iron-session to define the cookie
+    cookieName: 'auth-session',
+    ttl: 0
+  });
+
+  if (!session.isLoggedIn) {
+    session.isLoggedIn = false;
+    session.username = 'Anonymous';
+    session.role = 'none';
+    session.id = 'none';
+  }
+
+  return session;
 }

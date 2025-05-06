@@ -5,8 +5,9 @@ import GroupsView from "@/app/components/common/groupsView/groupsView";
 import { GanttContainer } from "@/components/common/ganttContainer/ganttContainer";
 import { getViewType, getWorkspaceAndBoardData } from "@/actions/boards";
 import { getGanttChartData } from "@/actions/gantt";
-import { getRoleAccess } from '@/utils/userAccess';
 import { redirect } from 'next/navigation';
+import { verifySession } from '@/utils/dal';
+import { ROLES } from '@/utils/roleDefinition';
 
 type Props = {
   params: Promise<{ id: string; viewId: string }>;
@@ -15,13 +16,13 @@ type Props = {
 export default async function Page({ params }: Props) {
   const { id: boardId, viewId } = await params;
   const { workspaceName, boardName } = await getWorkspaceAndBoardData(boardId);
-  const userRole = await getRoleAccess();
-  const userWorkspace = userRole.permissions.findIndex(permission => permission.workspace === workspaceName);
+  const { role } = await verifySession();
+  const userWorkspace = ROLES[role].permissions.find(permission => permission.workspace === workspaceName);
 
   if (
-    userWorkspace < 0 ||
-    !userRole.permissions[userWorkspace].boards.includes(boardName) &&
-    userRole.permissions[userWorkspace].boards[0] !== '*'
+    !userWorkspace ||
+    !userWorkspace.boards.includes(boardName) &&
+    !userWorkspace.boards.includes('*')
   ) {
     redirect('/');
   }
@@ -30,7 +31,7 @@ export default async function Page({ params }: Props) {
   const arrayGroups = Array.from(boardData.groups.values());
   const viewType: string = await getViewType(viewId);
   const gantData = await getGanttChartData(boardId);
-  const allowedUserActions = userRole.permissions[userWorkspace].actions;
+  const allowedUserActions = userWorkspace.actions;
 
   return (
     <article className={styles.container}>

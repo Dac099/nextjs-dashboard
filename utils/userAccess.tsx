@@ -1,18 +1,16 @@
 'use server';
-import { cookies } from 'next/headers';
 import { ROLES } from './roleDefinition';
 import { Role, Actions } from './types/roles';
 import connection from '@/services/database';
+import { getSession } from '@/actions/auth';
 
-export async function getRoleAccess(): Promise<Role>{
-  const cookieStore = await cookies();
-  const userInfo = cookieStore.get('user-info');
-  const role = JSON.parse(userInfo!.value).role;
+export async function getRoleAccess(): Promise<Role> {
+  const session = await getSession();
+  const role = session?.role;
   return ROLES[role];
-} 
+}
 
-export async function roleAccess(boardId: string): Promise<Actions[]>
-{
+export async function roleAccess(boardId: string): Promise<Actions[]> {
   await connection.connect();
   const query: string = `
     SELECT 
@@ -33,7 +31,7 @@ export async function roleAccess(boardId: string): Promise<Actions[]>
   const workspaceAccess = permissions.findIndex(permission => permission.workspace === workspace);
 
 
-  if(workspaceAccess < 0) throw Error('Usuario sin permisos suficientes');
+  if (workspaceAccess < 0) throw Error('Usuario sin permisos suficientes');
 
   return permissions[workspaceAccess].actions;
 }

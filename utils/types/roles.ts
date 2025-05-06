@@ -10,4 +10,11 @@ export type Role = {
   permissions: Permission[];
 };
 
+export type SessionData = {
+  id: string;
+  username: string;
+  role: string,
+  isLoggedIn: boolean
+};
+
 export type Actions = 'read' | 'create' | 'update';

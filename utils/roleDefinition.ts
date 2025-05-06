@@ -8,22 +8,22 @@ export const ROLES: Record<string, Role> = {
       {
         workspace: 'Proyectos',
         actions: ['read', 'create', 'update'],
-        boards: ['General Status', 'Global planning', 'Proyectos 2025']
+        boards: ['*']
       },
       {
         workspace: 'Cobranza',
         actions: ['read', 'create', 'update'],
-        boards: ['Cobranza Jobs']
+        boards: ['*']
       },
       {
         workspace: 'Servicios',
         actions: ['read', 'create', 'update'],
-        boards: ['02 Registro Servicios y refacciones', '1.- S&R Locales General status', 'Monitor']
+        boards: ['*']
       },
       {
         workspace: 'Recursos Humanos',
         actions: ['read', 'create', 'update'],
-        boards: ['Contratación', 'Solicitud de viáticos', '2025 Bono Horas Extra']
+        boards: ['*']
       },
     ]
   },
@@ -34,7 +34,7 @@ export const ROLES: Record<string, Role> = {
       {
         workspace: 'Proyectos',
         actions: ['read', 'create', 'update'],
-        boards: ['General Status', 'Global planning', 'Proyectos 2025']
+        boards: ['*']
       }
     ]
   },
@@ -56,12 +56,12 @@ export const ROLES: Record<string, Role> = {
       {
         workspace: 'Proyectos',
         actions: ['read'],
-        boards: ['General Status', 'Global planning', 'Proyectos 2025']
+        boards: ['*']
       },
       {
         workspace: 'Cobranza',
         actions: ['read', 'create', 'update'],
-        boards: ['Cobranza Jobs']
+        boards: ['*']
       }
     ]
   },
