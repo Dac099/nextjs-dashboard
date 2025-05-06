@@ -19,4 +19,7 @@
   border-top-left-radius: 10px;
   position: relative;
   height: 95vh;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
