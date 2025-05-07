@@ -30,22 +30,20 @@ export function TagEditor({ tag, onClose, columnId }: Props) {
       return;
     }
 
-    const updatedTag = {
+    const newTag = {
       color: tagColor,
       text: tagText,
       id: tag.id
     };
 
     const statusValue = {
-      value: JSON.stringify({ text: tagText, color: tagColor }),
+      value: JSON.stringify({ color: tagColor, text: tagText }),
       id: tag.id,
       columnId: columnId
     }
 
     updateBoardStatus(statusValue);
-    await updateTagStatus(updatedTag);
-    // Add function to update items TableValue
-    // Add function to update subItems TableValue
+    await updateTagStatus(newTag, columnId, tag);
     onClose();
   }
 
@@ -54,7 +52,7 @@ export function TagEditor({ tag, onClose, columnId }: Props) {
       {error && <p className={styles.errorMsg}>{error}</p>}
       <input
         type="text"
-        value={tag.text}
+        value={tagText}
         onChange={e => handleTagTextChange(e.target.value)}
         className={styles.tagInput}
       />

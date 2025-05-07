@@ -363,20 +363,32 @@ export async function getChatTasks(itemId: string): Promise<ChatTask[]> {
   return tasks;
 }
 
-export async function updateTagStatus(tag: { id: string, text: string, color: string }) {
+export async function updateTagStatus(
+  newTag: { id: string, text: string, color: string },
+  columnId: string,
+  previousTag: { id: string, text: string, color: string },
+) {
   try {
     await connection.connect();
-    const queryString: string = `
+
+    const updateQuery: string = `
       UPDATE TableValues
-      SET value = @value
-      WHERE id = @id
+      SET value = @newValue
+      WHERE column_id = @columnId
+      AND value = @previousValue
     `;
 
-    await connection
+    const result = await connection
       .request()
-      .input('value', JSON.stringify({ text: tag.text, color: tag.color }))
-      .input('id', tag.id)
-      .query(queryString);
+      .input('newValue', JSON.stringify({ color: newTag.color, text: newTag.text }))
+      .input('columnId', columnId)
+      .input('previousValue', JSON.stringify({ color: previousTag.color, text: previousTag.text }))
+      .query(updateQuery);
+    
+    const rowsUpdated = result.rowsAffected[0];
+    if (rowsUpdated > 0) {
+      revalidatePath(`board/[id]/view/[viewId]`, 'page');
+    }
   } catch (e) {
     if (e instanceof Error) {
       console.log('Error on update tag status');

@@ -10,6 +10,16 @@ export async function validateAccessResources(req: NextRequest, res: NextRespons
     ttl: 0
   });
 
+  if(req.nextUrl.pathname === '/login') {
+    if(session.isLoggedIn){
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+
+    req.cookies.clear();
+  }
+
+
+
   if (!session.isLoggedIn) {
     return NextResponse.redirect(new URL('/login', req.url));
   }

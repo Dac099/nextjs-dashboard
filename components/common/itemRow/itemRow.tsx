@@ -4,13 +4,13 @@ import type { Column, Item, TableValue } from "@/utils/types/groups";
 import { ItemValue } from "@/components/common/itemValue/itemValue";
 import { ProgressDial } from "../progressDial/progressDial";
 import { ChatRing } from "../chatRing/chatRing";
-import { getSubItems, addSubItem, getChatTasks, deleteSubItem } from "@/actions/items";
+import { getSubItems, addSubItem, getChatTasks } from "@/actions/items";
 import { RowTitle } from "@/components/common/rowTitle/rowTitle";
 import { DeleteRowBtn } from "../deleteRowBtn/deleteRowBtn";
 import { useEffect, useRef, useState, KeyboardEvent } from "react";
 import { useRoleUserActions } from "@/stores/roleUserActions";
 import useClickOutside from "@/hooks/useClickOutside";
-import { findParentKeyBySubItemId, subItemValueByColumnId } from '@/utils/helpers';
+import { subItemValueByColumnId } from '@/utils/helpers';
 import { useItemStore } from "@/stores/useItemStore";
 import { useChatStore } from '@/stores/chatStore';
 import { GrList as SubItemsIcon} from "react-icons/gr";
@@ -26,7 +26,6 @@ type Props = {
 
 export function ItemRow({ item, values, columns }: Props) {
 	const { id: boardId, viewId } = useParams();
-	const deleteSubItemStore = useItemStore(state => state.removeSubItem);
 	const chatStore = useChatStore();
 	const setSubItemsValues = useItemStore(state => state.setSubItems);
 	const subItems = useItemStore(state => state.subItemsMap);

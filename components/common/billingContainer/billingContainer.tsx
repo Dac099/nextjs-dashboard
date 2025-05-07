@@ -18,7 +18,7 @@ export function BillingContainer({ idProject, projectName }: Props) {
 
     useEffect(() => {
         async function fetchData(): Promise<void> {
-            const id: string = await addGroupToBillingBoard(`${idProject} | ${projectName}`);
+            const id: string = await addGroupToBillingBoard(`${idProject} | ${projectName}`.slice(0, 100));
             const itemsRes: Item[] = await getItemsForBilling(id);
             setGroupId(id);
             setItems(itemsRes);

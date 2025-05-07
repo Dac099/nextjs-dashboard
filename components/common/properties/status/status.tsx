@@ -8,7 +8,6 @@ import { HexColorPicker } from "react-colorful";
 import { FaAngleDown } from "react-icons/fa";
 import useClickOutside from "@/hooks/useClickOutside";
 import { useParams } from "next/navigation";
-import { Tooltip } from "@/components/common/tooltip/tooltip";
 import { useBoardStore } from "@/stores/boardStore";
 import { useRoleUserActions } from '@/stores/roleUserActions';
 import { useItemStore } from '@/stores/useItemStore';
@@ -50,7 +49,6 @@ export function Status({ value, itemId, columnId }: Props) {
   const [newInputColor, setNewInputColor] = useState<string>("");
   const [showEditor, setShowEditor] = useState<boolean>(false);
   const [tagToEdit, setTagToEdit] = useState<Tag | null>(null);
-
 
   useClickOutside(containerListRef as RefObject<HTMLDivElement>, () => {
     setShowStatusList(false);
