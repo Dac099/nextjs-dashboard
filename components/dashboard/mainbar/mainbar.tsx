@@ -29,7 +29,7 @@ export function MainBar() {
           src={LogoYne} 
           alt="Logo de la empresa YNE Automatización Internacional" 
           />
-        <p>YNE Automatización</p>
+        <p>WorkMonitor</p>
         <ThemeButton />
       </section>
       <section className={styles.userData} ref={menuRef}>

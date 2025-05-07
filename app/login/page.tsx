@@ -11,7 +11,7 @@ export default async function Page({ searchParams }: Props) {
 
   return (
     <article className={styles.loginContainer}>
-      <h2>SYS Proyectos</h2>
+      <h2><div>YNE Automatización</div> | WorkMonitor</h2>
 
       {badCredentials === 'true' &&
         <p className={styles.msgError}>
@@ -26,17 +26,19 @@ export default async function Page({ searchParams }: Props) {
         </section>
       }
 
-      <form action={loginUser}>
-        <section className={styles.inputField}>
-          <label htmlFor="username">Nombre de usuario</label>
-          <input type="text" name="username" id="username" required />
-        </section>
-        <section className={styles.inputField}>
-          <label htmlFor="password">Contraseña</label>
-          <input type="password" name="password" id="password" required />
-        </section>
-        <button type="submit" className={styles.submitBtn}>Iniciar</button>
-      </form>
+      <section className={styles.centerForm}>
+        <form action={loginUser}>
+          <section className={styles.inputField}>
+            <label htmlFor="username">Nombre de usuario</label>
+            <input type="text" name="username" id="username" required />
+          </section>
+          <section className={styles.inputField}>
+            <label htmlFor="password">Contraseña</label>
+            <input type="password" name="password" id="password" required />
+          </section>
+          <button type="submit" className={styles.submitBtn}>Iniciar</button>
+        </form>
+      </section>
     </article>
   );
 }

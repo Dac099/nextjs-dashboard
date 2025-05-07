@@ -47,6 +47,10 @@ export async function SideBar() {
           userRole={userRole}
         />
       ))}
+
+      <section className={styles.sidebar__footer}>
+        YNE Automatización 2025 Diseño y Desarrollo de Soluciones. All rights reserved.
+      </section>
     </aside>
   );
 }
