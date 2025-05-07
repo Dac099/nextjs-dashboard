@@ -3,7 +3,8 @@
     font-size: 1.4rem;
     display: grid;
     grid-auto-flow: column;
-    grid-template-columns: minmax(200px, 2fr) repeat(auto-fit, minmax(60px, 1fr));
+    grid-template-columns: minmax(300px, 400px);
+    grid-auto-columns: minmax(200px, 1fr);
 }
 
 .groupRow > div

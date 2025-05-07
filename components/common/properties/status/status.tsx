@@ -13,6 +13,8 @@ import { useBoardStore } from "@/stores/boardStore";
 import { useRoleUserActions } from '@/stores/roleUserActions';
 import { useItemStore } from '@/stores/useItemStore';
 import { findParentKeyBySubItemId } from '@/utils/helpers';
+import { TagEditor } from '../tagEditor/tagEditor';
+import TagListItem from './TagListItem';
 
 type Props = {
   value: TableValue;
@@ -46,12 +48,22 @@ export function Status({ value, itemId, columnId }: Props) {
   const [showInputTag, setShowInputTag] = useState<boolean>(false);
   const [newInputName, setNewInputName] = useState<string>("");
   const [newInputColor, setNewInputColor] = useState<string>("");
+  const [showEditor, setShowEditor] = useState<boolean>(false);
+  const [tagToEdit, setTagToEdit] = useState<Tag | null>(null);
 
 
   useClickOutside(containerListRef as RefObject<HTMLDivElement>, () => {
     setShowStatusList(false);
     setShowInputTag(false);
   });
+
+  const setTag = (tag: Tag) => {
+    setTagToEdit(tag);
+  }
+
+  const openEditor = () => {
+    setShowEditor(true);
+  }
 
   const handleShowStatusList = (e: MouseEvent<HTMLElement>) => {
     if (!userActions.includes('update') || !userActions.includes('create')) return;
@@ -160,24 +172,27 @@ export function Status({ value, itemId, columnId }: Props) {
           )}
 
           {/* Render the status list */}
-          {!showInputTag && (
+          {!showInputTag && !showEditor && (
             <section className={styles.tagsContainer}>
               {statusList.map((item) => (
-                <Tooltip text={item.text} key={`${item.color}-${item.text}`}>
-                  <article
-                    className={styles.listItem}
-                    key={`${item.color}-${item.text}`}
-                  >
-                    <article
-                      style={{ backgroundColor: item.color }}
-                      onClick={() => handleSetValue(item)}
-                    >
-                      <p>{item.text}</p>
-                    </article>
-                  </article>
-                </Tooltip>
+                <TagListItem
+                  item={item}
+                  handleSetValue={handleSetValue}
+                  key={item.id}
+                  setTag={setTag}
+                  openEditor={openEditor}
+                />
               ))}
             </section>
+          )}
+
+          {/* Render container to edit tags */}
+          {!showInputTag && showEditor && tagToEdit && (
+            <TagEditor
+              tag={tagToEdit}
+              onClose={() => setShowEditor(false)}
+              columnId={columnId}
+            />
           )}
         </section>
       )}

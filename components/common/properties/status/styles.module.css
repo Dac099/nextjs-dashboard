@@ -111,17 +111,6 @@
     text-overflow: ellipsis;
 }
 
-/*Estos estilos se comentan para dejar de estilizar el botón de eliminar etiqueta, ya que de momento se desactiva*/
-/*.listItem article:first-child*/
-/*{*/
-/*    border-radius: 5px 0 0 5px;*/
-/*}*/
-
-/*.listItem article:last-child*/
-/*{*/
-/*    border-radius: 0 5px 5px 0;*/
-/*}*/
-
 .listItem article:hover
 {
     transform: scale(0.9);
@@ -165,4 +154,40 @@
         width: 15px;
         height: 15px;
     }
+}
+
+.tagItemListContainer
+{
+    position: relative;
+}
+
+.contextMenu
+{
+    position: absolute;
+    z-index: 2;
+    border: 1px solid var(--accent-color);
+    padding: 5px;
+    right: 0;
+    bottom: 0;
+    transform: translateX(70%) translateY(60%);
+    background-color: var(--bg-color);
+    color: var(--font-color);
+    width: 150px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.2);
+}
+
+.contextMenu p 
+{
+    cursor: pointer;
+    width: 100%;
+    margin: 2px 0;
+    padding-left: 3px;
+    border-radius: 2px;
+}
+
+.contextMenu p:hover
+{
+    background-color: var(--accent-color);
+    color: var(--action-color);
 }

@@ -362,3 +362,26 @@ export async function getChatTasks(itemId: string): Promise<ChatTask[]> {
 
   return tasks;
 }
+
+export async function updateTagStatus(tag: { id: string, text: string, color: string }) {
+  try {
+    await connection.connect();
+    const queryString: string = `
+      UPDATE TableValues
+      SET value = @value
+      WHERE id = @id
+    `;
+
+    await connection
+      .request()
+      .input('value', JSON.stringify({ text: tag.text, color: tag.color }))
+      .input('id', tag.id)
+      .query(queryString);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.log('Error on update tag status');
+      console.log(`ERROR MESSAGE: ${e.message}`);
+    }
+    console.log('Error on update tag status');
+  }
+}
