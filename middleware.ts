@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateAccessResources } from './middleware/helpers';
 
 export async function middleware(request: NextRequest) {
-  validateAccessResources(request, NextResponse.next());
-
-  return NextResponse.next();
+  return validateAccessResources(request, NextResponse.next());
 }
 
 export const config = {

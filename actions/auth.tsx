@@ -128,7 +128,12 @@ export async function getSession() {
   const session = await getIronSession<{ id: string; username: string; role: string, isLoggedIn: boolean }>(await cookies(), {
     password: 'hw57Bp7NGo39BvBvtYKT3r0fcJCy29Fn', // Required by iron-session to define the cookie
     cookieName: 'auth-session',
-    ttl: 0
+    cookieOptions: {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 // una semana en segundos
+    }
   });
 
   if (!session.isLoggedIn) {

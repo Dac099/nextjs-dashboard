@@ -6,9 +6,7 @@ import { getSession } from '@/actions/auth';
 
 export async function getRoleAccess(): Promise<Role> {
   const session = await getSession();
-  console.log('session', session);
   const role = session?.role;
-  console.log(ROLES[role]);
   return ROLES[role];
 }
 
@@ -27,15 +25,19 @@ export async function roleAccess(boardId: string): Promise<Actions[]> {
       .input('boardId', boardId)
       .query(query);
 
-    const workspace = result.recordset[0] ? result.recordset[0].name : '';
+    const workspace = result.recordset[0]?.name;
+
+    if(!workspace) throw Error('Ocurrió un error al obtener la información del workspace');
 
     const role = await getRoleAccess();
-    console.log('role', role);
-    const permissions = role?.permissions;
+    
+    if (!role) throw Error('No se ha encontrado el rol del usuario');
+    console.log('ROL del usuario:', role);
+
+    const permissions = role.permissions;
     const workspaceAccess = permissions.findIndex(permission => permission.workspace === workspace);
 
 
-    if (workspaceAccess < 0) throw Error('Usuario sin permisos suficientes');
 
     return permissions[workspaceAccess].actions;
   } catch (error) {
