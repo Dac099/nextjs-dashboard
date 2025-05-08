@@ -62,6 +62,49 @@ input, button, textarea
   font-family: inherit;
 }
 
+.notFound
+{
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  display: grid;
+  place-content: center;
+  background-color: var(--bg-color);
+}
+
+.notFound__link
+{
+  text-align: center;
+  font-size: 1.6rem;
+  font-style: italic;
+  color: var(--progress-color);
+}
+
+.notFound__link:hover
+{
+  text-decoration: underline;
+}
+
+.notFound__title
+{
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  user-select: none;
+
+  h2
+  {
+    font-size: 5rem;
+    color: var(--action-color);
+  }
+
+  p
+  {
+    align-self: center;
+    font-size: 2rem;
+  }
+}
+
 .react-calendar
 {
   background-color: var(--bg-color);

@@ -15,7 +15,13 @@ type Props = {
 
 export default async function Page({ params }: Props) {
   const { id: boardId, viewId } = await params;
-  const { workspaceName, boardName } = await getWorkspaceAndBoardData(boardId);
+  const result = await getWorkspaceAndBoardData(boardId);
+
+  if (!result || result.length === 0) {
+    redirect('/not-found');
+  }
+
+  const { workspaceName, boardName } = result;
   const { role } = await verifySession();
   const userWorkspace = ROLES[role].permissions.find(permission => permission.workspace === workspaceName);
 
@@ -30,6 +36,11 @@ export default async function Page({ params }: Props) {
   const boardData: BoardData = await GetBoardData(boardId);
   const arrayGroups = Array.from(boardData.groups.values());
   const viewType: string = await getViewType(viewId);
+
+  if(!viewType){
+    redirect('/not-found');
+  }
+
   const gantData = await getGanttChartData(boardId);
   const allowedUserActions = userWorkspace.actions;
 

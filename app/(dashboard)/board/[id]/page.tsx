@@ -1,5 +1,5 @@
 import { verifySession } from '@/utils/dal';
-import { getWorkspaceAndBoardData } from "@/actions/boards";
+import { getWorkspaceAndBoardData, getBoardViews } from "@/actions/boards";
 import { ROLES } from '@/utils/roleDefinition';
 import { redirect } from 'next/navigation';
 
@@ -9,8 +9,22 @@ type Props = {
 
 export default async function Page({ params }: Props) {
     const { id: boardId } = await params;
-    const { workspaceName, boardName } = await getWorkspaceAndBoardData(boardId);
-    const { role } = await verifySession();
+    const [viewsBoard, result, roleResult] = await Promise.all([
+        getBoardViews(boardId), 
+        getWorkspaceAndBoardData(boardId),
+        verifySession()
+    ]);
+
+    if(viewsBoard && viewsBoard.length > 0 && viewsBoard[0].view.name) {
+        redirect(`/board/${boardId}/view/${viewsBoard[0].view.id}`);
+    }
+
+    if(!result || result.length === 0) {
+        redirect('/not-found');
+    }
+
+    const { workspaceName, boardName } = result;
+    const { role } = roleResult;
     const userWorkspace = ROLES[role].permissions.find(permission => permission.workspace === workspaceName);
 
     if (
@@ -30,7 +44,7 @@ export default async function Page({ params }: Props) {
                 fontWeight: 'bold'
             }}
         >
-            <p>¿Con qué vista vas a trabajar?</p>
+            <p>Empieza agregando un una nueva vista al tablero</p>
         </article>
     );
 }
