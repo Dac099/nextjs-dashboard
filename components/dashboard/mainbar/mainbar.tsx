@@ -9,6 +9,7 @@ import { useState, useRef, RefObject } from 'react';
 import { IoLogOut as LogoutIcon } from "react-icons/io5";
 import { logoutAction } from '@/actions/auth';
 import useClickOutside from '@/hooks/useClickOutside';
+import Link from 'next/link';
 
 export function MainBar() {
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -25,10 +26,14 @@ export function MainBar() {
   return (
     <article className={styles.mainbar}>
       <section>
-        <Image 
-          src={LogoYne} 
-          alt="Logo de la empresa YNE Automatización Internacional" 
+        <Link href="/">
+          <Image 
+            src={LogoYne} 
+            alt="Logo de la empresa YNE Automatización Internacional" 
+            width={50}
+            height={25}
           />
+        </Link>
         <p>WorkMonitor</p>
         <ThemeButton />
       </section>

@@ -8,20 +8,20 @@
   align-content: center;
   align-items: center;
   gap: 10px;
-  padding: 5px;
   border-radius: 5px;
-  border: 1px solid var(--action-color);
-  background-color: var(--accent-color);
-  color: var(--font-color);
-}
-
-.actionBtn:hover {
+  padding: 3px 5px;
+  border: none;
   background-color: var(--action-color);
   color: var(--bg-color);
 }
 
+.actionBtn:hover {
+  box-shadow: 2px 2px 0px 0px var(--accent-color);
+}
+
 .btnIcon {
-  display: block;
+  display: grid;
+  place-content: center;
 }
 
 .actionBtn p {
@@ -44,7 +44,7 @@
 
 .buttonsContainer
 {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 10px;
 }

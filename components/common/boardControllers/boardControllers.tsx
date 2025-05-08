@@ -1,7 +1,7 @@
 'use client';
 import styles from './boardControllers.module.css';
 import { useState } from 'react';
-import { CiViewTable } from "react-icons/ci";
+import { TbTableFilled } from "react-icons/tb";
 import { Columns } from '@/utils/types/groups';
 import { useParams } from 'next/navigation';
 import { GroupTemplate } from '../groupTemplate/groupTemplate';
@@ -31,7 +31,7 @@ export function BoardControllers({ boardId, columns, groupsCount }: Props) {
           className={styles.actionBtn}
         >
           <span className={styles.btnIcon}>
-            <CiViewTable size={20} />
+            <TbTableFilled size={20} />
           </span>
           <p>Agregar grupo</p>
         </button>
