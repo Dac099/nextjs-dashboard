@@ -2,7 +2,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import connection from '@/services/database';
-import { getIronSession, IronSession } from 'iron-session';
 
 type UserData = {
   id: string;
@@ -57,8 +56,14 @@ async function getUserDataByCredentials(username: string, password: string): Pro
 }
 
 export async function logoutAction(): Promise<void> {
-  const session = await getSession();
-  session.destroy();
+  const cookieStore = await cookies();
+  
+  // Eliminar todas las cookies de sesión
+  cookieStore.delete('userId');
+  cookieStore.delete('username');
+  cookieStore.delete('userRole');
+  cookieStore.delete('isLoggedIn');
+  
   redirect('/login');
 }
 
@@ -84,12 +89,6 @@ export async function loginUser(formData: FormData) {
   const password = formData.get('password') as string;
   const hashedPassword = await hashPassword(password);
   let userData: UserData | null = null;
-  let userSession: IronSession<{
-    id: string;
-    username: string;
-    role: string,
-    isLoggedIn: boolean
-  }> | null = null;
 
   try {
     userData = await getUserDataByCredentials(username, hashedPassword);
@@ -101,47 +100,72 @@ export async function loginUser(formData: FormData) {
     redirect('/login?badCredentials=true');
   }
 
-  try {
-    userSession = await getSession();
-  } catch (e) {
-    console.log(`Error on get session: ${e}`);
-  }
-
-  if (!userSession) {
-    redirect('/login?error=Error al validar credenciales');
-  }
-
-  userSession.id = userData.id;
-  userSession.username = userData.username;
-  userSession.role = userData.role;
-  userSession.isLoggedIn = true;
-  await userSession.save();
+  // Usar cookies nativas de Next.js en lugar de iron-session
+  const cookieStore = await cookies();
+  
+  // Crear cookies para cada dato de usuario necesario
+  cookieStore.set('userId', userData.id, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60, // Una semana en segundos
+    path: '/'
+  });
+  
+  cookieStore.set('username', userData.username, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60,
+    path: '/'
+  });
+  
+  cookieStore.set('userRole', userData.role, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60,
+    path: '/'
+  });
+  
+  cookieStore.set('isLoggedIn', 'true', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60,
+    path: '/'
+  });
 
   redirect('/');
 }
 
 /**
- * @description Get the session user data
+ * @description Get the session user data using Next.js native cookies
  * @returns An object with id: string, username: string, role: string, isLoggedIn: boolean
  */
 export async function getSession() {
-  const session = await getIronSession<{ id: string; username: string; role: string, isLoggedIn: boolean }>(await cookies(), {
-    password: 'hw57Bp7NGo39BvBvtYKT3r0fcJCy29Fn', // Required by iron-session to define the cookie
-    cookieName: 'auth-session',
-    cookieOptions: {
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 // una semana en segundos
-    }
-  });
-
-  if (!session.isLoggedIn) {
-    session.isLoggedIn = false;
-    session.username = 'Anonymous';
-    session.role = 'none';
-    session.id = 'none';
+  const cookieStore = await cookies();
+  
+  const id = cookieStore.get('userId')?.value;
+  const username = cookieStore.get('username')?.value;
+  const role = cookieStore.get('userRole')?.value;
+  const isLoggedInValue = cookieStore.get('isLoggedIn')?.value;
+  const isLoggedIn = isLoggedInValue === 'true';
+  
+  // Si no hay cookie de sesión, devolvemos una sesión anónima
+  if (!isLoggedIn) {
+    return {
+      id: 'none',
+      username: 'Anonymous',
+      role: 'none',
+      isLoggedIn: false
+    };
   }
 
-  return session;
+  return {
+    id: id || 'none',
+    username: username || 'Anonymous',
+    role: role || 'none',
+    isLoggedIn: true
+  };
 }
