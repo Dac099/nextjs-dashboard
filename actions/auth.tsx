@@ -106,7 +106,7 @@ export async function loginUser(formData: FormData) {
   // Crear cookies para cada dato de usuario necesario
   cookieStore.set('userId', userData.id, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60, // Una semana en segundos
     path: '/'
@@ -114,7 +114,7 @@ export async function loginUser(formData: FormData) {
   
   cookieStore.set('username', userData.username, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60,
     path: '/'
@@ -122,7 +122,7 @@ export async function loginUser(formData: FormData) {
   
   cookieStore.set('userRole', userData.role, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60,
     path: '/'
@@ -130,7 +130,7 @@ export async function loginUser(formData: FormData) {
   
   cookieStore.set('isLoggedIn', 'true', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60,
     path: '/'
