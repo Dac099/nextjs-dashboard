@@ -179,6 +179,7 @@ export function Status({ value, itemId, columnId }: Props) {
                   key={item.id}
                   setTag={setTag}
                   openEditor={openEditor}
+                  columnId={columnId}
                 />
               ))}
             </section>

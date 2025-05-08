@@ -2,30 +2,44 @@ import { Tooltip } from '@/components/common/tooltip/tooltip';
 import styles from './styles.module.css';
 import { useState, useRef, RefObject } from 'react';
 import useClickOutside from '@/hooks/useClickOutside';
+import { useBoardStore } from '@/stores/boardStore';
+import { deleteTagStatus } from '@/actions/items';
 
 // Añadir tipos explícitos a las propiedades del componente TagListItem
+type TagItem = {
+    text: string;
+    color: string;
+    id: string;
+};
 interface TagListItemProps {
-    item: {
-        text: string;
-        color: string;
-        id: string;
-    };
+    item: TagItem;
     setTag: (tag: {
         text: string;
         color: string;
         id: string;
     }) => void;
     openEditor: () => void;
-    handleSetValue: (item: any) => void;
+    handleSetValue: (item: TagItem) => void;
+    columnId: string;
 }
 
-const TagListItem = ({ item, handleSetValue, setTag, openEditor }: TagListItemProps) => {
+const TagListItem = ({ item, handleSetValue, setTag, openEditor, columnId }: TagListItemProps) => {
     const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const removeStatus = useBoardStore(state => state.removeStatus);
 
     useClickOutside(containerRef as RefObject<HTMLDivElement>, () => {
         setShowContextMenu(false);
     });
+
+    const handleDeleteTag = async (item: TagItem) => {
+        removeStatus(item.id, columnId);
+        setShowContextMenu(false);
+        const itemsAffected = await deleteTagStatus(item.id, JSON.stringify({ color: item.color, text: item.text }), columnId);
+        if (itemsAffected > 0) {
+            window.location.reload();
+        }
+    }
 
     return (
         <article className={styles.tagItemListContainer} ref={containerRef}>
@@ -57,7 +71,11 @@ const TagListItem = ({ item, handleSetValue, setTag, openEditor }: TagListItemPr
                     >
                         Editar
                     </p>
-                    <p>Eliminar</p>
+                    <p
+                        onClick={() => {handleDeleteTag(item)}}
+                    >
+                        Eliminar
+                    </p>
                 </article>
             }
         </article>

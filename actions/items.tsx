@@ -367,7 +367,7 @@ export async function updateTagStatus(
   newTag: { id: string, text: string, color: string },
   columnId: string,
   previousTag: { id: string, text: string, color: string },
-) {
+): Promise<number> {
   try {
     await connection.connect();
 
@@ -386,14 +386,57 @@ export async function updateTagStatus(
       .query(updateQuery);
     
     const rowsUpdated = result.rowsAffected[0];
-    if (rowsUpdated > 0) {
-      revalidatePath(`board/[id]/view/[viewId]`, 'page');
-    }
+    return rowsUpdated;
   } catch (e) {
     if (e instanceof Error) {
       console.log('Error on update tag status');
       console.log(`ERROR MESSAGE: ${e.message}`);
     }
     console.log('Error on update tag status');
+    return 0;
+  }
+}
+
+export async function deleteTagStatus(tagId: string, value: string, columnId: string): Promise<number> {
+  try{
+    await connection.connect();
+    const defaultValue = JSON.stringify({ color: 'rgba(0,0,0,0.4)', text: 'Sin confirmar' });
+    const deleteQuery = `
+      UPDATE TableValues
+      SET deleted_at = GETDATE()
+      WHERE id = @tagId
+    `;
+    const updateQuery = `
+      UPDATE TableValues
+      SET value = @defaultValue
+      WHERE column_id = @columnId
+      AND value = @value
+      AND deleted_at IS NULL
+    `;
+
+    const resultDelete = await connection
+      .request()
+      .input('tagId', tagId)
+      .query(deleteQuery);
+    
+    if(resultDelete.rowsAffected[0] <= 0) throw new Error('No se pudo eliminar el tag');
+
+    const resultUpdate = await connection
+      .request()
+      .input('defaultValue', defaultValue)  
+      .input('columnId', columnId)
+      .input('value', value)
+      .query(updateQuery);
+    
+      if(resultUpdate.rowsAffected[0] <= 0) throw new Error('No se actualizaron los tags asociados al valor');
+
+    return resultUpdate.rowsAffected[0];
+  }catch(e){
+    if (e instanceof Error) {
+      console.log('Error on delete tag status');
+      console.log(`ERROR MESSAGE: ${e.message}`);
+    }
+    console.log('Error on delete tag status');
+    return 0;
   }
 }

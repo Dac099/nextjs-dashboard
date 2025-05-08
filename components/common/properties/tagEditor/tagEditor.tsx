@@ -43,8 +43,11 @@ export function TagEditor({ tag, onClose, columnId }: Props) {
     }
 
     updateBoardStatus(statusValue);
-    await updateTagStatus(newTag, columnId, tag);
+    const itemsAffected = await updateTagStatus(newTag, columnId, tag);
     onClose();
+    if (itemsAffected > 1) {
+      window.location.reload();
+    } 
   }
 
   return (
