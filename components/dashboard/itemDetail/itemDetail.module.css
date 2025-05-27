@@ -1,7 +1,7 @@
 .container
 {
     position: absolute;
-    width: 60vw;
+    width: 900px;
     height: 95vh;
     border: 1px solid var(--accent-color);
     background-color: var(--sec-bg-color);

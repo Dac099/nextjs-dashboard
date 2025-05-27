@@ -1,0 +1,78 @@
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.actionBtn
+{
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.searchContainer {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 3px
+}
+
+/* Estilos para el header del DataTable */
+.tableHeader {
+  background-color: var(--surface-card);
+  color: var(--primary-color);
+  font-weight: 600;
+  padding: 1rem;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* Estilos para la tabla */
+.dataTable :global(.p-datatable-thead > tr > th) {
+  background-color: var(--surface-ground);
+  color: var(--text-color);
+  font-weight: 600;
+  border-bottom: 1px solid var(--primary-color);
+}
+
+.customHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+
+.searchInput 
+{
+  height: 30px;
+  width: 250px;
+  padding: 5px;
+  font-size: 1.2rem;
+}
+
+.searchInput::placeholder
+{
+  font-size: 1.2rem;
+}
+
+
+.dataTable
+{
+  font-size: 1.3rem;
+}

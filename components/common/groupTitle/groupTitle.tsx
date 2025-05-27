@@ -138,7 +138,7 @@ export function GroupTitle({ group }: Props) {
           style={{ color: colorGroup }}
           onKeyUp={(e) => handleUpdateTitle(e)}
         />
-        : <p style={{ color: colorGroup }}>
+        : <p style={{ color: colorGroup, margin: '0' }}>
           {groupName}
         </p>
       }

@@ -1,4 +1,4 @@
-import { Item, ValueDB } from "@/utils/types/projectDetail";
+import { Item, ProjectFormData, ValueDB } from "@/utils/types/projectDetail";
 import { SubItem, TableValue } from './types/groups';
 import { Task } from './types/items';
 import { v4 as uuidV4 } from 'uuid';
@@ -146,3 +146,107 @@ export function getDateSQLFormat() {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
+export function validateProjectFormData(projectData: ProjectFormData): string[] {
+  const errors: string[] = [];
+  
+  if(!projectData.projectFolio){
+    errors.push('Se requiere folio de proyecto');
+  }
+
+  if(!projectData.poClient){
+    errors.push('Se requiere PO de cliente');
+  }
+
+  if(!projectData.projectName){
+    errors.push('Se requiere nombre de proyecto');
+  }
+
+  if(!projectData.quoteItem?.quote){
+    errors.push('Se requiere número de cotización');
+  }
+
+  if(projectData.totalBudget < 0){
+    errors.push('Presupuesto total debe ser mayor a 0');
+  }
+
+  if(!projectData.currency){
+    errors.push('Se requiere moneda');
+  }
+
+  if(!projectData.sector){
+    errors.push('Se requiere sector');
+  }
+
+  if(!projectData.status){
+    errors.push('Se requiere estatus');
+  }
+
+  if(!projectData.projectManagerId || !projectData.assemblerId || !projectData.electricalDesignerId || !projectData.mechanicalDesignerId) {
+    errors.push('No se definieron todos los responsables');
+  }
+
+  if(!projectData.poDate){
+    errors.push('Se requiere fecha de PO');
+  }
+
+  if(!projectData.deadline){
+    errors.push('Se requiere fecha fin');
+  }
+
+  if(!projectData.kickOffDate){
+    errors.push('Se requiere fecha de kickoff');
+  }
+
+  if(!projectData.proposedWeeks){
+    errors.push('Se requiere semanas propuestas');
+  }
+
+  return errors;
+}
+
+export function validateProjectBudgetAndTime(projectData: ProjectFormData): ProjectFormData{
+  // Inicializar valores predeterminados para evitar NaN si alguno es undefined
+  const otherBudget = projectData.otherBudget || 0;
+  const mechanicalBudget = projectData.mechanicalBudget || 0;
+  const machineBudget = projectData.machineBudget || 0;
+  const electricalBudget = projectData.electricalBudget || 0;
+  
+  // Si no hay máquinas, calculamos el presupuesto total directamente de los campos del proyecto
+  if(projectData.machines.length === 0) {
+    const updatedData: ProjectFormData = {
+      ...projectData, 
+      otherBudget,
+      mechanicalBudget,
+      machineBudget,
+      electricalBudget,
+      totalBudget: otherBudget + mechanicalBudget + machineBudget + electricalBudget,
+    };
+
+    return updatedData;
+  }
+
+  // Si hay máquinas, calculamos los presupuestos y tiempos sumando los valores de todas las máquinas
+  const calculatedMachineBudget = projectData.machines.reduce((acc, machine) => acc + (machine.machineBudget || 0), 0);
+  const calculatedElectricalBudget = projectData.machines.reduce((acc, machine) => acc + (machine.electricalBudget || 0), 0);
+  const calculatedMechanicalBudget = projectData.machines.reduce((acc, machine) => acc + (machine.mechanicalBudget || 0), 0);
+  const calculatedOtherBudget = projectData.machines.reduce((acc, machine) => acc + (machine.otherBudget || 0), 0);
+
+  // Calculamos el presupuesto total sumando todos los presupuestos calculados
+  const calculatedTotalBudget = calculatedMachineBudget + calculatedElectricalBudget + calculatedMechanicalBudget + calculatedOtherBudget;
+
+  const updatedData: ProjectFormData = {
+    ...projectData,
+    machineBudget: calculatedMachineBudget,
+    electricalBudget: calculatedElectricalBudget,
+    mechanicalBudget: calculatedMechanicalBudget,
+    otherBudget: calculatedOtherBudget,
+    totalBudget: calculatedTotalBudget,
+    otherTime: projectData.machines.reduce((acc, machine) => acc + (machine.otherTime || 0), 0),
+    electricalDesignTime: projectData.machines.reduce((acc, machine) => acc + (machine.electricalDesignTime || 0), 0),
+    mechanicalDesignTime: projectData.machines.reduce((acc, machine) => acc + (machine.mechanicalDesignTime || 0), 0),
+    assemblyTime: projectData.machines.reduce((acc, machine) => acc + (machine.assemblyTime || 0), 0),
+    developmentTime: projectData.machines.reduce((acc, machine) => acc + (machine.developmentTime || 0), 0)
+  };
+
+  return updatedData;
+}

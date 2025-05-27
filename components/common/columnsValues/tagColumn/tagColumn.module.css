@@ -1,0 +1,58 @@
+.tagContainer
+{
+  width: 100%;
+  height: 100%;
+  border-radius: 0 0 5px 5px;
+}
+
+.tagContainerText
+{
+  margin: 0;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  font-size: 1.2rem;
+  color: var(--bg-color);
+  cursor: pointer;
+  border-radius: 0 0 5px 5px;
+}
+
+.tagListContainer
+{
+  display: grid;
+  grid-template-columns: repeat(6, 100px);
+  grid-auto-rows: 30px;
+  gap: 10px;
+}
+
+.tagListContainer p
+{
+  margin: 0;
+  font-size: 1.2rem;
+  border-radius: 2px;
+  cursor: pointer;
+  overflow: hidden;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  padding-top: 10px;
+  color: var(--bg-color);
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+.tagListContainer p:hover
+{
+  transform: scale(1.05);
+}
+
+.generatorField
+{
+  margin: 15px auto;
+}
+
+.actionsContainer
+{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}

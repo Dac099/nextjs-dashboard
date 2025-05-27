@@ -1,8 +1,7 @@
 'use client';
 import styles from './itemDetail.module.css';
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState, useRef, RefObject } from "react";
-import useClickOutside from "@/hooks/useClickOutside";
+import { useEffect, useState, useRef } from "react";
 import { DetailView } from '@/components/common/detailView/detailView';
 import { FormNewItem } from '@/components/common/formNewItem/formNewItem';
 
@@ -29,10 +28,6 @@ export function ItemDetail() {
         setShowContainer(false);
     }
 
-    useClickOutside(containerRef as RefObject<HTMLDivElement>, () => {
-        closeContainer();
-    });
-
     useEffect(() => {
         if (itemId || isNewProject) setShowContainer(true);
     }, [isNewProject, itemId]);
@@ -43,7 +38,7 @@ export function ItemDetail() {
                 ref={containerRef}
                 className={styles.container}
             >
-                {itemId && <DetailView itemId={itemId} />}
+                {itemId && <DetailView itemId={itemId} closeContainer={closeContainer} />}
                 {isNewProject && <FormNewItem groupId={groupId as string} closeContainer={closeContainer} />}
             </article>
         );

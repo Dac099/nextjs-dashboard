@@ -9,6 +9,29 @@
     font-size: 2rem;
 }
 
+.loaderHeaderTitle
+{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.closeBtn
+{
+  color: rgb(201, 47, 47);
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+}
+
+.closeBtn:hover
+{
+  background-color: rgba(201, 47, 47, 0.466);
+  border-radius: 50%;
+}
+
 .loaderHeader p:last-child
 {
     text-align: right;

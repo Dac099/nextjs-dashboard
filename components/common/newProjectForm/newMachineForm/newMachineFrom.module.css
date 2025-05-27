@@ -1,0 +1,63 @@
+.title
+{
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 2rem;
+  color: var(--bg-color);
+  background-color: var(--action-color);
+  border-radius: 5px;
+}
+
+.inputTextContainer
+{
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.inputText
+{
+  height: 30px;
+  width: 250px;
+  padding: 0 5px;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  outline: none;
+  border: 1px solid var(--accent-color);
+  margin-top: 10px;
+}
+
+.inputTextLabel
+{
+  color: var(--action-color);
+  font-weight: bold;
+  font-size: 1.3rem;
+  display: block;
+}
+
+.dropdown
+{
+  width: 250px;
+  height: 30px;
+  border-radius: 5px;
+  outline: none;
+  border: 1px solid var(--accent-color);  
+}
+
+.actions
+{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.actions button
+{
+  background-color: var(--action-color);
+  color: var(--bg-color);
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}

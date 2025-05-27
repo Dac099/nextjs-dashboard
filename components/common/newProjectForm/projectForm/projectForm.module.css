@@ -1,0 +1,378 @@
+.buttonContainer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.actionBtn
+{
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  width: 100px;
+}
+
+.projectTypeContainer
+{
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.projectType
+{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.projectTypeGenerator
+{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 30px;
+}
+
+.dropdown
+{
+  width: 250px;
+  height: 30px;
+  border-radius: 5px;
+  outline: none;
+  border: 1px solid var(--accent-color);  
+}
+
+.projectTypeGenerator p
+{
+  color: var(--action-color);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.projectTypeGeneratorManual
+{
+  margin-bottom: 30px;
+}
+
+.inputText
+{
+  height: 30px;
+  width: 250px;
+  padding: 0 5px;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  outline: none;
+  border: 1px solid var(--accent-color);
+  margin-top: 10px;
+}
+
+.inputNumber
+{
+  height: 30px;
+  width: 250px;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.inputTextLabel
+{
+  color: var(--action-color);
+  font-weight: bold;
+  font-size: 1.3rem;
+  display: block;
+}
+
+.switchSelection
+{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 20px;
+  padding-left: 10px;
+  margin-bottom: 10px;
+}
+
+.clientInfo
+{
+  margin-top: 30px;
+}
+
+.dropdownLabel
+{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 20px 0;
+}
+
+.dropdownLabel label
+{
+  padding-left: 10px;
+}
+
+.projectInfo
+{
+  margin: 30px 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 15px;
+}
+
+.inputGroup
+{
+  height: 30px;
+  width: 250px;
+}
+
+.inputGroup input
+{
+  height: 30px;
+  padding: 0 5px;
+  font-size: 1.2rem;
+  outline: none;
+}
+
+.chipsContainer 
+{
+  width: 100%;
+  margin: 30px 0;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  align-items: center;
+  align-content: center;
+}
+
+.chipsActions
+{
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Estilos personalizados para el componente Chips */
+.chipsContainer :global(.p-chips) {
+  width: 100%;
+}
+
+/* Estilo para el contenedor del input */
+.chipsContainer :global(.p-inputtext) {
+  height: 30px !important;
+  border-radius: 5px !important;
+  width: 100% !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 6px !important;
+  color: var(--font-color) !important;
+  font-size: 0.95rem !important;
+}
+
+/* Enfoque en el input */
+.chipsContainer :global(.p-inputtext:focus) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Estilo para el componente Chips completo */
+.chipsInput {
+  width: 100%;
+  height: 30px;
+  border-radius: 5px;
+}
+
+/* Asegurar que el contenedor del chip tiene el tamaño adecuado */
+.chipsContainer :global(.p-chips-multiple-container) {
+  min-height: 30px;
+  border-radius: 5px;
+  width: 100%;
+  padding: 3px 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  background-color: var(--bg-color);
+  border: 1px solid var(--accent-color);
+}
+
+/* Estilo para cada chip individual */
+.chipsContainer :global(.p-chips-token) {
+  height: 24px;
+  border-radius: 5px;
+  margin: 0 2px;
+  background-color: var(--action-color);
+  color: var(--bg-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 5px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* Hover en los chips */
+.chipsContainer :global(.p-chips-token:hover) {
+  background-color: var(--action-color);
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para el label del chip */
+.chipsContainer :global(.p-chips-token-label) {
+  margin-right: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+/* Estilo para el icono de remover */
+.chipsContainer :global(.p-chips-token-icon) {
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--bg-color);
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  margin-left: 3px;
+}
+
+/* Hover en el icono de remover */
+.chipsContainer :global(.p-chips-token-icon:hover) {
+  opacity: 1;
+}
+
+.dialogWindow
+{
+  width: 50vw;
+  min-height: max-content;
+}
+
+.dialogWindow :global(.p-dialog-content), 
+.dialogWindow :global(.p-dialog-header)
+{
+  background-color: var(--sec-bg-color);
+  color: var(--font-color);
+  padding: 5px;
+}
+
+.dialogWindow :global(.p-dialog-header)
+{
+  border-bottom: 1px solid var(--accent-color);
+}
+
+.dialogWindow :global(.p-dialog-title)
+{
+  font-size: 1.8rem;
+  color: var(--action-color);
+}
+
+/* Estilos para el Accordion */
+:global(.p-accordion) {
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para la cabecera del AccordionTab */
+:global(.p-accordion .p-accordion-header) {
+  background-color: var(--sec-bg-color);
+  border: none;
+  margin: 0;
+}
+
+:global(.p-accordion .p-accordion-header .p-accordion-header-link) {
+  padding: 12px 15px;
+  background-color: var(--sec-bg-color);
+  color: var(--font-color);
+  font-weight: bold;
+  border: none;
+  border-bottom: 1px solid var(--accent-color);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+:global(.p-accordion .p-accordion-header:hover .p-accordion-header-link) {
+  background-color: var(--accent-color);
+}
+
+:global(.p-accordion .p-accordion-header .p-accordion-header-link:focus) {
+  box-shadow: none;
+  outline: none;
+}
+
+/* Estilo para el icono del acordeón */
+:global(.p-accordion .p-accordion-toggle-icon) {
+  margin-right: 8px;
+  color: var(--action-color);
+}
+
+/* Estilo para el panel de contenido */
+:global(.p-accordion .p-accordion-content) {
+  padding: 15px;
+  background-color: var(--bg-color);
+  border: none;
+  border-bottom: 1px solid var(--accent-color);
+}
+
+/* Estilo para el acordeón activo */
+:global(.p-accordion .p-accordion-tab.p-accordion-tab-active .p-accordion-header-link) {
+  background-color: var(--action-color);
+  color: var(--bg-color);
+}
+
+/* Estilos para las tarjetas de datos de máquina */
+.machineDataCard {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: var(--sec-bg-color);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.machineDataCardTitle {
+  font-size: 1.4rem;
+  color: var(--action-color);
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--accent-color);
+  padding-bottom: 5px;
+}
+
+.machineDataCardContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.formNotes
+{
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tagFolio, .p-tag, .p-component
+{
+  background-color: var(--action-color);
+  color: var(--bg-color);
+  height: 25px;
+  width: 80px;
+  font-size: 1.4rem;
+}
+
+:global(.p-calendar .p-component)
+{
+  height: 30px;
+  margin-top: 10px;
+  width: 150px;
+  padding-left: 5px;
+  font-size: 1.2rem;
+}

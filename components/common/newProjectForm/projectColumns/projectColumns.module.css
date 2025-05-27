@@ -1,0 +1,57 @@
+.buttonContainer
+{
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.actionBtn
+{
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  width: 100px;
+}
+
+.columnsContainer
+{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-auto-rows: 100px;
+  gap: 10px;
+}
+
+.columnContainer
+{
+  border: 1px solid var(--accent-color);
+  border-radius: 5px;
+  margin-bottom: 20px;
+  padding: 0;
+  display: grid;
+  grid-template-rows: 40% 60%;
+}
+
+.columnContainer:hover
+{
+  box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.2);
+}
+
+.columnHeader
+{
+  border-bottom: 1px solid var(--accent-color);
+}
+
+.columnHeader p
+{
+  font-size: 1.5rem;
+  margin: 5px 0;
+  user-select: none;
+  padding-left: 10px;
+}
+
+.columnContent
+{
+  height: 100%;
+}

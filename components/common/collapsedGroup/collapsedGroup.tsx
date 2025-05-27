@@ -53,7 +53,8 @@ export function CollapsedGroup({group, columns, items, values, setIsCollapsed, i
         <p 
           className={styles.itemsCount}
           style={{
-            backgroundColor: group.color
+            backgroundColor: group.color,
+            margin: '0'
           }}
         >
           {items?.length || 0} {items && items.length === 1 ? 'Item'  : 'Items'}

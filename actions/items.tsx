@@ -423,15 +423,47 @@ export async function deleteTagStatus(tagId: string, value: string, columnId: st
       .input('value', value)
       .query(updateQuery);
     
-      if(resultUpdate.rowsAffected[0] <= 0) throw new Error('No se actualizaron los tags asociados al valor');
-
     return resultUpdate.rowsAffected[0];
   }catch(e){
     if (e instanceof Error) {
       console.log('Error on delete tag status');
-      console.log(`ERROR MESSAGE: ${e.message}`);
+      console.log(`ERROR MESSAGE: ${e instanceof Error ? e.message : e}`);
     }
-    console.log('Error on delete tag status');
     return 0;
+  }
+}
+
+
+export async function insertTableValues(itemId: string, values: {columnId: string, value: string}[]): Promise<void> {
+  try {
+    await connection.connect();
+    
+    // Ejecutar una consulta de inserción por cada valor
+    for (const val of values) {
+      const insertQuery: string = `
+        INSERT INTO TableValues (
+          item_id, 
+          column_id, 
+          value, 
+          created_at
+        )
+        VALUES (@itemId, @columnId, @value, GETDATE())
+      `;
+      
+      await connection
+        .request()
+        .input('itemId', itemId)
+        .input('columnId', val.columnId)
+        .input('value', val.value)
+        .query(insertQuery);
+    }
+  }catch(e){
+    if (e instanceof Error) {
+      console.log('Error on insert table values');
+      console.log(`ERROR MESSAGE: ${e.message}`);
+      return;
+    }
+    console.log('Error on insert table values');
+    console.log(`ERROR MESSAGE: ${e}`);
   }
 }

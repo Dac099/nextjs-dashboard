@@ -19,9 +19,10 @@ import { FaToolbox } from "react-icons/fa6";
 
 type Props = {
   itemId: string;
+  closeContainer: () => void;
 }
 
-export function DetailView({ itemId }: Props) {
+export function DetailView({ itemId, closeContainer }: Props) {
   const [projectData, setProjectData] = useState<ProjectData | null>(null);
   const [itemDetail, setItemDetail] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -80,7 +81,10 @@ export function DetailView({ itemId }: Props) {
   return (
     <>
       <section className={styles.loaderHeader}>
-        <p>{itemDetail[0].name}</p>
+        <section className={styles.loaderHeaderTitle}>
+          <span className={styles.closeBtn} onClick={closeContainer}>x</span>
+          <p>{itemDetail[0].name}</p>
+        </section>
         <p>{formatDate(itemDetail[0].created_at)}</p>
       </section>
 

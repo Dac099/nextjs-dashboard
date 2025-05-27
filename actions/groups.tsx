@@ -11,7 +11,8 @@ import {
   BoardData,
   Group,
   StatusValue,
-  StatusByColumn
+  StatusByColumn,
+  Column
 } from "@/utils/types/groups";
 import sql from "mssql";
 import { buildInsertItemsBatchQuery } from "@/utils/actionsGrups/helpers";
@@ -51,7 +52,7 @@ export async function GetBoardData(boardId: string): Promise<BoardData> {
   };
 }
 
-async function fetchStatusBoard(boardId: string): Promise<StatusByColumn> {
+export async function fetchStatusBoard(boardId: string): Promise<StatusByColumn> {
   const query: string = `
     SELECT 
       tv.id,
@@ -152,7 +153,7 @@ async function fetchBoardItems(boardId: string): Promise<GroupItem> {
   }, new Map<string, Item[]>());
 }
 
-async function fetchColumnsGroups(boardId: string): Promise<ColumnsGroups> {
+export async function fetchColumnsGroups(boardId: string): Promise<ColumnsGroups> {
   await connection.connect();
   const boardQuery: string = `
     SELECT 
@@ -387,31 +388,6 @@ export async function setTableValue(
   return itemCreated;
 }
 
-export async function getBoardStatusList(columnId: string): Promise<{ color: string, text: string, id: string }[]> {
-  await connection.connect();
-
-  const selectQuery: string = `
-    SELECT 
-        id,
-        value 
-    FROM TableValues
-    WHERE column_id = @columnId 
-        AND item_id IS NULL
-        AND deleted_at IS NULL
-    ORDER BY created_at DESC
-  `;
-
-  const result = await connection
-    .request()
-    .input('columnId', columnId)
-    .query(selectQuery);
-
-  return result.recordset.map((res): { color: string, text: string, id: string } => ({
-    ...JSON.parse(res.value),
-    id: res.id
-  }));
-}
-
 export async function addStatusColumn(columnId: string, value: string, boardId: string, viewId: string): Promise<string> {
   await connection.connect();
   const query: string = `
@@ -629,3 +605,31 @@ export async function setPercentageValue(
     console.log(e);
   }
 }
+
+export async function getColumnsBoard(boardId: string): Promise<Column[]> {
+  try {
+    await connection.connect();
+    const selectQuery: string = `
+      SELECT 
+        id,
+        name,
+        type,
+        position
+      FROM Columns 
+      WHERE deleted_at IS NULL
+      AND board_id = @boardId
+      ORDER BY position ASC
+    `;
+
+    const result = await connection
+      .request()
+      .input('boardId', boardId)
+      .query(selectQuery);
+    
+    return result.recordset;
+  }catch(e){
+    console.error('ERROR: occurred while fetching columns');
+    throw e
+  }
+}
+

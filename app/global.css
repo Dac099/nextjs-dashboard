@@ -1,3 +1,4 @@
+
 :root
 {
   --sec-bg-color: #fffffe;
@@ -24,8 +25,6 @@
 
 *
 {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
   scrollbar-color: var(--accent-color) rgba(0,0,0,0);
   scrollbar-width: thin;
@@ -57,7 +56,7 @@ a
   color: inherit;
 }
 
-input, button, textarea
+input, button, textarea, select
 {
   font-family: inherit;
 }

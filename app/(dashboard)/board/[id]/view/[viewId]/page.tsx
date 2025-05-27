@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation';
 import { verifySession } from '@/utils/dal';
 import { ROLES } from '@/utils/roleDefinition';
 
+
 type Props = {
   params: Promise<{ id: string; viewId: string }>;
 };

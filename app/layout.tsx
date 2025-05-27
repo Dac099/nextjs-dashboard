@@ -1,9 +1,13 @@
-'use client';
+// PrimeReact imports
+import 'primeicons/primeicons.css';
+import 'primereact/resources/themes/lara-light-purple/theme.css';
+import 'primereact/resources/primereact.min.css';
 
 import './global.css';
 import { Poppins } from 'next/font/google';
-import useThemeStore from '@/stores/themeStore';
-import { useEffect } from 'react';
+import { PrimeReactProvider } from '@/providers/PrimeReactProvider';
+import { ThemeInitializer } from '@/components/common/themeInitializer/themeInitializer';
+
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -11,16 +15,14 @@ const poppins = Poppins({
 });
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
-  const theme = useThemeStore((state) => state.theme);
-
-  useEffect(() => {
-    document.body.setAttribute('data-theme', theme);
-  }, [theme]);
 
   return (
     <html lang="es" className={`${poppins.className} antialiased`}>
       <body>
-        {children}
+        <PrimeReactProvider>
+          <ThemeInitializer />
+          {children}
+        </PrimeReactProvider>
       </body>
     </html>
   );
