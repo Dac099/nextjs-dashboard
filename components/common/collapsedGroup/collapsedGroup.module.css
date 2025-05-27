@@ -11,6 +11,11 @@
   grid-auto-columns: minmax(200px, 1fr);
 }
 
+.container *
+{
+  margin: 0;
+}
+
 .groupHeader
 {
   display: grid;
