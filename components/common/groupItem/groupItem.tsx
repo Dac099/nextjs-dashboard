@@ -7,9 +7,10 @@ import { GroupHeaderColumn } from "../groupHeaderColumn/groupHeaderColumn";
 import { AddItemSection } from "@/components/common/addItemSection/addItemSection";
 import { ItemRow } from "@/components/common/itemRow/itemRow";
 import { LuChevronDown as Arrow } from "react-icons/lu";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CollapsedGroup } from '../collapsedGroup/collapsedGroup';
 import { useRoleUserActions } from "@/stores/roleUserActions";
+import { useBoardConfigurationStore } from '@/stores/boardConfiguration';
 
 type Props = {
 	group: Group;
@@ -20,7 +21,12 @@ type Props = {
 
 export function GroupItem({ group, columns, items, values }: Props) {
 	const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
+	const expandedGroups = useBoardConfigurationStore((state) => state.expandedGroups);
 	const userActions = useRoleUserActions((state) => state.userActions);
+
+	useEffect(() => {
+		setIsCollapsed(!expandedGroups);
+	}, [expandedGroups]);
 
 	if (isCollapsed) {
 		return <CollapsedGroup

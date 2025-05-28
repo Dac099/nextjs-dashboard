@@ -1,11 +1,10 @@
 'use client';
 import styles from './boardControllers.module.css';
 import { useState } from 'react';
-import { TbTableFilled } from "react-icons/tb";
 import { Columns } from '@/utils/types/groups';
 import { useParams } from 'next/navigation';
 import { GroupTemplate } from '../groupTemplate/groupTemplate';
-import { FaFileExport } from "react-icons/fa";
+import { useBoardConfigurationStore } from '@/stores/boardConfiguration';
 
 type Props = {
   boardId: string;
@@ -15,6 +14,8 @@ type Props = {
 
 export function BoardControllers({ boardId, columns, groupsCount }: Props) {
   const { viewId } = useParams() as { viewId: string };
+  const setExpandedGroups = useBoardConfigurationStore((state) => state.setExpandedGroups);
+  const expandedGroups = useBoardConfigurationStore((state) => state.expandedGroups);
   const [showGroupTemplate, setShowGroupTemplate] = useState<boolean>(false);
   const columnsArray = Array.from(columns.values());
 
@@ -30,9 +31,7 @@ export function BoardControllers({ boardId, columns, groupsCount }: Props) {
           onClick={handleShowGroupTemplate}
           className={styles.actionBtn}
         >
-          <span className={styles.btnIcon}>
-            <TbTableFilled size={20} />
-          </span>
+          <i className={`pi pi-plus ${styles.btnIcon}`}></i>
           <p>Agregar grupo</p>
         </button>
 
@@ -40,11 +39,18 @@ export function BoardControllers({ boardId, columns, groupsCount }: Props) {
           href={`/board/${boardId}/view/${viewId}/api`}
           className={styles.actionBtn}
         >
-          <span className={styles.btnIcon}>
-            <FaFileExport size={15} />
-          </span>
+          <i className={`pi pi-file-export ${styles.btnIcon}`}></i>
           <p>Exportar tablero</p>
         </a>
+
+        <button 
+          type="button"
+          className={styles.actionBtn}
+          onClick={() => setExpandedGroups(!expandedGroups)}
+        >
+          <i className={`pi pi-expand ${styles.btnIcon}`}></i>
+          <p>{expandedGroups ? 'Colapsar grupos' : 'Expandir grupos'}</p>
+        </button>
       </section>
 
       {showGroupTemplate &&

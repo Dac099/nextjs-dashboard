@@ -13,6 +13,7 @@
   border: none;
   background-color: var(--action-color);
   color: var(--bg-color);
+  margin: 0;
 }
 
 .actionBtn:hover {
@@ -20,8 +21,7 @@
 }
 
 .btnIcon {
-  display: grid;
-  place-content: center;
+  font-size: 1.5rem;
 }
 
 .actionBtn p {
@@ -30,6 +30,7 @@
   display: grid;
   place-content: center;
   padding-bottom: 3px;
+  margin: 0;
 }
 .emptyGroupsTitle {
   position: absolute;
