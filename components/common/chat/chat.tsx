@@ -102,7 +102,7 @@ export default function Chat({ chat, userData }: Props) {
     <section className={styles.mainContent}>
       <section className={styles.headerChat}>
         <UserIcon className={styles.userIcon} />
-        <p>{chat.author.name}</p>
+        <p>{chat.author.id}</p>
       </section>
 
       <EditorContent editor={editor} />
@@ -114,7 +114,7 @@ export default function Chat({ chat, userData }: Props) {
         >
           Comentar
         </button>
-        {chat.author.id === userData.id && !editContainer &&
+        {(chat.author.id.toString() === userData.id.toString() || chat.author.name == userData.name) && !editContainer &&
           <button
             className={`${styles.controlBtn} ${styles.editBtn}`}
             onClick={handleSetEditContainer}

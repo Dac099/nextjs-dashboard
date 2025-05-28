@@ -11,12 +11,12 @@ type Props = {
 };
 
 export function ChatsContainer({ itemChats, setItemChats }: Props) {
-  const [userId, setUserId] = useState<{ id: string; name: string }>({} as { id: string; name: string });
+  const [userData, setUserData] = useState<{ id: string; name: string }>({} as { id: string; name: string });
 
   useEffect(() => {
     async function fetchData() {
-      const dataResponse = await getUserInfo();
-      setUserId(dataResponse);
+      const userAccessData = await getUserInfo();
+      setUserData(userAccessData);
     }
 
     fetchData();
@@ -36,7 +36,7 @@ export function ChatsContainer({ itemChats, setItemChats }: Props) {
           <Chat
             key={chat.id}
             chat={chat}
-            userData={userId}
+            userData={userData}
           />
         ))}
       </section>
