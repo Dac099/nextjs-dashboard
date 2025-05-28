@@ -273,62 +273,6 @@
   color: var(--action-color);
 }
 
-/* Estilos para el Accordion */
-:global(.p-accordion) {
-  margin: 20px 0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilos para la cabecera del AccordionTab */
-:global(.p-accordion .p-accordion-header) {
-  background-color: var(--sec-bg-color);
-  border: none;
-  margin: 0;
-}
-
-:global(.p-accordion .p-accordion-header .p-accordion-header-link) {
-  padding: 12px 15px;
-  background-color: var(--sec-bg-color);
-  color: var(--font-color);
-  font-weight: bold;
-  border: none;
-  border-bottom: 1px solid var(--accent-color);
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-}
-
-:global(.p-accordion .p-accordion-header:hover .p-accordion-header-link) {
-  background-color: var(--accent-color);
-}
-
-:global(.p-accordion .p-accordion-header .p-accordion-header-link:focus) {
-  box-shadow: none;
-  outline: none;
-}
-
-/* Estilo para el icono del acordeón */
-:global(.p-accordion .p-accordion-toggle-icon) {
-  margin-right: 8px;
-  color: var(--action-color);
-}
-
-/* Estilo para el panel de contenido */
-:global(.p-accordion .p-accordion-content) {
-  padding: 15px;
-  background-color: var(--bg-color);
-  border: none;
-  border-bottom: 1px solid var(--accent-color);
-}
-
-/* Estilo para el acordeón activo */
-:global(.p-accordion .p-accordion-tab.p-accordion-tab-active .p-accordion-header-link) {
-  background-color: var(--action-color);
-  color: var(--bg-color);
-}
-
 /* Estilos para las tarjetas de datos de máquina */
 .machineDataCard {
   margin-bottom: 20px;
@@ -368,11 +312,3 @@
   font-size: 1.4rem;
 }
 
-:global(.p-calendar .p-component)
-{
-  height: 30px;
-  margin-top: 10px;
-  width: 150px;
-  padding-left: 5px;
-  font-size: 1.2rem;
-}

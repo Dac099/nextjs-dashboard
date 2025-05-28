@@ -1,4 +1,3 @@
-import styles from './tableMachines.module.css';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { useEffect, useState } from 'react';
@@ -59,7 +58,7 @@ export function TableMachines({ projectFormData, setProjectFormData, closeDialog
 
   const renderHeader = () => {
     return (
-      <div className={styles.tableHeader}>
+      <div>
         <InputText
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
