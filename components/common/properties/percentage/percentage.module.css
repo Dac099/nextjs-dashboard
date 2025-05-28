@@ -12,6 +12,7 @@
   border: none;
   text-align: center;
   font-family: inherit;
+  margin: 0;
 }
 
 .percentValue
@@ -20,4 +21,5 @@
   height: 100%;
   display: grid;
   place-content: center;
+  margin: 0;
 }
