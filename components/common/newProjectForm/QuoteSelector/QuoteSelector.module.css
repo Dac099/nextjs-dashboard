@@ -26,23 +26,6 @@
   gap: 3px
 }
 
-/* Estilos para el header del DataTable */
-.tableHeader {
-  background-color: var(--surface-card);
-  color: var(--primary-color);
-  font-weight: 600;
-  padding: 1rem;
-  border-bottom: 2px solid var(--primary-color);
-}
-
-/* Estilos para la tabla */
-.dataTable :global(.p-datatable-thead > tr > th) {
-  background-color: var(--surface-ground);
-  color: var(--text-color);
-  font-weight: 600;
-  border-bottom: 1px solid var(--primary-color);
-}
-
 .customHeader {
   display: flex;
   align-items: center;
