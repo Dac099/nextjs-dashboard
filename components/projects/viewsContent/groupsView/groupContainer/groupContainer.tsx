@@ -42,10 +42,10 @@ export function GroupContainer({ groupData, boardColumns }: Props) {
           >
             <td className={css.cell}>{item.name}</td>
             {boardColumns.map((column) => {
-              const value = item.values.find((v) => v.columnId === column.id);
+              // const value = item.values.find((v) => v.columnId === column.id);
               return (
                 <td key={column.id} className={css.cell}>
-                  {value ? value.value : ''}
+                  <p>value</p>
                 </td>
               );
             })}
