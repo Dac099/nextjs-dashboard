@@ -4,5 +4,5 @@
     min-width: 0;
     white-space: nowrap;
     height: calc(95vh - 100px);
-    overflow: auto;    
+    overflow: auto;  
 }

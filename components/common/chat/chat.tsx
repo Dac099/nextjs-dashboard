@@ -114,7 +114,7 @@ export default function Chat({ chat, userData }: Props) {
         >
           Comentar
         </button>
-        {(chat.author.id.toString() === userData.id.toString() || chat.author.name == userData.name) && !editContainer &&
+        {(chat.author.id == userData.id || chat.author.name == userData.name) && !editContainer &&
           <button
             className={`${styles.controlBtn} ${styles.editBtn}`}
             onClick={handleSetEditContainer}
