@@ -1,14 +1,10 @@
-import { BoardData } from "@/utils/types/groups";
 import styles from "./styles.module.css";
-import { GetBoardData } from "@/actions/groups";
-import GroupsView from "@/app/components/common/groupsView/groupsView";
-import { GanttContainer } from "@/components/common/ganttContainer/ganttContainer";
-import { getViewType, getWorkspaceAndBoardData } from "@/actions/boards";
-import { getGanttChartData } from "@/actions/gantt";
-import { redirect } from 'next/navigation';
-import { verifySession } from '@/utils/dal';
-import { ROLES } from '@/utils/roleDefinition';
-
+import { validateBoardAccess } from "@/utils/validateBoardAccess";
+import { UserActionsProvider } from "@/components/dashboard/userActionsProvider/userActionsProvider";
+import { Suspense } from 'react';
+import { GroupsSkeleton } from './groupsSkeleton';
+import { GroupsView } from '@/components/projects/viewsContent/groupsView/groupsView';
+import { getBoardData, getBoardColumns } from '@/actions/boards';
 
 type Props = {
   params: Promise<{ id: string; viewId: string }>;
@@ -16,49 +12,19 @@ type Props = {
 
 export default async function Page({ params }: Props) {
   const { id: boardId, viewId } = await params;
-  const result = await getWorkspaceAndBoardData(boardId);
-
-  if (!result || result.length === 0) {
-    redirect('/not-found');
-  }
-
-  const { workspaceName, boardName } = result;
-  const { role } = await verifySession();
-  const userWorkspace = ROLES[role].permissions.find(permission => permission.workspace === workspaceName);
-
-  if (
-    !userWorkspace ||
-    !userWorkspace.boards.includes(boardName) &&
-    !userWorkspace.boards.includes('*')
-  ) {
-    redirect('/');
-  }
-
-  const boardData: BoardData = await GetBoardData(boardId);
-  const arrayGroups = Array.from(boardData.groups.values());
-  const viewType: string = await getViewType(viewId);
-
-  if(!viewType){
-    redirect('/not-found');
-  }
-
-  const gantData = await getGanttChartData(boardId);
-  const allowedUserActions = userWorkspace.actions;
+  const { allowedUserActions, viewType } = await validateBoardAccess(boardId, viewId);
+  const boardDataPromise = getBoardData(boardId);
+  const boardColumnsPromise = getBoardColumns(boardId);
 
   return (
     <article className={styles.container}>
-      {viewType === "groups" && (
-        <GroupsView
-          boardId={boardId}
-          columns={boardData.columns}
-          groups={arrayGroups}
-          itemsByGroup={boardData.itemsByGroup}
-          valuesByItem={boardData.valuesByItem}
-          userActions={allowedUserActions}
-          boardStatus={boardData.statusBoard}
-        />
-      )}
-      {viewType === "gantt" && <GanttContainer boardData={gantData} />}
+      <UserActionsProvider allowedUserActions={allowedUserActions} />
+      
+      <section className={styles.contentView} data-view-type={viewType}>
+        <Suspense fallback={<GroupsSkeleton />}>
+          <GroupsView boardDataPromise={boardDataPromise} boardColumnsPromise={boardColumnsPromise} />
+        </Suspense>
+      </section>
     </article>
   );
 }

@@ -19,7 +19,7 @@ export default async function Layout({ params, children }: Props) {
     <article style={{position: "relative"}}>
       <ItemDetail />
       <HeaderBoard views={views} boardId={boardId} userActions={actions}/>
-      {children}
+        {children}
     </article>
   );
 }
