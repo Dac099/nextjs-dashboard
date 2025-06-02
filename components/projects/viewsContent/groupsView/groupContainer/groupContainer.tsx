@@ -27,7 +27,6 @@ export function GroupContainer({ groupData, boardColumns }: Props) {
             <th 
               key={column.id}
               className={`${css.cellHeader} ${css.cell}`}
-              draggable={true}
             >
               {column.name}
             </th>
@@ -38,7 +37,6 @@ export function GroupContainer({ groupData, boardColumns }: Props) {
         {groupData.items.map((item) => (
           <tr 
             key={item.id}
-            draggable={true}
           >
             <td className={css.cell}>{item.name}</td>
             {boardColumns.map((column) => {

@@ -5,6 +5,7 @@
   margin: 20px 0;
   border-spacing: 0;
   width: max-content;
+  table-layout: fixed;
 }
 
 .groupContainer, .cellHeader, .cell
@@ -18,7 +19,8 @@
   font-size: 1.3rem;
   font-weight: normal;
   height: 30px;
-  min-width: 80px;
+  min-width: 120px;
+  width: 120px;
 }
 
 .groupContainer thead tr th:first-child
