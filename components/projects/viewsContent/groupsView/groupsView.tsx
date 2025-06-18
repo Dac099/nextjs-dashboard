@@ -1,9 +1,29 @@
 'use client';
 import css from './groupsView.module.css';
-// import { useRoleUserActions } from '@/stores/roleUserActions';
-import { use, useEffect } from 'react';
-import type { ColumnData, GroupData } from '@/utils/types/views';
+import { use, useState } from 'react';
+import type { ColumnData, GroupData, ItemData as RowData } from '@/utils/types/views'; // Renombrar ItemData a RowData para consistencia
 import { GroupContainer } from './groupContainer/groupContainer';
+import { useResizableColumns } from "@/hooks/useResizableColumns";
+import { GroupContainerWrapper } from './groupContainer/groupContainerWrapper';
+import { SortableDraggableRow } from './sortableDraggableRow/sortableDraggableRow'; // Asegúrate de tener este import
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  DragOverlay,
+  DragStartEvent,
+  DragEndEvent
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove
+} from "@dnd-kit/sortable";
+import {
+  restrictToVerticalAxis,
+  restrictToHorizontalAxis
+} from '@dnd-kit/modifiers';
 
 type Props = {
   boardDataPromise: Promise<GroupData[]>;
@@ -11,150 +31,192 @@ type Props = {
 };
 
 export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
-  // const userActions = useRoleUserActions(state => state.userActions);
-  const boardData = use(boardDataPromise);
-  const boardColumns = use(boardColumnsPromise);
+  const [boardData, setBoardData] = useState<GroupData[]>(use(boardDataPromise));
+  const [boardColumns, setBoardColumns] = useState<ColumnData[]>(use(boardColumnsPromise));
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const sensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      delay: 100,
+      tolerance: 5
+    }
+  })
 
-  useEffect(() => {
-    const tables = document.getElementsByTagName('table');
-    
-    if(tables.length === 0) return;
+  useResizableColumns();
 
-    const createResizerElement = (tableHeight: number) => {
-      const resizerElement = document.createElement('div');
-      resizerElement.className = 'column-resizer';
-      resizerElement.style.top = '0';
-      resizerElement.style.right = '-2px';
-      resizerElement.style.width = '4px';      
-      resizerElement.style.position = 'absolute';
-      resizerElement.style.cursor = 'col-resize';
-      resizerElement.style.backgroundColor = 'transparent';
-      resizerElement.style.userSelect = 'none';
-      resizerElement.style.height = `${tableHeight}px`;
-      resizerElement.style.zIndex = '10';
-      return resizerElement;
-    }    
-    
-    // Función para sincronizar el ancho de columnas entre todas las tablas
-    const syncColumnWidths = (columnIndex: number, newWidth: number) => {
-      Array.from(tables).forEach(table => {
-        // Configurar la tabla para layout fijo
-        table.style.tableLayout = 'fixed';
-        table.style.width = 'max-content';
-        
-        const firstRow = table.getElementsByTagName('tr')[0];
-        if (firstRow) {
-          const cells = firstRow.getElementsByTagName('th');
-          if (cells[columnIndex]) {
-            cells[columnIndex].style.width = `${newWidth}px`;
-            cells[columnIndex].style.minWidth = `${newWidth}px`;
-            cells[columnIndex].style.maxWidth = `${newWidth}px`;
-          }
+  const findGroup = (id: string): GroupData | undefined => boardData.find(group => group.id === id);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) {
+      setActiveId(null);
+      return;
+    }
+
+    const activeType = active.data.current?.type;
+    const overType = over.data.current?.type; // Puede ser 'group' o 'column' o 'row'
+
+    // Lógica para reordenar TABLAS (Groups)
+    if (activeType === 'group' && overType === 'group') {
+      const oldIndex = boardData.findIndex(group => group.id === active.id);
+      const newIndex = boardData.findIndex(group => group.id === over.id);
+
+      if (oldIndex !== newIndex) {
+        setBoardData(prev => arrayMove(prev, oldIndex, newIndex));
+      }
+    }
+    // Lógica para reordenar COLUMNAS
+    else if (activeType === 'column' && overType === 'column') {
+      const oldIndex = boardColumns.findIndex(column => column.id === active.id);
+      const newIndex = boardColumns.findIndex(column => column.id === over.id);
+
+      if (oldIndex !== newIndex) {
+        setBoardColumns(prev => arrayMove(prev, oldIndex, newIndex));
+      }
+    }
+    // Lógica para reordenar FILAS O MOVER FILAS ENTRE GRUPOS
+    else if (activeType === 'row') {
+      const activeRowParentId = active.data.current?.parentGroupId as string; // Asegurarse de que sea string
+      const overContainerId = over.id as string; // El ID del elemento sobre el que se soltó (puede ser una fila o un grupo)
+
+      const activeGroup = findGroup(activeRowParentId);
+      const activeRow = active.data.current?.rowData as RowData; // Acceder a los datos completos de la fila activa
+
+      if (!activeGroup || !activeRow) {
+        setActiveId(null);
+        return;
+      }
+
+      // Si se soltó sobre un DROPPABLE de grupo (GroupContainerWrapper es droppable)
+      const overIsGroup = boardData.some(group => group.id === overContainerId);
+      
+      const newBoardData = [...boardData]; // Crear una copia mutable para la manipulación
+
+      // 1. Eliminar la fila del grupo de origen
+      const sourceGroupIndex = newBoardData.findIndex(g => g.id === activeGroup.id);
+      if (sourceGroupIndex !== -1) {
+          newBoardData[sourceGroupIndex].items = newBoardData[sourceGroupIndex].items.filter(row => row.id !== active.id);
+      } else {
+          // Esto no debería pasar si activeGroup se encontró
+          setActiveId(null);
+          return;
+      }
+
+      // 2. Insertar la fila en el grupo de destino
+      if (overIsGroup) { // Se soltó sobre un GroupContainerWrapper (un grupo)
+        const destinationGroupIndex = newBoardData.findIndex(g => g.id === overContainerId);
+        if (destinationGroupIndex !== -1) {
+            newBoardData[destinationGroupIndex].items.push(activeRow); // Añadir al final del grupo
         }
-      });
-    };
+      } else { // Se soltó sobre otra fila
+        const overRowParentId = over.data.current?.parentGroupId as string;
+        const destinationGroupIndex = newBoardData.findIndex(g => g.id === overRowParentId);
+        const overRowIndex = newBoardData[destinationGroupIndex]?.items.findIndex(row => row.id === over.id);
 
-    const setListeners = (resizerElement: HTMLDivElement, columnIndex: number) => {
-      let isResizing = false;
-      let startX: number;
-      let startWidth: number;
-
-      const handleMouseDown = (e: MouseEvent) => {
-        isResizing = true;
-        startX = e.clientX;
-        
-        // Obtener el ancho actual de la columna
-        const parentTh = resizerElement.parentElement as HTMLTableCellElement;
-        startWidth = parentTh.offsetWidth;
-        
-        document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
-        
-        e.preventDefault();
-      };
-
-      const handleMouseMove = (e: MouseEvent) => {
-        if (!isResizing) return;
-        
-        const diffX = e.clientX - startX;
-        const newWidth = Math.max(120, startWidth + diffX); // Mínimo 120px
-
-        // Sincronizar el ancho en todas las tablas
-        syncColumnWidths(columnIndex, newWidth);
-        
-        e.preventDefault();
-      };
-
-      const handleMouseUp = () => {
-        if (!isResizing) return;
-        
-        isResizing = false;
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
-      };
-
-      resizerElement.addEventListener('mousedown', handleMouseDown);
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-
-      // Cleanup function para remover listeners
-      return () => {
-        resizerElement.removeEventListener('mousedown', handleMouseDown);
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    };    
-    
-    const resizableGrid = (table: HTMLTableElement) => {
-      // Verificar si ya se procesó esta tabla
-      if (table.hasAttribute('data-resizable')) return;
-      
-      // Configurar la tabla para layout fijo
-      table.style.tableLayout = 'fixed';
-      table.style.width = 'max-content';
-      
-      const firstRow = table.getElementsByTagName('tr')[0];
-      const cells = firstRow?.getElementsByTagName('th');
-      
-      if(!cells || cells.length === 0) return;      // Inicializar anchos por defecto para todas las columnas
-      Array.from(cells).forEach((cell, index) => {
-        const defaultWidth = index === 0 ? 200 : 120; // Primera columna más ancha
-        cell.style.width = `${defaultWidth}px`;
-        cell.style.minWidth = `${defaultWidth}px`;
-        cell.style.maxWidth = `${defaultWidth}px`;
-      });
-
-      // Agregar resizers a todas las columnas excepto la última
-      for(let i = 0; i < cells.length - 1; i++){
-        const column = cells[i];
-        
-        // Verificar si ya tiene un resizer
-        if (!column.querySelector('.column-resizer')) {
-          const resizerElement = createResizerElement(table.offsetHeight);
-          column.appendChild(resizerElement);
-          column.style.position = 'relative';
-          
-          // Configurar listeners con el índice de la columna
-          setListeners(resizerElement, i);
+        if (destinationGroupIndex !== -1 && overRowIndex !== -1) {
+            newBoardData[destinationGroupIndex].items.splice(overRowIndex, 0, activeRow);
+        } else if (destinationGroupIndex !== -1) {
+            // Caso de borde: se soltó sobre un ID que no es una fila dentro de ese grupo (e.g. el GroupContainerWrapper mismo)
+            newBoardData[destinationGroupIndex].items.push(activeRow);
         }
       }
-      
-      // Marcar la tabla como procesada
-      table.setAttribute('data-resizable', 'true');
-    };
+      setBoardData(newBoardData); // Actualizar el estado con la nueva configuración
+    }
 
-    // Procesar todas las tablas
-    Array.from(tables).forEach(table => {
-      resizableGrid(table);
-    });
-    
-  }, [boardData]);
+    setActiveId(null);
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const isDraggingColumn = activeId ? boardColumns.some(column => column.id === activeId) : false; // CORREGIDO
+  const isDraggingGroup = activeId ? boardData.some(group => group.id === activeId) : false;
+  const isDraggingRow = activeId ? boardData.some(group => group.items.some(item => item.id === activeId)) : false;
+
+  const renderDragOverlayContent = () => {
+    if (isDraggingGroup) {
+      const activeGroup = boardData.find(group => group.id === activeId);
+      if (activeGroup) {
+        return (
+          <div className={css.groupDragging}>
+            <GroupContainer
+              groupData={activeGroup}
+              boardColumns={boardColumns}
+              activeDndId={activeId}
+            />
+          </div>
+        );
+      }
+    }
+
+    if (isDraggingRow) {
+      let activeRow: RowData | null = null;
+      let parentGroupId: string | null = null;
+
+      // Encuentra la fila activa y su grupo padre
+      // Podrías simplificar esto si `active.data.current?.rowData` ya tiene la fila completa
+      for (const group of boardData) {
+        const foundRow = group.items.find(row => row.id === activeId);
+        if (foundRow) {
+          activeRow = foundRow;
+          parentGroupId = group.id;
+          break;
+        }
+      }
+
+      if (activeRow && parentGroupId) {
+        return (
+          <table className={css.rowDragging}>
+            <tbody>
+              <SortableDraggableRow
+                itemData={activeRow}
+                id={activeRow.id}
+                boardColumns={boardColumns}
+                isThisRowActive={true} // El clon siempre es visible
+                parentGroupId={parentGroupId} // Pasamos el parentGroupId al clon
+              />
+            </tbody>
+          </table>
+        );
+      }
+    }
+
+    return null;
+  };
+
+  const getAxisModifiersMovement = () => {
+    if (isDraggingGroup) return [restrictToVerticalAxis];
+    if (isDraggingColumn) return [restrictToHorizontalAxis];
+    if (isDraggingRow) return [restrictToVerticalAxis]; // Las filas solo se mueven verticalmente
+    return []; // Por defecto, no hay modificadores
+  };
 
   return (
     <section className={css.mainContainer}>
-      {boardData.map((group) => (
-        <GroupContainer key={group.id} groupData={group} boardColumns={boardColumns} />
-      ))}
+      <DndContext
+        sensors={[sensor]}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+        onDragStart={handleDragStart}
+      >
+        <SortableContext items={boardData.map(group => group.id)} strategy={verticalListSortingStrategy} > {/* Corregido: items={boardData.map(group => group.id)} */}
+          {boardData.map((group) => (
+            <GroupContainerWrapper
+              key={group.id}
+              groupData={group}
+              boardColumns={boardColumns}
+              id={group.id}
+              isThisGroupActive={activeId === group.id}
+              activeDndId={activeId}
+            />
+          ))}
+        </SortableContext>
+
+        <DragOverlay modifiers={getAxisModifiersMovement()}>
+          {renderDragOverlayContent()}
+        </DragOverlay>
+      </DndContext>
     </section>
   );
 }

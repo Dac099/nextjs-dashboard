@@ -1,0 +1,17 @@
+.groupDragging
+{
+  opacity: 0.5;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  width: auto; 
+  cursor: grabbing;
+}
+
+.rowDragging
+{
+  border-radius: 5px;
+  min-width: 100%;
+  margin: 20px 0;
+  border-spacing: 0;
+  width: max-content;
+  table-layout: fixed;
+}
