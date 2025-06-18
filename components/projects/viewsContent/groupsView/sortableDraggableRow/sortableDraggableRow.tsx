@@ -36,7 +36,7 @@ export function SortableDraggableRow({ itemData, id, boardColumns, isThisRowActi
     transition,
     opacity: isThisRowActive ? 0.5 : 1, 
     cursor: isThisRowActive ? 'grabbing' : 'default', 
-    boxShadow: '0px 2px 4px rgba(0,0,0,0.1)', 
+    boxShadow: isThisRowActive ? '0px 2px 4px rgba(0,0,0,0.1)' : 'none', 
   };
 
   return (
