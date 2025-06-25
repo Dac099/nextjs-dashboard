@@ -8,6 +8,9 @@ import {
 } from '@dnd-kit/sortable';
 import { SortableColumnHeader } from '../sortableColumnHeader/sortableColumnHeader';
 import { SortableDraggableRow } from '../sortableDraggableRow/sortableDraggableRow'; 
+import { OverlayPanel } from 'primereact/overlaypanel';
+import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 type Props = {
     groupData: GroupData;
@@ -18,6 +21,18 @@ type Props = {
 export function GroupContainer({ groupData, boardColumns, activeDndId }: Props) {
     const columnIds = boardColumns.map(col => col.id);
     const rowIds = groupData.items.map(item => item.id); 
+    const panelRef = useRef<OverlayPanel>(null);
+    const router = useRouter();
+
+    //Function to handle showing the project form for proyect items
+    const handleShowProjectForm = () => {
+        router.push(`?newProject=true&groupId=${groupData.id}`);
+        panelRef.current?.hide();
+    };
+
+    const handleShowInputItem = async() => {
+        
+    };
 
     return (
         <table
@@ -61,7 +76,32 @@ export function GroupContainer({ groupData, boardColumns, activeDndId }: Props) 
                         />
                     ))}
                 </SortableContext>
+                <tr>
+                    <td
+                        colSpan={boardColumns.length + 1}
+                        className={css.addRowBtn}
+                        onClick={(e) => panelRef.current?.toggle(e)}
+                    >
+                        <p>
+                            <i className={`pi pi-plus`} /> Agregar nuevo item
+                        </p>
+                    </td>
+                </tr>
             </tbody>
+            <OverlayPanel ref={panelRef}>
+                <button 
+                    className={css.addItemBtn}
+                    onClick={handleShowInputItem}
+                >
+                    Item simple
+                </button>
+                <button 
+                    className={css.addItemBtn}
+                    onClick={handleShowProjectForm}
+                >
+                    Item de proyecto
+                </button>
+            </OverlayPanel>
         </table>
     );
 }

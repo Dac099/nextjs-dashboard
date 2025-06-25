@@ -2,7 +2,7 @@
 {
   border-radius: 5px;
   min-width: 100%;
-  margin: 20px 0;
+  margin: 0;
   border-spacing: 0;
   width: max-content;
   table-layout: fixed;
@@ -33,4 +33,75 @@
 .cell
 {
   height: 40px;
+}
+
+.groupContainerTitle 
+{
+  margin: 40px 0 10px 0;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.groupContainerControls
+{
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.groupContainerText
+{
+  font-size: 2rem;
+  margin: 0;
+  user-select: none;
+}
+
+.iconControl
+{
+  font-size: 1.4rem;
+}
+
+.addRowBtn
+{
+  height: 10px;
+  border: 1px solid var(--accent-color);
+  opacity: 0.8;
+  font-size: 1.2rem;
+  font-style: italic;
+  user-select: none;
+  cursor: pointer;
+  padding: 5px;
+  background-color: rgba(0,0,0,0.04);
+}
+
+.addRowBtn:hover
+{
+  background-color: var(--accent-color);
+  color: var(--font-color);
+}
+
+.addRowBtn p 
+{
+  margin: 0;
+}
+
+.addItemBtn
+{
+  display: block;
+  width: 150px;
+  text-align: left;
+  font-family: inherit;
+  margin: 5px 0;
+  height: 30px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.addItemBtn:hover
+{
+  background-color: var(--accent-color);
+  color: var(--font-color);
 }

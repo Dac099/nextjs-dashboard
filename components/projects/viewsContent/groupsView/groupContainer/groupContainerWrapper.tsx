@@ -1,4 +1,4 @@
-// GroupContainerWrapper.tsx
+import styles from './groupContainer.module.css';
 import { useDroppable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { GroupContainer } from "./groupContainer";
@@ -22,7 +22,7 @@ export function GroupContainerWrapper({ groupData, boardColumns, id, isThisGroup
         transition,
     } = useSortable({
         id: id,
-        data: { // <-- Añadido el tipo 'group'
+        data: { 
             type: 'group',
             groupData: groupData,
         },
@@ -33,7 +33,7 @@ export function GroupContainerWrapper({ groupData, boardColumns, id, isThisGroup
         isOver,
     } = useDroppable({
         id: id,
-        data: { // <-- Añadido el tipo 'group' para que los elementos droppable de grupo se identifiquen
+        data: { 
             type: 'group',
             groupData: groupData,
         },
@@ -48,7 +48,7 @@ export function GroupContainerWrapper({ groupData, boardColumns, id, isThisGroup
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        backgroundColor: isOver ? 'rgba(0, 0, 0, 0.3)' : 'transparent',
+        backgroundColor: isOver ? 'rgba(0, 0, 0, 0.1)' : 'transparent',
         opacity: isThisGroupActive ? 0 : 1, // Opacidad para el grupo original
     };
 
@@ -59,6 +59,22 @@ export function GroupContainerWrapper({ groupData, boardColumns, id, isThisGroup
             {...sortableListeners}
             {...sortableAttributes}
         >
+            <section 
+                className={styles.groupContainerTitle}
+                style={{ color: groupData.color}}
+            >
+                <section className={styles.groupContainerControls}>
+                    <i 
+                        className={`pi pi-ellipsis-v ${styles.iconControl}`}
+                        style={{ cursor: 'pointer' }}
+                    ></i>
+                    <i 
+                        className={`pi pi-bars ${styles.iconControl}`}
+                        style={{ cursor: 'grab' }}
+                    ></i>
+                </section>
+                <p className={styles.groupContainerText}>{groupData.name}</p>
+            </section>
             <GroupContainer
                 groupData={groupData}
                 boardColumns={boardColumns}
