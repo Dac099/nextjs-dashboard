@@ -1,11 +1,16 @@
-'use client';
-import css from './groupsView.module.css';
-import { use, useState } from 'react';
-import type { ColumnData, GroupData, ItemData as RowData } from '@/utils/types/views'; // Renombrar ItemData a RowData para consistencia
-import { GroupContainer } from './groupContainer/groupContainer';
+"use client";
+import css from "./groupsView.module.css";
+import { use, useState } from "react";
+import type {
+  ColumnData,
+  GroupData,
+  ItemData as RowData,
+} from "@/utils/types/views"; // Renombrar ItemData a RowData para consistencia
+import { GroupContainer } from "./groupContainer/groupContainer";
 import { useResizableColumns } from "@/hooks/useResizableColumns";
-import { GroupContainerWrapper } from './groupContainer/groupContainerWrapper';
-import { SortableDraggableRow } from './sortableDraggableRow/sortableDraggableRow'; // Asegúrate de tener este import
+import { GroupContainerWrapper } from "./groupContainer/groupContainerWrapper";
+import { SortableDraggableRow } from "./sortableDraggableRow/sortableDraggableRow"; // Asegúrate de tener este import
+import { dropItemInGroup, orderElements } from "./actions";
 import {
   DndContext,
   closestCenter,
@@ -13,17 +18,18 @@ import {
   useSensor,
   DragOverlay,
   DragStartEvent,
-  DragEndEvent
+  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
-  arrayMove
+  arrayMove,
 } from "@dnd-kit/sortable";
 import {
   restrictToVerticalAxis,
-  restrictToHorizontalAxis
-} from '@dnd-kit/modifiers';
+  restrictToHorizontalAxis,
+} from "@dnd-kit/modifiers";
+import { CustomError } from "@/utils/customError";
 
 type Props = {
   boardDataPromise: Promise<GroupData[]>;
@@ -31,19 +37,24 @@ type Props = {
 };
 
 export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
-  const [boardData, setBoardData] = useState<GroupData[]>(use(boardDataPromise));
-  const [boardColumns, setBoardColumns] = useState<ColumnData[]>(use(boardColumnsPromise));
+  const [boardData, setBoardData] = useState<GroupData[]>(
+    use(boardDataPromise)
+  );
+  const [boardColumns, setBoardColumns] = useState<ColumnData[]>(
+    use(boardColumnsPromise)
+  );
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensor = useSensor(PointerSensor, {
     activationConstraint: {
       delay: 100,
-      tolerance: 5
-    }
-  })
+      tolerance: 5,
+    },
+  });
 
   useResizableColumns();
 
-  const findGroup = (id: string): GroupData | undefined => boardData.find(group => group.id === id);
+  const findGroup = (id: string): GroupData | undefined =>
+    boardData.find((group) => group.id === id);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -57,25 +68,39 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
     const overType = over.data.current?.type; // Puede ser 'group' o 'column' o 'row'
 
     // Lógica para reordenar TABLAS (Groups)
-    if (activeType === 'group' && overType === 'group') {
-      const oldIndex = boardData.findIndex(group => group.id === active.id);
-      const newIndex = boardData.findIndex(group => group.id === over.id);
+    if (activeType === "group" && overType === "group") {
+      const oldIndex = boardData.findIndex((group) => group.id === active.id);
+      const newIndex = boardData.findIndex((group) => group.id === over.id);
 
       if (oldIndex !== newIndex) {
-        setBoardData(prev => arrayMove(prev, oldIndex, newIndex));
+        setBoardData((prev) => arrayMove(prev, oldIndex, newIndex));
+        orderElements(over.id as string, active.id as string, "Groups").catch(
+          (error: CustomError) => {
+            console.log(error.message);
+          }
+        );
       }
     }
     // Lógica para reordenar COLUMNAS
-    else if (activeType === 'column' && overType === 'column') {
-      const oldIndex = boardColumns.findIndex(column => column.id === active.id);
-      const newIndex = boardColumns.findIndex(column => column.id === over.id);
+    else if (activeType === "column" && overType === "column") {
+      const oldIndex = boardColumns.findIndex(
+        (column) => column.id === active.id
+      );
+      const newIndex = boardColumns.findIndex(
+        (column) => column.id === over.id
+      );
 
       if (oldIndex !== newIndex) {
-        setBoardColumns(prev => arrayMove(prev, oldIndex, newIndex));
+        setBoardColumns((prev) => arrayMove(prev, oldIndex, newIndex));
+        orderElements(over.id as string, active.id as string, "Columns").catch(
+          (error: CustomError) => {
+            console.log(error.message);
+          }
+        );
       }
     }
     // Lógica para reordenar FILAS O MOVER FILAS ENTRE GRUPOS
-    else if (activeType === 'row') {
+    else if (activeType === "row" && (overType === "row" || overType === "group")) {
       const activeRowParentId = active.data.current?.parentGroupId as string; // Asegurarse de que sea string
       const overContainerId = over.id as string; // El ID del elemento sobre el que se soltó (puede ser una fila o un grupo)
 
@@ -88,36 +113,75 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
       }
 
       // Si se soltó sobre un DROPPABLE de grupo (GroupContainerWrapper es droppable)
-      const overIsGroup = boardData.some(group => group.id === overContainerId);
-      
+      const overIsGroup = boardData.some(
+        (group) => group.id === overContainerId
+      );
+
       const newBoardData = [...boardData]; // Crear una copia mutable para la manipulación
 
       // 1. Eliminar la fila del grupo de origen
-      const sourceGroupIndex = newBoardData.findIndex(g => g.id === activeGroup.id);
+      const sourceGroupIndex = newBoardData.findIndex(
+        (g) => g.id === activeGroup.id
+      );
       if (sourceGroupIndex !== -1) {
-          newBoardData[sourceGroupIndex].items = newBoardData[sourceGroupIndex].items.filter(row => row.id !== active.id);
+        newBoardData[sourceGroupIndex].items = newBoardData[
+          sourceGroupIndex
+        ].items.filter((row) => row.id !== active.id);
       } else {
-          // Esto no debería pasar si activeGroup se encontró
-          setActiveId(null);
-          return;
+        // Esto no debería pasar si activeGroup se encontró
+        setActiveId(null);
+        return;
       }
 
       // 2. Insertar la fila en el grupo de destino
-      if (overIsGroup) { // Se soltó sobre un GroupContainerWrapper (un grupo)
-        const destinationGroupIndex = newBoardData.findIndex(g => g.id === overContainerId);
+      if (overIsGroup) {
+        // Se soltó sobre un GroupContainerWrapper (un grupo)
+        const destinationGroupIndex = newBoardData.findIndex(
+          (g) => g.id === overContainerId
+        );
         if (destinationGroupIndex !== -1) {
-            newBoardData[destinationGroupIndex].items.push(activeRow); // Añadir al final del grupo
+          newBoardData[destinationGroupIndex].items.push(activeRow); // Añadir al final del grupo}
+          dropItemInGroup(overContainerId, activeRow.id) // Call the action to update the database
+            .catch((error: CustomError) => {
+              console.log(error.message);
+            });
         }
-      } else { // Se soltó sobre otra fila
+      } else {
+        // Se soltó sobre otra fila
         const overRowParentId = over.data.current?.parentGroupId as string;
-        const destinationGroupIndex = newBoardData.findIndex(g => g.id === overRowParentId);
-        const overRowIndex = newBoardData[destinationGroupIndex]?.items.findIndex(row => row.id === over.id);
+        const destinationGroupIndex = newBoardData.findIndex(
+          (g) => g.id === overRowParentId
+        );
+        const overRowIndex = newBoardData[
+          destinationGroupIndex
+        ]?.items.findIndex((row) => row.id === over.id);
 
         if (destinationGroupIndex !== -1 && overRowIndex !== -1) {
-            newBoardData[destinationGroupIndex].items.splice(overRowIndex, 0, activeRow);
-        } else if (destinationGroupIndex !== -1) {
-            // Caso de borde: se soltó sobre un ID que no es una fila dentro de ese grupo (e.g. el GroupContainerWrapper mismo)
-            newBoardData[destinationGroupIndex].items.push(activeRow);
+          newBoardData[destinationGroupIndex].items.splice(
+            overRowIndex,
+            0,
+            activeRow
+          );
+
+          dropItemInGroup(overRowParentId, activeRow.id)
+            .then((orderOK) => {
+              if(orderOK){
+                return orderElements(over.id as string, activeRow.id, 'Items');
+              }
+            })
+            .catch((error: CustomError) => {
+              console.log(error.message);
+            });
+        } 
+        
+        else if (destinationGroupIndex !== -1) {
+          // Caso de borde: se soltó sobre un ID que no es una fila dentro de ese grupo (e.g. el GroupContainerWrapper mismo)
+          newBoardData[destinationGroupIndex].items.push(activeRow);
+
+          dropItemInGroup(overRowParentId, activeRow.id)
+            .catch((error: CustomError) => {
+              console.log(error.message);
+            });
         }
       }
       setBoardData(newBoardData); // Actualizar el estado con la nueva configuración
@@ -130,13 +194,21 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
     setActiveId(event.active.id as string);
   };
 
-  const isDraggingColumn = activeId ? boardColumns.some(column => column.id === activeId) : false; // CORREGIDO
-  const isDraggingGroup = activeId ? boardData.some(group => group.id === activeId) : false;
-  const isDraggingRow = activeId ? boardData.some(group => group.items.some(item => item.id === activeId)) : false;
+  const isDraggingColumn = activeId
+    ? boardColumns.some((column) => column.id === activeId)
+    : false; // CORREGIDO
+  const isDraggingGroup = activeId
+    ? boardData.some((group) => group.id === activeId)
+    : false;
+  const isDraggingRow = activeId
+    ? boardData.some((group) =>
+        group.items.some((item) => item.id === activeId)
+      )
+    : false;
 
   const renderDragOverlayContent = () => {
     if (isDraggingGroup) {
-      const activeGroup = boardData.find(group => group.id === activeId);
+      const activeGroup = boardData.find((group) => group.id === activeId);
       if (activeGroup) {
         return (
           <div className={css.groupDragging}>
@@ -157,7 +229,7 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
       // Encuentra la fila activa y su grupo padre
       // Podrías simplificar esto si `active.data.current?.rowData` ya tiene la fila completa
       for (const group of boardData) {
-        const foundRow = group.items.find(row => row.id === activeId);
+        const foundRow = group.items.find((row) => row.id === activeId);
         if (foundRow) {
           activeRow = foundRow;
           parentGroupId = group.id;
@@ -200,7 +272,10 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}
       >
-        <SortableContext items={boardData.map(group => group.id)} strategy={verticalListSortingStrategy} > {/* Corregido: items={boardData.map(group => group.id)} */}
+        <SortableContext
+          items={boardData.map((group) => group.id)}
+          strategy={verticalListSortingStrategy}
+        >
           {boardData.map((group) => (
             <GroupContainerWrapper
               key={group.id}
