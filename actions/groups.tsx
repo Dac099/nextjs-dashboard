@@ -338,8 +338,6 @@ export async function addItemBoard(groupId: string, viewId: string, boardId: str
  * @returns true if the item was created, false if the item was updated
  */
 export async function setTableValue(
-  boardId: string,
-  viewId: string,
   itemId: string | undefined,
   columnId: string | undefined,
   value: string
@@ -384,7 +382,6 @@ export async function setTableValue(
     itemCreated = true;
   }
 
-  revalidatePath(`/board/${boardId}/view/${viewId}`);
   return itemCreated;
 }
 
@@ -537,7 +534,7 @@ export async function setPercentageValue(
 ): Promise<void> {
 
   if (value < 100) {
-    await setTableValue(boardId, viewId, itemId, columnId, JSON.stringify(value));
+    await setTableValue(boardId, viewId, itemId);
     return;
   }
 

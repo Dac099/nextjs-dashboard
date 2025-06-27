@@ -2,18 +2,17 @@ import styles from './groupContainer.module.css';
 import { useDroppable } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { GroupContainer } from "./groupContainer";
-import { ColumnData, GroupData } from "@/utils/types/views";
+import { GroupData } from "@/utils/types/views";
 import { CSS } from "@dnd-kit/utilities";
 
 type Props = {
     groupData: GroupData;
-    boardColumns: ColumnData[];
     id: string;
     isThisGroupActive: boolean;
     activeDndId: string | null;
 };
 
-export function GroupContainerWrapper({ groupData, boardColumns, id, isThisGroupActive, activeDndId }: Props) {
+export function GroupContainerWrapper({ groupData, id, isThisGroupActive, activeDndId }: Props) {
     const {
         attributes: sortableAttributes,
         listeners: sortableListeners,
@@ -77,7 +76,6 @@ export function GroupContainerWrapper({ groupData, boardColumns, id, isThisGroup
             </section>
             <GroupContainer
                 groupData={groupData}
-                boardColumns={boardColumns}
                 activeDndId={activeDndId}
             />
         </div>

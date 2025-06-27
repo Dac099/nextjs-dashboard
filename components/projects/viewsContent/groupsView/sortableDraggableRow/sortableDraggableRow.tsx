@@ -6,6 +6,8 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { UniqueIdentifier } from '@dnd-kit/core';
 import type { ColumnData, ItemData as RowData } from '@/utils/types/views'; 
+import { RowName } from './values/rowName/rowName';
+import { RowValue } from './values/rowValue/rowValue';
 
 type Props = {
   itemData: RowData;
@@ -40,21 +42,24 @@ export function SortableDraggableRow({ itemData, id, boardColumns, isThisRowActi
   };
 
   return (
-    <tr
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-    >
-      <td className={styles.cell}>{itemData.name}</td>
+    <>
+      <tr
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+      >
+        <td className={styles.cell}><RowName itemData={itemData} /></td>
 
-      {boardColumns.map((column) => {
-        return (
-          <td key={column.id} className={styles.cell}>
-            {column.name}
-          </td>
-        );
-      })}
-    </tr>
+        {boardColumns.map((column) => {
+          return (
+            <td key={column.id} className={styles.cell}>
+              <RowValue column={column} itemData={itemData} />
+            </td>
+          );
+        })}
+      </tr>
+      {/* Render the subitems for this itemRow */}
+    </>
   );
 }

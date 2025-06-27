@@ -32,6 +32,13 @@ export type ItemData = {
     values: ItemValue[];
 };
 
+export type SubItemData = {
+    id: string;
+    name: string;
+    itemParentId: string;
+    values: ItemValue[];
+};
+
 export type GroupData = {
     id: string;
     name: string;

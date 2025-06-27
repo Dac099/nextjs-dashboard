@@ -63,7 +63,7 @@ export const useResizableColumns = () => {
                 if (!isResizing) return;
 
                 const diffX = e.clientX - startX;
-                const newWidth = Math.max(120, startWidth + diffX); // Mínimo 120px
+                const newWidth = Math.max(160, startWidth + diffX); // Mínimo 120px
 
                 // Sincronizar el ancho en todas las tablas
                 syncColumnWidths(columnIndex, newWidth);
@@ -104,7 +104,7 @@ export const useResizableColumns = () => {
 
             if(!cells || cells.length === 0) return;      // Inicializar anchos por defecto para todas las columnas
             Array.from(cells).forEach((cell, index) => {
-                const defaultWidth = index === 0 ? 200 : 120; // Primera columna más ancha
+                const defaultWidth = index === 0 ? 400 : 160; // Primera columna más ancha
                 cell.style.width = `${defaultWidth}px`;
                 cell.style.minWidth = `${defaultWidth}px`;
                 cell.style.maxWidth = `${defaultWidth}px`;
@@ -134,5 +134,5 @@ export const useResizableColumns = () => {
             resizableGrid(table);
         });
 
-    }, []);
+    });
 }

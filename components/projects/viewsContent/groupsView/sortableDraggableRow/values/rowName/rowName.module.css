@@ -1,0 +1,50 @@
+.container
+{
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 5% 75% 20%;
+  gap: 2px;
+  align-items: center;
+  user-select: none;
+}
+
+.icon
+{
+  cursor: pointer;
+  font-size: 1.4rem;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  border-radius: 3px;
+}
+
+.icon:hover
+{
+  background-color: var(--accent-color);
+  color: var(--action-color);
+}
+
+.itemName
+{
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-size: 1.3rem;
+  margin: 0;
+  text-wrap: nowrap;
+}
+
+.chatData 
+{
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  justify-content: space-evenly;
+}
+
+.chatIcon
+{
+  font-size: 1.7rem;
+  color: var(--progress-color);
+  cursor: pointer;
+}

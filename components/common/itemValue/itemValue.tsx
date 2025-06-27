@@ -2,7 +2,7 @@
 import styles from './itemValue.module.css';
 import { SubItem, TableValue } from "@/utils/types/groups";
 import { DefinedDate } from "@/components/common/properties/definedDate/definedDate";
-import { Primitive } from "@/components/common/properties/primitive/primitive";
+import { Primitive } from "@/components/common/properties/numberColumn/numberColumn";
 import { Status } from "@/components/common/properties/status/status";
 import { TimeLine } from '@/components/common/properties/timeLine/timeLine';
 import { Percentage } from '../properties/percentage/percentage';

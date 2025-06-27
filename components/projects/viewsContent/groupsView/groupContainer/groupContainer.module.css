@@ -105,3 +105,12 @@
   background-color: var(--accent-color);
   color: var(--font-color);
 }
+
+.addItemInput
+{
+  outline: none;
+  border: none;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: 1.3rem;
+}

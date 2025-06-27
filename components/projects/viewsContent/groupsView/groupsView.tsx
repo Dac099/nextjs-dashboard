@@ -1,6 +1,6 @@
 "use client";
 import css from "./groupsView.module.css";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import type {
   ColumnData,
   GroupData,
@@ -11,6 +11,7 @@ import { useResizableColumns } from "@/hooks/useResizableColumns";
 import { GroupContainerWrapper } from "./groupContainer/groupContainerWrapper";
 import { SortableDraggableRow } from "./sortableDraggableRow/sortableDraggableRow"; // Asegúrate de tener este import
 import { dropItemInGroup, orderElements } from "./actions";
+import { useBoardDataStore } from '@/stores/boardDataStore';
 import {
   DndContext,
   closestCenter,
@@ -37,16 +38,26 @@ type Props = {
 };
 
 export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
-  const [boardData, setBoardData] = useState<GroupData[]>(
-    use(boardDataPromise)
-  );
-  const [boardColumns, setBoardColumns] = useState<ColumnData[]>(
-    use(boardColumnsPromise)
-  );
+  const {
+    groups,
+    columns,
+    setGroups,
+    setColumns
+  } = useBoardDataStore(state => state);
+  
+  const initialGroups = use(boardDataPromise);
+  const initialColumns = use(boardColumnsPromise);
+
+  useEffect(() => {
+    setGroups(initialGroups);
+    setColumns(initialColumns);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensor = useSensor(PointerSensor, {
     activationConstraint: {
-      delay: 100,
+      delay: 150,
       tolerance: 5,
     },
   });
@@ -54,7 +65,7 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
   useResizableColumns();
 
   const findGroup = (id: string): GroupData | undefined =>
-    boardData.find((group) => group.id === id);
+    groups.find((group) => group.id === id);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -69,11 +80,12 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
 
     // Lógica para reordenar TABLAS (Groups)
     if (activeType === "group" && overType === "group") {
-      const oldIndex = boardData.findIndex((group) => group.id === active.id);
-      const newIndex = boardData.findIndex((group) => group.id === over.id);
+      const oldIndex = groups.findIndex((group) => group.id === active.id);
+      const newIndex = groups.findIndex((group) => group.id === over.id);
 
       if (oldIndex !== newIndex) {
-        setBoardData((prev) => arrayMove(prev, oldIndex, newIndex));
+        const updatedGroups = arrayMove(groups, oldIndex, newIndex);
+        setGroups(updatedGroups);
         orderElements(over.id as string, active.id as string, "Groups").catch(
           (error: CustomError) => {
             console.log(error.message);
@@ -83,15 +95,16 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
     }
     // Lógica para reordenar COLUMNAS
     else if (activeType === "column" && overType === "column") {
-      const oldIndex = boardColumns.findIndex(
+      const oldIndex = columns.findIndex(
         (column) => column.id === active.id
       );
-      const newIndex = boardColumns.findIndex(
+      const newIndex = columns.findIndex(
         (column) => column.id === over.id
       );
 
       if (oldIndex !== newIndex) {
-        setBoardColumns((prev) => arrayMove(prev, oldIndex, newIndex));
+        const updatedColumns = arrayMove(columns, oldIndex, newIndex);
+        setColumns(updatedColumns);
         orderElements(over.id as string, active.id as string, "Columns").catch(
           (error: CustomError) => {
             console.log(error.message);
@@ -113,11 +126,11 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
       }
 
       // Si se soltó sobre un DROPPABLE de grupo (GroupContainerWrapper es droppable)
-      const overIsGroup = boardData.some(
+      const overIsGroup = groups.some(
         (group) => group.id === overContainerId
       );
 
-      const newBoardData = [...boardData]; // Crear una copia mutable para la manipulación
+      const newBoardData = [...groups]; // Crear una copia mutable para la manipulación
 
       // 1. Eliminar la fila del grupo de origen
       const sourceGroupIndex = newBoardData.findIndex(
@@ -184,7 +197,7 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
             });
         }
       }
-      setBoardData(newBoardData); // Actualizar el estado con la nueva configuración
+      setGroups(newBoardData); // Actualizar el estado con la nueva configuración
     }
 
     setActiveId(null);
@@ -195,26 +208,27 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
   };
 
   const isDraggingColumn = activeId
-    ? boardColumns.some((column) => column.id === activeId)
+    ? columns.some((column) => column.id === activeId)
     : false; // CORREGIDO
+
   const isDraggingGroup = activeId
-    ? boardData.some((group) => group.id === activeId)
+    ? groups.some((group) => group.id === activeId)
     : false;
+
   const isDraggingRow = activeId
-    ? boardData.some((group) =>
+    ? groups.some((group) =>
         group.items.some((item) => item.id === activeId)
       )
     : false;
 
   const renderDragOverlayContent = () => {
     if (isDraggingGroup) {
-      const activeGroup = boardData.find((group) => group.id === activeId);
+      const activeGroup = groups.find((group) => group.id === activeId);
       if (activeGroup) {
         return (
           <div className={css.groupDragging}>
             <GroupContainer
               groupData={activeGroup}
-              boardColumns={boardColumns}
               activeDndId={activeId}
             />
           </div>
@@ -228,7 +242,7 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
 
       // Encuentra la fila activa y su grupo padre
       // Podrías simplificar esto si `active.data.current?.rowData` ya tiene la fila completa
-      for (const group of boardData) {
+      for (const group of groups) {
         const foundRow = group.items.find((row) => row.id === activeId);
         if (foundRow) {
           activeRow = foundRow;
@@ -244,7 +258,7 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
               <SortableDraggableRow
                 itemData={activeRow}
                 id={activeRow.id}
-                boardColumns={boardColumns}
+                boardColumns={columns}
                 isThisRowActive={true} // El clon siempre es visible
                 parentGroupId={parentGroupId} // Pasamos el parentGroupId al clon
               />
@@ -273,14 +287,13 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
         onDragStart={handleDragStart}
       >
         <SortableContext
-          items={boardData.map((group) => group.id)}
+          items={groups.map((group) => group.id)}
           strategy={verticalListSortingStrategy}
         >
-          {boardData.map((group) => (
+          {groups.map((group) => (
             <GroupContainerWrapper
               key={group.id}
               groupData={group}
-              boardColumns={boardColumns}
               id={group.id}
               isThisGroupActive={activeId === group.id}
               activeDndId={activeId}

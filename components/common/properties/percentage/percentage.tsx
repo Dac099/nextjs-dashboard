@@ -1,5 +1,4 @@
 'use client';
-import { TableValue } from '@/utils/types/groups';
 import styles from './percentage.module.css';
 import {
   useEffect,
@@ -9,14 +8,15 @@ import {
 } from 'react';
 import { setPercentageValue } from '@/actions/groups';
 import { useParams } from 'next/navigation';
+import { ColumnData, ItemData, ItemValue } from '@/utils/types/views';
 
 type Props = {
-  value: TableValue;
-  columnId: string;
-  itemId: string;
+  value: ItemValue;
+  column: ColumnData;
+  item: ItemData;
 };
 
-export function Percentage({ value, columnId, itemId }: Props) {
+export function Percentage({ value, column, item }: Props) {
   const { id: boardId, viewId } = useParams() as { id: string, viewId: string };
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [showInput, setShowInput] = useState<boolean>(false);
@@ -39,7 +39,7 @@ export function Percentage({ value, columnId, itemId }: Props) {
   }
 
   async function submitNewValue() {
-    await setPercentageValue(boardId, viewId, itemId, columnId, tableValue);
+    await setPercentageValue(boardId, viewId, item.id, column.id, tableValue);
   }
 
   useEffect(() => {
