@@ -4,6 +4,7 @@ import type { ColumnData, ItemData } from '@/utils/types/views';
 import { NumberColumn } from '@/components/common/properties/numberColumn/numberColumn';
 import { TextColumn } from '@/components/common/properties/textColumn/textColumn';
 import { DefinedDate } from '@/components/common/properties/definedDate/definedDate';
+import { Percentage } from '@/components/common/properties/percentage/percentage';
 
 type Props = {
   column: ColumnData;
@@ -12,7 +13,7 @@ type Props = {
 
 export function RowValue({ column, itemData }: Props) {
   const renderValueByColumnType = () => {
-    const itemValue = itemData.values.find(value => value.columnId === column.id);
+    const itemValue = itemData.values.find(value => value?.columnId === column.id);
 
     switch(column.type){
       case 'date':
@@ -22,7 +23,7 @@ export function RowValue({ column, itemData }: Props) {
       case 'status':
         return <p>{itemValue ? itemValue.value : 'sin valor'}</p>;
       case 'percentage':
-        return <p>{itemValue ? itemValue.value : 'sin valor'}</p>;
+        return <Percentage item={itemData} column={column} value={itemValue} />;
       case 'text':
         return <TextColumn value={itemValue} item={itemData} column={column} />;
       case 'timeline':

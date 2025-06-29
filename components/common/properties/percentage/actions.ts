@@ -9,13 +9,13 @@ export async function setPercentageValue(item: ItemData, column: ColumnData, val
     await connection.connect();
     const transacction = new sql.Transaction(connection);
     await transacction.begin();
-    
+    console.log(2, 'Inicia transaccion');
     try {
       const parsedValue = parseFloat(value.value!);
       const requestGroupPosition = await transacction
         .request()
         .input('groupId', item.groupId)
-        .query('SELECT position FROM groups WHERE id = @groupId');
+        .query('SELECT position FROM Groups WHERE id = @groupId');
 
       const requestLastPositionGroups = await transacction
         .request()
@@ -34,6 +34,7 @@ export async function setPercentageValue(item: ItemData, column: ColumnData, val
       const lastPosition = requestLastPositionGroups.recordset[0].lastPosition;
       const groupPosition = requestGroupPosition.recordset[0].position;
       const isUpdateValue = value.id !== undefined;
+      console.log(1, lastPosition, groupPosition, isUpdateValue);
       
       if(parsedValue < 100 && groupPosition === lastPosition){
         if (isUpdateValue) {

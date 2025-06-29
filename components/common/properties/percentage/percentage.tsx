@@ -1,77 +1,71 @@
 'use client';
 import styles from './percentage.module.css';
-import {
-  useEffect,
-  useRef,
-  useState,
-  KeyboardEvent
-} from 'react';
-import { setPercentageValue } from '@/actions/groups';
-import { useParams } from 'next/navigation';
-import { ColumnData, ItemData, ItemValue } from '@/utils/types/views';
+import { ItemData, ItemValue, ColumnData } from '@/utils/types/views';
+import { useBoardDataStore } from '@/stores/boardDataStore';
+import { useState, FocusEvent, KeyboardEvent, use } from 'react';
+import { setPercentageValue } from './actions';
 
 type Props = {
-  value: ItemValue;
-  column: ColumnData;
+  value: ItemValue | undefined;
   item: ItemData;
+  column: ColumnData;
 };
 
-export function Percentage({ value, column, item }: Props) {
-  const { id: boardId, viewId } = useParams() as { id: string, viewId: string };
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [showInput, setShowInput] = useState<boolean>(false);
-  const [tableValue, setTableValue] = useState<number>(
-    value.value
-      ? JSON.parse(value.value)
-      : 0
-  );
+export function Percentage({ item, column, value }: Props) {
+  const [ inputValue, setInputValue ] = useState<string>(value?.value || '0');
+  const { groups, setGroups } = useBoardDataStore();
+  
+  const handleSubmitValue = async(e: FocusEvent | KeyboardEvent) => {
+    if(e.type === 'blur' || (e.type === 'keydown' && (e as KeyboardEvent).key === 'Enter')) {
+      try {
+        const itemValue: ItemValue = await setPercentageValue(item, column, {
+          ...value,
+          value: inputValue,
+        });
+        
+        const parsedValue = parseFloat(inputValue);
+        const newGroups = [...groups];
+        //if value is less than 100, update the value and the store
+        //if the value is 100, find the id of the next group
+        //delete the item from de current group and add it to the next group
+        //update the store with the new item position
+        if(parsedValue < 100){
+          const groupIndex = newGroups.findIndex(group => group.id === item.groupId);
+          const itemIndex = newGroups[groupIndex].items.findIndex(i => i.id === item.id);
+          
+          if(value?.id === undefined){
+            newGroups[groupIndex].items[itemIndex].values.push(itemValue)
+          }else{
+            newGroups[groupIndex].items[itemIndex].values = item.values.map(val => {
+              if(val.id === value.id) {
+                return {
+                  ...val,
+                  value: inputValue,
+                };
+              }
+              return val;
+            });
 
-  async function handleBlur() {
-    setShowInput(false);
-    await submitNewValue();
-  }
+          }
+        }
 
-  async function handleEnterKey(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.code === 'Enter' || e.code === 'NumpadEnter') {
-      setShowInput(false);
-      await submitNewValue();
+        setGroups(newGroups);
+      } catch (error) {
+        console.log('Error al actualizar el valor de porcentaje:', error);
+      }
     }
-  }
-
-  async function submitNewValue() {
-    await setPercentageValue(boardId, viewId, item.id, column.id, tableValue);
-  }
-
-  useEffect(() => {
-    if (showInput) {
-      inputRef.current!.focus();
-      inputRef.current!.select();
-    }
-  }, [showInput]);
+  };
 
   return (
-    <article className={styles.container}>
-      {showInput &&
-        <input
-          type="number"
-          min={0}
-          step={1}
-          onBlur={() => handleBlur()}
-          onKeyUp={(e) => handleEnterKey(e)}
-          className={styles.inputValue}
-          ref={inputRef}
-          value={tableValue}
-          onChange={e => setTableValue(parseInt(e.target.value))}
-        />
-      }
-      {!showInput &&
-        <p
-          onClick={() => setShowInput(true)}
-          className={styles.percentValue}
-        >
-          {tableValue} %
-        </p>
-      }
-    </article>
+    <input 
+      type="number" 
+      value={inputValue}
+      onChange={(e) => setInputValue(e.target.value)}
+      className={styles.inputValue}
+      max={100}
+      min={0}
+      onBlur={handleSubmitValue}
+      onKeyDown={handleSubmitValue}
+    />
   );
 }
