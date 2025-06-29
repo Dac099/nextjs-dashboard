@@ -33,9 +33,11 @@ export async function setPercentageValue(item: ItemData, column: ColumnData, val
       /** The value is equal to 100  */
       let itemToReturn : ItemValue;
       if(isUpdateValue){
-        itemToReturn = await updatePercentageRecord(item, column, {...value as ItemValue, value: '0'}, transacction);
+        const valueToRecord = groupPosition === lastPosition ? '0' : value.value!;
+        itemToReturn = await updatePercentageRecord(item, column, {...value as ItemValue, value: valueToRecord}, transacction);
       }else{
-        itemToReturn = await createPercentageRecord(item, column, '0', transacction);
+        const valueToRecord = groupPosition === lastPosition ? '0' : value.value!;
+        itemToReturn = await createPercentageRecord(item, column, valueToRecord, transacction);
       }
 
       if(groupPosition === lastPosition){

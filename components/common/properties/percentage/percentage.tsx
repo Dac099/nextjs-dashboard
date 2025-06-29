@@ -18,37 +18,27 @@ export function Percentage({ item, column, value }: Props) {
   const handleSubmitValue = async(e: FocusEvent | KeyboardEvent) => {
     if(e.type === 'blur' || (e.type === 'keydown' && (e as KeyboardEvent).key === 'Enter')) {
       try {
-        const [itemValue, itemGroup]: ItemValue = await setPercentageValue(item, column, {
+        const [itemValue, itemGroup]: [ItemValue, ItemData] = await setPercentageValue(item, column, {
           ...value,
           value: inputValue,
-        });
-        
-        const parsedValue = parseFloat(inputValue);
-        const newGroups = [...groups];
-        const groupIndex = newGroups.findIndex(group => group.id === item.groupId);
-        const itemIndex = newGroups[groupIndex].items.findIndex(i => i.id === item.id);
-        const lastGroupIndex = newGroups.length - 1;
+        });                
 
         if(value?.id === undefined){
-          newGroups[groupIndex].items[itemIndex].values.push(itemValue)
+          item.values.push(itemValue);          
         }else{
-          newGroups[groupIndex].items[itemIndex].values = item.values.map(val => {
-            if(val.id === value.id) {
-              return {
-                ...val,
-                value: inputValue,
-              };
-            }
-            return val;
-          });
+          const valueIndex = item.values.findIndex(v => v.id === value.id);
+          item.values[valueIndex] = itemValue;
         }
 
-        if(parsedValue < 100){          
-          setGroups(newGroups);
-          return;
-        }
+        const currentGroupIndex = groups.findIndex(g => g.id === item.groupId);
+        const recordGroupIndex = groups.findIndex(g => g.id === itemGroup.groupId);
 
+        const newGroups = [...groups];
+        const itemGroups = newGroups[currentGroupIndex].items.filter(i => i.id !== item.id);
+        itemGroups.push(item);
+        newGroups[recordGroupIndex].items = itemGroups;
 
+        setGroups(newGroups);
 
       } catch (error) {
         console.log('Error al actualizar el valor de porcentaje:', error);
