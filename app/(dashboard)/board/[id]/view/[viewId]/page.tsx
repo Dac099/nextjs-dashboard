@@ -6,6 +6,7 @@ import { GroupsSkeleton } from './groupsSkeleton';
 import { GroupsView } from '@/components/projects/viewsContent/groupsView/groupsView';
 import { getBoardData, getBoardColumns } from '@/actions/boards';
 import { fetchBoardValues } from  '@/actions/groups'
+import { BoardControllers } from '@/components/common/boardControllers/boardControllers';
 
 type Props = {
   params: Promise<{ id: string; viewId: string }>;
@@ -24,6 +25,7 @@ export default async function Page({ params }: Props) {
       
       <section className={styles.contentView} data-view-type={viewType}>
         <Suspense fallback={<GroupsSkeleton />}>
+          <BoardControllers boardId={boardId} />
           <GroupsView 
             boardDataPromise={boardDataPromise} 
             boardColumnsPromise={boardColumnsPromise} 
