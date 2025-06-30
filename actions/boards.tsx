@@ -1,9 +1,8 @@
 'use server';
-import { ViewWithSettings, GroupData, ColumnData, TagListItem } from "@/utils/types/views";
+import { ViewWithSettings, GroupData, ColumnData } from "@/utils/types/views";
 import connection from '@/services/database';
 import { redirect } from "next/navigation";
 import { CustomError } from '@/utils/customError';
-import { th } from '@faker-js/faker';
 
 type ViewsDB = {
     id: string;
