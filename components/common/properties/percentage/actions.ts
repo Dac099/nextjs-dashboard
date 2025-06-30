@@ -33,20 +33,23 @@ export async function setPercentageValue(item: ItemData, column: ColumnData, val
       /** The value is equal to 100  */
       let itemToReturn : ItemValue;
       if(isUpdateValue){
-        const valueToRecord = groupPosition === lastPosition ? '0' : value.value!;
+        const valueToRecord = groupPosition === lastPosition ? value.value! : '0';
         itemToReturn = await updatePercentageRecord(item, column, {...value as ItemValue, value: valueToRecord}, transacction);
       }else{
-        const valueToRecord = groupPosition === lastPosition ? '0' : value.value!;
+        const valueToRecord = groupPosition === lastPosition ? value.value! : '0';
         itemToReturn = await createPercentageRecord(item, column, valueToRecord, transacction);
       }
 
       if(groupPosition === lastPosition){
+        await transacction.commit();
         return [itemToReturn, item];
       }
+
 
       const nextGroupId = await getNextGroupId(transacction, item.groupId);
       item.groupId = nextGroupId;
       await moveItemToNextGroup(transacction, item.id, nextGroupId);
+      await transacction.commit();
 
       return [itemToReturn, item];
     } catch (error) {
@@ -133,6 +136,7 @@ async function getCurrentGroupPosition(transacction: sql.Transaction, groupId: s
 async function getNextGroupId(transacction: sql.Transaction, groupId: string): Promise<string> {
   const groupsListResult = await transacction
     .request()
+    .input('groupId', groupId)
     .query(`
       SELECT id, position
       FROM Groups
