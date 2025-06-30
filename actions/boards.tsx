@@ -1,5 +1,5 @@
 'use server';
-import { ViewWithSettings, GroupData, ColumnData } from "@/utils/types/views";
+import { ViewWithSettings, GroupData, ColumnData, TagListItem } from "@/utils/types/views";
 import connection from '@/services/database';
 import { redirect } from "next/navigation";
 import { CustomError } from '@/utils/customError';
@@ -169,6 +169,7 @@ export async function getBoardData(boardId: string): Promise<GroupData[]> {
             WHERE g.board_id = @boardId 
                 AND g.deleted_at IS NULL
                 AND i.deleted_at IS NULL
+                AND tb.deleted_at IS NULL
         `;
 
         const itemsQuery: string = `

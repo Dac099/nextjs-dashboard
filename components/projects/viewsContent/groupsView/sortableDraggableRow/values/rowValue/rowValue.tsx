@@ -5,6 +5,8 @@ import { NumberColumn } from '@/components/common/properties/numberColumn/number
 import { TextColumn } from '@/components/common/properties/textColumn/textColumn';
 import { DefinedDate } from '@/components/common/properties/definedDate/definedDate';
 import { Percentage } from '@/components/common/properties/percentage/percentage';
+import { TimeLine } from '@/components/common/properties/timeLine/timeLine';
+import { Status } from '@/components/common/properties/status/status';
 
 type Props = {
   column: ColumnData;
@@ -21,13 +23,13 @@ export function RowValue({ column, itemData }: Props) {
       case 'number':
         return <NumberColumn value={itemValue} item={itemData} column={column} />;
       case 'status':
-        return <p>{itemValue ? itemValue.value : 'sin valor'}</p>;
+        return <Status value={itemValue} item={itemData} column={column} />;
       case 'percentage':
         return <Percentage item={itemData} column={column} value={itemValue} />;
       case 'text':
         return <TextColumn value={itemValue} item={itemData} column={column} />;
       case 'timeline':
-        return <p>{itemValue ? itemValue.value : 'sin valor'}</p>;
+        return <TimeLine value={itemValue} column={column} item={itemData} />;
     }
   };
 

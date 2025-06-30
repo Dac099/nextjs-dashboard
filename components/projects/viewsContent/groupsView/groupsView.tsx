@@ -31,26 +31,32 @@ import {
   restrictToHorizontalAxis,
 } from "@dnd-kit/modifiers";
 import { CustomError } from "@/utils/customError";
+import { ItemValues } from '@/utils/types/groups';
+import { useBoardStore } from '@/stores/boardStore';
 
 type Props = {
   boardDataPromise: Promise<GroupData[]>;
   boardColumnsPromise: Promise<ColumnData[]>;
+  boardValuesPromise: Promise<ItemValues>
 };
 
-export function GroupsView({ boardDataPromise, boardColumnsPromise }: Props) {
+export function GroupsView({ boardDataPromise, boardColumnsPromise, boardValuesPromise }: Props) {
   const {
     groups,
     columns,
     setGroups,
     setColumns
   } = useBoardDataStore(state => state);
+  const { setBoardStatus } = useBoardStore();
   
   const initialGroups = use(boardDataPromise);
   const initialColumns = use(boardColumnsPromise);
+  const initialStatus = use(boardValuesPromise);
 
   useEffect(() => {
     setGroups(initialGroups);
     setColumns(initialColumns);
+    setBoardStatus(initialStatus);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

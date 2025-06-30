@@ -84,17 +84,17 @@ export async function fetchStatusBoard(boardId: string): Promise<StatusByColumn>
   return groupedResult;
 }
 
-async function fetchBoardValues(boardId: string): Promise<ItemValues> {
+export async function fetchBoardValues(boardId: string): Promise<ItemValues> {
   const valuesQuery: string = `
-    SELECT 
-      tv.id,
-      tv.item_id as itemId,
-      tv.column_id as columnId,
+    SELECT
+      tv.id, 
+      tv.column_id AS columnId,
       tv.value
-    FROM TableValues tv  
-    INNER JOIN Items i on i.id = tv.item_id
-    INNER JOIN Groups g on i.group_id = g.id
-    WHERE g.board_id = @boardId AND tv.deleted_at IS NULL
+    FROM TableValues tv
+    INNER JOIN Columns c ON c.id = tv.column_id
+    WHERE c.board_id = @boardId
+      AND tv.item_id IS NULL
+      AND tv.deleted_at IS NULL
   `;
 
   await connection.connect();
@@ -104,11 +104,11 @@ async function fetchBoardValues(boardId: string): Promise<ItemValues> {
     .query(valuesQuery);
 
   return result.recordset.reduce((acc: ItemValues, curr: TableValue) => {
-    if (!acc.has(curr.itemId)) {
-      acc.set(curr.itemId, []);
+    if (!acc.has(curr.columnId)) {
+      acc.set(curr.columnId, []);
     }
 
-    acc.get(curr.itemId)!.push({
+    acc.get(curr.columnId)!.push({
       id: curr.id,
       itemId: curr.itemId,
       groupId: curr.groupId,

@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { GroupsSkeleton } from './groupsSkeleton';
 import { GroupsView } from '@/components/projects/viewsContent/groupsView/groupsView';
 import { getBoardData, getBoardColumns } from '@/actions/boards';
+import { fetchBoardValues } from  '@/actions/groups'
 
 type Props = {
   params: Promise<{ id: string; viewId: string }>;
@@ -15,6 +16,7 @@ export default async function Page({ params }: Props) {
   const { allowedUserActions, viewType } = await validateBoardAccess(boardId, viewId);
   const boardDataPromise = getBoardData(boardId);
   const boardColumnsPromise = getBoardColumns(boardId);
+  const boardValuesPromise = fetchBoardValues(boardId);
 
   return (
     <article className={styles.container}>
@@ -22,7 +24,11 @@ export default async function Page({ params }: Props) {
       
       <section className={styles.contentView} data-view-type={viewType}>
         <Suspense fallback={<GroupsSkeleton />}>
-          <GroupsView boardDataPromise={boardDataPromise} boardColumnsPromise={boardColumnsPromise} />
+          <GroupsView 
+            boardDataPromise={boardDataPromise} 
+            boardColumnsPromise={boardColumnsPromise} 
+            boardValuesPromise={boardValuesPromise}
+          />
         </Suspense>
       </section>
     </article>
