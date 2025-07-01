@@ -4,6 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { GroupContainer } from "./groupContainer";
 import { GroupData } from "@/utils/types/views";
 import { CSS } from "@dnd-kit/utilities";
+import { useBoardConfigurationStore } from '@/stores/boardConfiguration';
 
 type Props = {
     groupData: GroupData;
@@ -26,7 +27,6 @@ export function GroupContainerWrapper({ groupData, id, isThisGroupActive, active
             groupData: groupData,
         },
     });
-
     const {
         setNodeRef: setDroppableNodeRef,
         isOver,
@@ -80,4 +80,5 @@ export function GroupContainerWrapper({ groupData, id, isThisGroupActive, active
             />
         </div>
     );
+
 }
