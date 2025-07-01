@@ -44,6 +44,7 @@ export function groupItemsByType(data: ValueDB[]): Item[] {
         groupedByItemId[itemId].invoiceNumber = JSON.parse(value);
         break;
       case "Status":
+      case "Status PM":
         try {
           groupedByItemId[itemId].status = JSON.parse(value);
         } catch (e) {
