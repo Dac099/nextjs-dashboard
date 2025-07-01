@@ -1,0 +1,5 @@
+.cell
+{
+  border: 1px solid var(--accent-color);
+  height: 40px;
+}

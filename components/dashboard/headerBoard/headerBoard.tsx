@@ -19,7 +19,6 @@ import {
 import useClickOutside from "@/hooks/useClickOutside";
 import { addViewBoard } from "@/actions/boards";
 import { useParams } from "next/navigation";
-import { FiltersBar } from "@/components/projects/filtersBar/filtersBar";
 import { Actions } from '@/utils/types/roles';
 
 type Props = {
@@ -160,9 +159,6 @@ export function HeaderBoard({ views, boardId, userActions }: Props) {
                         </section>
                     }
                 </section>
-            </section>
-            <section className={styles.filters}>
-                <FiltersBar />
             </section>
         </article>
     );

@@ -1,3 +1,6 @@
+// Hacer la importación de datos para construir el dashboard
+
+
 export default async function Page() {
   return (
     <article>

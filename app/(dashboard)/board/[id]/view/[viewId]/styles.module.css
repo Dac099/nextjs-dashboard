@@ -1,8 +1,13 @@
 .container
 {
-    width: 100%;
-    min-width: 0;
-    white-space: nowrap;
-    height: calc(95vh - 100px);
-    overflow: auto;  
+    display: flex;
+    flex-direction: column;
+    height: calc(95vh - 50px);
+}
+
+
+.contentView 
+{
+    flex: 1 1 auto;
+    overflow: auto;
 }

@@ -28,7 +28,6 @@ export function PrimeReactProvider({ children }: { children: React.ReactNode }) 
         if (themeLink) {
           const newTheme = theme === 'light' ? 'lara-light-purple' : 'lara-dark-purple';
           themeLink.href = `/themes/${newTheme}/theme.css`;
-          console.log(`Tema ${newTheme} aplicado correctamente`);
         }
       };
       

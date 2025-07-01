@@ -2,7 +2,7 @@
 {
     position: absolute;
     width: 900px;
-    height: 95vh;
+    height: 94vh;
     border: 1px solid var(--accent-color);
     background-color: var(--sec-bg-color);
     z-index: 3;

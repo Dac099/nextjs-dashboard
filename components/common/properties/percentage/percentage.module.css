@@ -1,25 +1,10 @@
-.container
-{
-  width: 100%;
-  height: 100%;
-}
-
 .inputValue
 {
   width: 100%;
   height: 100%;
-  outline: none;
-  border: none;
+  background-color: transparent;
   text-align: center;
-  font-family: inherit;
-  margin: 0;
-}
-
-.percentValue
-{
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-content: center;
-  margin: 0;
+  padding-left: 15px;
+  border: none;
+  outline: none;
 }

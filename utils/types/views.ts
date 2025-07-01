@@ -15,3 +15,41 @@ export type ViewWithSettings = {
     view: ViewDB;
     settings: ViewSettings[];
 };
+
+export type ItemValue = {
+    id: string;
+    itemId: string;
+    columnId: string;
+    value: string;
+};
+
+export type ItemData = {
+    id: string;
+    groupId: string;
+    projectId: string | null | undefined;
+    name: string;
+    position: number; 
+    values: ItemValue[];
+};
+
+export type SubItemData = {
+    id: string;
+    name: string;
+    itemParentId: string;
+    values: ItemValue[];
+};
+
+export type GroupData = {
+    id: string;
+    name: string;
+    position: number;
+    color: string;
+    items: ItemData[];
+};
+
+export type ColumnData = {
+    id: string;
+    name: string;
+    type: 'text' | 'number' | 'status' | 'date' | 'timeline' | 'percentage';
+    postion: number;
+};

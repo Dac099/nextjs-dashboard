@@ -3,38 +3,23 @@
 import styles from "./styles.module.css";
 import { Calendar } from "primereact/calendar";
 import { useEffect, useState, useRef } from "react";
-import { TableValue } from "@/utils/types/groups";
-import { useParams } from "next/navigation";
-import { setTableValue } from "@/actions/groups";
 import { ProgressBar } from "primereact/progressbar";
 import { useRoleUserActions } from "@/stores/roleUserActions";
 import { Nullable } from "primereact/ts-helpers";
 import { calculatePercentageBetweenDates } from "@/utils/helpers";
 import { formatTimeLineItemValue } from "@/utils/helpers";
+import { ColumnData, ItemData, ItemValue } from '@/utils/types/views';
+import { setTimeLineValue } from './actions';
 
 type Props = {
-  value: TableValue;
-  columnId: string;
-  itemId: string;
+  value: ItemValue | undefined;
+  column: ColumnData;
+  item: ItemData;
 };
 
-/**
- * Componente `TimeLine`
- *
- * Renderiza un calendario de selección de rango de fechas y una barra de progreso que indica el porcentaje de avance entre dos fechas seleccionadas.
- * Permite seleccionar un rango de fechas y muestra el rango seleccionado en formato legible. El progreso se calcula en base a las fechas seleccionadas.
- *
- * @param props - Propiedades del componente.
- * @param props.value - Objeto de tipo TableValue que contiene un campo `value`, el cual es un JSON que representa un arreglo de dos fechas (`[fechaInicial, fechaFinal]`), donde la primera posición es la fecha inicial y la segunda la fecha final.
- * @param props.columnId - Identificador de la columna asociada.
- * @param props.itemId - Identificador del ítem asociado.
- *
- * @returns Un componente visual que permite seleccionar un rango de fechas y muestra el progreso entre ellas.
- */
-export const TimeLine = ({ value, columnId, itemId }: Props) => {
+export const TimeLine = ({ value, column, item }: Props) => {
   const calendarRef = useRef<Calendar>(null);
   const userActions = useRoleUserActions((state) => state.userActions);
-  const { id: boardId, viewId } = useParams() as { id: string; viewId: string };
   const [percentage, setPercentage] = useState<number>(0);
   const [datesLabel, setDatesLabel] = useState<string>("Sin definir");
   const [dates, setDates] = useState<Nullable<Date | (Date | null)[]>>(
@@ -63,14 +48,16 @@ export const TimeLine = ({ value, columnId, itemId }: Props) => {
   const handleSelectDates = async (dates: Date[]) => {
     if (!dates || (Array.isArray(dates) && dates.some((date) => date === null)))
       return;
-
-    await setTableValue(
-      boardId,
-      viewId,
-      itemId,
-      columnId,
-      dates ? JSON.stringify(dates.map((date) => date.toISOString())) : ""
-    );
+    const parsedValues = JSON.stringify(dates.map((date) => date.toISOString()));
+    try{
+      await setTimeLineValue(item, column, {
+        ...value,
+        value: parsedValues,
+      } as ItemValue);
+    }catch (error) {
+      console.log(error);
+      return;
+    }
   };
 
   const handleShowCalendar = () => {

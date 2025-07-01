@@ -2,6 +2,7 @@ import { Item, ProjectFormData, ValueDB } from "@/utils/types/projectDetail";
 import { SubItem, TableValue } from "./types/groups";
 import { Task } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
+import { ItemValue } from './types/views';
 
 export function formatDate(date: Date): string {
   const options: Intl.DateTimeFormatOptions = {
@@ -327,7 +328,7 @@ export function calculatePercentageBetweenDates(dates: Date[]): number {
   return Math.round((elapsedDuration / totalDuration) * 100);
 }
 
-export const formatTimeLineItemValue = (value: TableValue): Date[] | null => {
+export const formatTimeLineItemValue = (value: ItemValue | undefined): Date[] | null => {
   if (!value || !value.value) return null;
 
   try {
