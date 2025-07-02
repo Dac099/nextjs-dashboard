@@ -6,6 +6,7 @@ import './global.css';
 import { Poppins } from 'next/font/google';
 import { PrimeReactProvider } from '@/providers/PrimeReactProvider';
 import { ThemeInitializer } from '@/components/common/themeInitializer/themeInitializer';
+import { UserRoleInitializer } from '@/components/initializers/userRoleInitializer';
 
 
 const poppins = Poppins({
@@ -17,9 +18,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
   return (
     <html lang="es" className={`${poppins.className} antialiased`}>
+      <head>
+        <title>WorkMonitor</title>
+      </head>
       <body>
         <PrimeReactProvider>
           <ThemeInitializer />
+          <UserRoleInitializer />
           {children}
         </PrimeReactProvider>
       </body>

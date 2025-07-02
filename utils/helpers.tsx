@@ -342,6 +342,6 @@ export const formatTimeLineItemValue = (value: ItemValue | undefined): Date[] | 
 };
 
 export function formatFileData(fileData: string): string[][] {
-  const fileLines = fileData.replaceAll('\t', ',').split('\n');
-  return fileLines.map(line => line.split(','));
+  const fileLines = fileData.replaceAll('\t', '|').split('\n');
+  return fileLines.map(line => line.split('|'));
 }

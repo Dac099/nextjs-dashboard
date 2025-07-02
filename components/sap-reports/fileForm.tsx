@@ -7,9 +7,11 @@ import { TableData } from './tableData/tableData';
 import { CustomError } from '@/utils/customError';
 import { Message } from 'primereact/message';
 import { getFileData } from '@/app/(dashboard)/sap-reports/actions';
+import { useRoleUserActions } from '@/stores/roleUserActions';
 
 export function FileForm() {
   const toast = useRef<Toast>(null);
+  const { userRoleName } = useRoleUserActions();
   const [ errorMsg, setErrorMsg ] = useState<CustomError | null>(null);
   const [ fileData, setFileData ] = useState<string | null>(null);
   const [ fileDate, setFileDate ] = useState<string | null>(null);
@@ -88,19 +90,21 @@ export function FileForm() {
         </section>
       }
 
-      <FileUpload 
-        mode='advanced'
-        name='report[]'
-        url='/sap-reports/api/'
-        emptyTemplate={<EmptyFormTemplate />}
-        uploadLabel='Subir el archivo'
-        chooseLabel='Selecciona el archivo'
-        cancelLabel='Cancelar subida'
-        onSelect={handleSelectFile}
-        multiple={false}
-        accept='.txt'
-        onRemove={handleClearFormFile}
-      />
+      { userRoleName === 'SYSTEMS' &&
+        <FileUpload 
+          mode='advanced'
+          name='report[]'
+          url='/sap-reports/api/'
+          emptyTemplate={<EmptyFormTemplate />}
+          uploadLabel='Subir el archivo'
+          chooseLabel='Selecciona el archivo'
+          cancelLabel='Cancelar subida'
+          onSelect={handleSelectFile}
+          multiple={false}
+          accept='.txt'
+          onRemove={handleClearFormFile}
+        />
+      }
 
       {fileData && <TableData data={fileData} />}
     </article>

@@ -1,3 +1,11 @@
+.fileFormContainer
+{
+  display: flex;
+  flex-direction: column;
+  height: calc(95vh - 20px);
+  overflow: auto;
+}
+
 .emptyFormTemplate {
   text-align: center;
   font-size: 1.5rem;
@@ -36,11 +44,4 @@
   font-weight: bold;
   font-size: 1.4rem;
   color: var(--action-color);
-}
-
-.fileFormContainer
-{
-  display: flex;
-  flex-direction: column;
-  height: 95vh;
 }

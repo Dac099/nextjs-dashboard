@@ -56,6 +56,9 @@ export function TableData({ data }: Props){
         header={renderHeader()}
         emptyMessage="No se encontraron registros"
         filters={filters}
+        resizableColumns
+        columnResizeMode="expand"
+        tableStyle={{ maxWidth: '100%', overflowX: 'hidden' }}
       >
         {header.map((col, index) => (
           <Column 
