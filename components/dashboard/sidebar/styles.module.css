@@ -6,6 +6,9 @@
   padding: 5px 10px 40px 5px;
   position: relative;
 }
+.sidebar p {
+  margin: 0;
+}
 
 .division
 {

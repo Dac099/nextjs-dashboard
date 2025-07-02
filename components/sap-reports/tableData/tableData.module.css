@@ -1,0 +1,7 @@
+.mainContainer
+{
+  margin-top: 20px;
+  flex: auto;
+  overflow-y: auto;
+  padding-bottom: 30px;
+}
