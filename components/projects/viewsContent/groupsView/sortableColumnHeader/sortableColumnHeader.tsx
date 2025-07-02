@@ -24,12 +24,27 @@ export function SortableColumnHeader({ columnData, id, isThisColumnActive }: Pro
         data: { type: 'column', columnData } // Asegurarse de que el tipo esté aquí
     });
 
+    const getColumnSizebyType = (type: string) : string => {
+        switch(type){
+            case 'number':
+            case 'percentage':
+            case 'date':
+            case 'text': return '120px';
+            case 'status': return '160px';
+            case 'timeline': return '380px';
+            default: return '120px';
+        }
+    }
+
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
         transition,
         // Opacidad 0 para el original si es el que se está arrastrando
         opacity: isThisColumnActive ? 0.5 : 1, // CORREGIDO
         cursor: isThisColumnActive ? 'grabbing' : 'default', // Indicar que es arrastrable
+        resize: 'horizontal',
+        overflow: 'auto',
+        width: getColumnSizebyType(columnData.type),
     };
 
     return (

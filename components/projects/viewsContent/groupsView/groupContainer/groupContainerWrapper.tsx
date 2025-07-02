@@ -55,8 +55,6 @@ export function GroupContainerWrapper({ groupData, id, isThisGroupActive, active
         <div
             ref={combinedRef}
             style={style}
-            {...sortableListeners}
-            {...sortableAttributes}
         >
             <section 
                 className={styles.groupContainerTitle}
@@ -70,6 +68,8 @@ export function GroupContainerWrapper({ groupData, id, isThisGroupActive, active
                     <i 
                         className={`pi pi-bars ${styles.iconControl}`}
                         style={{ cursor: 'grab' }}
+                        {...sortableListeners}
+                        {...sortableAttributes}
                     ></i>
                 </section>
                 <p className={styles.groupContainerText}>{groupData.name}</p>

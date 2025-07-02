@@ -7,14 +7,13 @@ import type {
   ItemData as RowData,
 } from "@/utils/types/views"; // Renombrar ItemData a RowData para consistencia
 import { GroupContainer } from "./groupContainer/groupContainer";
-import { useResizableColumns } from "@/hooks/useResizableColumns";
 import { GroupContainerWrapper } from "./groupContainer/groupContainerWrapper";
 import { SortableDraggableRow } from "./sortableDraggableRow/sortableDraggableRow"; // Asegúrate de tener este import
 import { dropItemInGroup, orderElements } from "./actions";
 import { useBoardDataStore } from '@/stores/boardDataStore';
 import {
   DndContext,
-  closestCenter,
+  rectIntersection,
   PointerSensor,
   useSensor,
   DragOverlay,
@@ -67,8 +66,6 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise, boardValuesP
       tolerance: 5,
     },
   });
-
-  useResizableColumns();
 
   const findGroup = (id: string): GroupData | undefined =>
     groups.find((group) => group.id === id);
@@ -288,7 +285,7 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise, boardValuesP
     <section className={css.mainContainer}>
       <DndContext
         sensors={[sensor]}
-        collisionDetection={closestCenter}
+        collisionDetection={rectIntersection}
         onDragEnd={handleDragEnd}
         onDragStart={handleDragStart}
       >

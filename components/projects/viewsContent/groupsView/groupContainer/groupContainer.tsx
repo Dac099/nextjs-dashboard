@@ -77,8 +77,9 @@ export function GroupContainer({ groupData, activeDndId }: Props) {
                 <thead>
                     <tr>
                         <th
-                            className={css.cell}
+                            className={`${css.cell} ${css.cellHeader}`}
                             draggable={false}
+                            style={{ width: '600px'}}
                         >
                             Item
                         </th>
