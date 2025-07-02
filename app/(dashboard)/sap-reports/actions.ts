@@ -21,7 +21,6 @@ export async function getFileData(): Promise<[string, string]> {
     });
 
     fileData = fileContent;
-    console.log(1, fileData);
 
     return [fileData, fileDate];
   }catch(error){
