@@ -1,6 +1,11 @@
 .mainContainer
 {
   margin-top: 20px;
-  flex: auto;
-  overflow-y: auto;
+}
+
+.headerContainer
+{
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
