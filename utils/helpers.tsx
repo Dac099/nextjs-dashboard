@@ -3,6 +3,7 @@ import { SubItem, TableValue } from "./types/groups";
 import { Task } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
 import { ItemValue } from './types/views';
+import { CustomError } from './customError';
 
 export function formatDate(date: Date): string {
   const options: Intl.DateTimeFormatOptions = {
@@ -339,3 +340,8 @@ export const formatTimeLineItemValue = (value: ItemValue | undefined): Date[] | 
     return null;
   }
 };
+
+export function formatFileData(fileData: string): string[][] {
+  const fileLines = fileData.replaceAll('\t', ',').split('\n');
+  return fileLines.map(line => line.split(','));
+}

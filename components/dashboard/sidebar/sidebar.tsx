@@ -40,6 +40,14 @@ export async function SideBar() {
         </SideBarItem>
       }
 
+      <SideBarItem url='/sap-reports'>
+        <i 
+          className='pi pi-money-bill'
+          style={{ fontSize: '1.8rem'}}
+        ></i>
+        Reporte SAP
+      </SideBarItem>
+
       {workspaces.map(workspace => (
         <WorkspaceItem 
           workspace={workspace} 
