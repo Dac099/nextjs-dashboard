@@ -1,5 +1,6 @@
 import { MainBar } from "@/components/dashboard/mainbar/mainbar";
-import { SideBar } from "@/components/dashboard/sidebar/sidebar";
+import { SidebarWrapper } from '@/components/dashboard/sidebar/sidebarWrapper';
+import { SideBar } from '@/components/dashboard/sidebar/sidebar';
 import styles from "./app-layout.module.css";
 
 type Props = {
@@ -8,12 +9,16 @@ type Props = {
 
 export default function MainLayout({ children }: Props) {
   return (
-      <article className={styles.layout}>
-        <MainBar />
-        <section className={styles.container}>
+    <article className={styles.layout}>
+      <MainBar />
+      <section className={styles.container}>
+        <SidebarWrapper>
           <SideBar />
-          <main className={styles.content}>{children}</main>
-        </section>
-      </article>
+        </SidebarWrapper>
+        <main className={styles.content}>
+          {children}
+        </main>
+      </section>
+    </article>
   );
 }

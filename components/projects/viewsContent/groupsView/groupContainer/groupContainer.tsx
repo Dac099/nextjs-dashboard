@@ -1,8 +1,8 @@
 'use client';
 import css from './groupContainer.module.css';
-import { GroupData, ItemData as RowData } from '@/utils/types/views'; 
+import { GroupData, ItemData as RowData } from '@/utils/types/views';
 import { SortableColumnHeader } from '../sortableColumnHeader/sortableColumnHeader';
-import { SortableDraggableRow } from '../sortableDraggableRow/sortableDraggableRow'; 
+import { SortableDraggableRow } from '../sortableDraggableRow/sortableDraggableRow';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -18,7 +18,7 @@ import { CustomError } from '@/utils/customError';
 
 type Props = {
     groupData: GroupData;
-    activeDndId: string | null; 
+    activeDndId: string | null;
 };
 
 export function GroupContainer({ groupData, activeDndId }: Props) {
@@ -29,7 +29,7 @@ export function GroupContainer({ groupData, activeDndId }: Props) {
     const panelRef = useRef<OverlayPanel>(null);
     const toastRef = useRef<Toast>(null);
     const columnIds = boardColumns.map(col => col.id);
-    const rowIds = groupData.items.map(item => item.id); 
+    const rowIds = groupData.items.map(item => item.id);
     const router = useRouter();
     const [showInputItem, setShowInputItem] = useState(false);
     const [newItemName, setNewItemName] = useState('');
@@ -61,7 +61,7 @@ export function GroupContainer({ groupData, activeDndId }: Props) {
             }
         }
 
-        if( e.key === 'Escape') {
+        if (e.key === 'Escape') {
             setShowInputItem(false);
         }
     };
@@ -79,7 +79,7 @@ export function GroupContainer({ groupData, activeDndId }: Props) {
                         <th
                             className={`${css.cell} ${css.cellHeader}`}
                             draggable={false}
-                            style={{ width: '600px'}}
+                            style={{ width: '800px' }}
                         >
                             Item
                         </th>
@@ -105,8 +105,8 @@ export function GroupContainer({ groupData, activeDndId }: Props) {
                                 id={item.id}
                                 itemData={item}
                                 boardColumns={boardColumns}
-                                isThisRowActive={activeDndId === item.id} 
-                                parentGroupId={groupData.id} 
+                                isThisRowActive={activeDndId === item.id}
+                                parentGroupId={groupData.id}
                             />
                         ))}
                     </SortableContext>
@@ -118,33 +118,33 @@ export function GroupContainer({ groupData, activeDndId }: Props) {
                         >
                             {showInputItem
                                 ?
-                                    <input 
-                                        type="text"
-                                        placeholder='Nombre del item'
-                                        className={css.addItemInput}
-                                        autoFocus
-                                        onBlur={() => setShowInputItem(false)}
-                                        onKeyDown={handleKeyDown}
-                                        onChange={(e) => setNewItemName(e.target.value)}
-                                        value={newItemName}
-                                    />
+                                <input
+                                    type="text"
+                                    placeholder='Nombre del item'
+                                    className={css.addItemInput}
+                                    autoFocus
+                                    onBlur={() => setShowInputItem(false)}
+                                    onKeyDown={handleKeyDown}
+                                    onChange={(e) => setNewItemName(e.target.value)}
+                                    value={newItemName}
+                                />
                                 :
-                                    <p>
-                                        <i className={`pi pi-plus`} /> Agregar nuevo item
-                                    </p>
+                                <p>
+                                    <i className={`pi pi-plus`} /> Agregar nuevo item
+                                </p>
                             }
                         </td>
                     </tr>
                 </tbody>
             </table>
             <OverlayPanel ref={panelRef}>
-                <button 
+                <button
                     className={css.addItemBtn}
                     onClick={handleShowInputItem}
                 >
                     Item simple
                 </button>
-                <button 
+                <button
                     className={css.addItemBtn}
                     onClick={handleShowProjectForm}
                 >

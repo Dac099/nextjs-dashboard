@@ -5,12 +5,15 @@ type BoardConfiguration = {
   setExpandedGroups: (expanded: boolean) => void;
   columnsWidth: Record<string, number>;
   setColumnWidth: (columnId: string, width: number) => void;
+  showSidebar: boolean;
+  setShowSidebar: (show: boolean) => void;
 };
 
 export const useBoardConfigurationStore = create<BoardConfiguration>((set) => ({
   expandedGroups: false,
-  setExpandedGroups: (expanded: boolean) => set({ expandedGroups: expanded }),
   columnsWidth: {},
+  showSidebar: true,
+  setExpandedGroups: (expanded: boolean) => set({ expandedGroups: expanded }),
   setColumnWidth: (columnId: string, width: number) => set((state) => {
     const newColumnsWidth = {
       ...state.columnsWidth,
@@ -18,4 +21,5 @@ export const useBoardConfigurationStore = create<BoardConfiguration>((set) => ({
     };
     return { columnsWidth: newColumnsWidth };
   }),
+  setShowSidebar: (show: boolean) => set({ showSidebar: show }),
 }));

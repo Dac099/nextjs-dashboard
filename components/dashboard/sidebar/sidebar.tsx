@@ -12,45 +12,47 @@ export async function SideBar() {
   const response: WorkspaceWithDashboards | Error = await getAllWorkspace();
   let workspaces: Dashboard[][] = [];
 
-  if(!(response instanceof Error)){
+  if (!(response instanceof Error)) {
     workspaces = Object.values(response);
   }
 
   const userRole = await getRoleAccess();
 
   return (
-    <aside className={styles.sidebar}>
+    <aside
+      className={styles.sidebar}
+    >
       <section>
         <SideBarItem url='/'>
-          <RiHome9Fill size={20}/>
+          <RiHome9Fill size={20} />
           <p>Tu espacio</p>
         </SideBarItem>
       </section>
 
-      <hr className={styles.division}/>
+      <hr className={styles.division} />
 
-      <SidebarControls userRole={userRole}/>
+      <SidebarControls userRole={userRole} />
 
-      <hr className={styles.division}/>
+      <hr className={styles.division} />
 
-      {userRole.name === 'SYSTEMS' && 
+      {userRole.name === 'SYSTEMS' &&
         <SideBarItem url='/access'>
-          <SiOpenaccess size={20}/>
-          Accesos
+          <SiOpenaccess size={20} />
+          <p>Accesos</p>
         </SideBarItem>
       }
 
       <SideBarItem url='/sap-reports'>
-        <i 
+        <i
           className='pi pi-money-bill'
-          style={{ fontSize: '1.8rem'}}
+          style={{ fontSize: '1.8rem' }}
         ></i>
-        Reporte SAP
+        <p>Reporte SAP</p>
       </SideBarItem>
 
       {workspaces.map(workspace => (
-        <WorkspaceItem 
-          workspace={workspace} 
+        <WorkspaceItem
+          workspace={workspace}
           key={workspace[0].workspaceId}
           userRole={userRole}
         />

@@ -38,8 +38,9 @@
 {
   display: flex;
   align-items: center;
-  gap: 3px;
-  justify-content: space-evenly;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-right: 10px;
 }
 
 .chatIcon

@@ -10,12 +10,13 @@ import { IoLogOut as LogoutIcon } from "react-icons/io5";
 import { logoutAction } from '@/actions/auth';
 import useClickOutside from '@/hooks/useClickOutside';
 import Link from 'next/link';
+import { ExpandedBtn } from './expandedBtn/expandedBtn';
 
 export function MainBar() {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const handleSignOut = async() => {
+  const handleSignOut = async () => {
     await logoutAction();
   }
 
@@ -27,28 +28,29 @@ export function MainBar() {
     <article className={styles.mainbar}>
       <section>
         <Link href="/">
-          <Image 
-            src={LogoYne} 
-            alt="Logo de la empresa YNE Automatización Internacional" 
+          <Image
+            src={LogoYne}
+            alt="Logo de la empresa YNE Automatización Internacional"
             width={50}
             height={25}
           />
         </Link>
-        <p>WorkMonitor</p>
+        <p className={styles.barTitle}>WorkMonitor</p>
         <ThemeButton />
+        <ExpandedBtn />
       </section>
       <section className={styles.userData} ref={menuRef}>
         <IoNotifications />
-        <FaUser 
+        <FaUser
           onClick={() => setShowUserMenu(!showUserMenu)}
         />
         {showUserMenu &&
           <article className={styles.userMenu}>
-            <div 
+            <div
               className={styles.menuOption}
               onClick={() => handleSignOut()}
-            > 
-              <span className={styles.iconOption}><LogoutIcon /></span> 
+            >
+              <span className={styles.iconOption}><LogoutIcon /></span>
               Logout
             </div>
           </article>
