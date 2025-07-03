@@ -32,6 +32,7 @@ import {
 import { CustomError } from "@/utils/customError";
 import { ItemValues } from '@/utils/types/groups';
 import { useBoardStore } from '@/stores/boardStore';
+import { useBoardConfigurationStore } from '@/stores/boardConfiguration';
 
 type Props = {
   boardDataPromise: Promise<GroupData[]>;
@@ -56,6 +57,11 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise, boardValuesP
     setGroups(initialGroups);
     setColumns(initialColumns);
     setBoardStatus(initialStatus);
+    initialColumns.forEach(column => {
+      if(column.columnWidth && column.columnWidth > 0){
+        useBoardConfigurationStore.getState().setColumnWidth(column.id, column.columnWidth);
+      }
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

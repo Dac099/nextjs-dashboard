@@ -52,4 +52,5 @@ export type ColumnData = {
     name: string;
     type: 'text' | 'number' | 'status' | 'date' | 'timeline' | 'percentage';
     postion: number;
+    columnWidth?: number;
 };

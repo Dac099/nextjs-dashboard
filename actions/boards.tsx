@@ -253,7 +253,8 @@ export async function getBoardColumns(boardId: string): Promise<ColumnData[]> {
                 c.id,
                 c.name,
                 c.type,
-                c.position
+                c.position,
+                c.column_width as columnWidth
             FROM Columns c
             LEFT JOIN Boards b ON c.board_id = b.id
             WHERE b.id = @boardId 
