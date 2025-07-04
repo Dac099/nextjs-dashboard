@@ -1,9 +1,10 @@
 'use client';
 import styles from './rowName.module.css';
-import type { ItemData, SubItemData } from '@/utils/types/views';
-import { useState } from 'react';
+import type { ItemData } from '@/utils/types/views';
+import { useState, useRef } from 'react';
 import { ProgressDial } from '@/components/common/progressDial/progressDial';
 import { useRouter } from 'next/navigation';
+import { ContextMenu } from 'primereact/contextmenu';
 
 type Props = {
   itemData: ItemData;
@@ -11,9 +12,19 @@ type Props = {
 
 export function RowName({ itemData }: Props) {
   const router = useRouter();
-  const [ subItems, setSubItems ] = useState<SubItemData[]>([]);
-  const [ showSubItems, setShowSubItems ] = useState(false);
- 
+  const menuRef = useRef<ContextMenu>(null);
+  const [showSubItems, setShowSubItems] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [itemName, setItemName] = useState(itemData.name);
+  const contextMenuItem = [
+    { label: 'Editar', icon: 'pi pi-pencil', command: () => setEditMode(true) },
+    {
+      label: 'Eliminar', icon: 'pi pi-trash', command: () => {
+        // Set operation to deleteItem
+      }
+    }
+  ];
+
   const handleShowSubItems = () => {
     setShowSubItems(!showSubItems);
   };
@@ -23,25 +34,47 @@ export function RowName({ itemData }: Props) {
   };
 
   return (
-    <section className={styles.container}>
-      <i 
+    <section
+      className={styles.container}
+      onContextMenu={e => {
+        menuRef.current?.show(e);
+      }}
+    >
+      <i
         className={`${styles.icon} pi pi-angle-${showSubItems ? 'down' : 'right'}`}
         onClick={handleShowSubItems}
         title='Mostrar/Ocultar subitems'
       ></i>
-      <p 
-        className={styles.itemName}
-        title={itemData.name}
-      >
-        {itemData.name}
-      </p>
+
+      {editMode
+        ?
+        <input
+          className={styles.editInput}
+          type='text'
+          value={itemName}
+          placeholder={itemName}
+          onChange={e => setItemName(e.target.value)}
+          onBlur={() => setEditMode(false)}
+          autoFocus
+        />
+        :
+        <p
+          className={styles.itemName}
+          title={itemData.name}
+        >
+          {itemData.name}
+        </p>
+      }
+
       <article className={styles.chatData}>
-        <ProgressDial total={10} completed={5}/>
-        <i 
-          className={`${styles.chatIcon} pi pi-comments`} 
+        <ProgressDial total={10} completed={5} />
+        <i
+          className={`${styles.chatIcon} pi pi-comments`}
           onClick={handleShowItemDetail}
         ></i>
       </article>
+
+      <ContextMenu ref={menuRef} model={contextMenuItem} />
     </section>
   );
 }
