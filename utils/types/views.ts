@@ -28,7 +28,7 @@ export type ItemData = {
     groupId: string;
     projectId: string | null | undefined;
     name: string;
-    position: number; 
+    position: number;
     values: ItemValue[];
 };
 

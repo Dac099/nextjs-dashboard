@@ -130,7 +130,7 @@ export function GroupContainer({ groupData, activeDndId }: Props) {
                                 />
                                 :
                                 <p>
-                                    <i className={`pi pi-plus`} /> Agregar nuevo item
+                                    <i className={`pi pi-plus`} /> Nuevo item
                                 </p>
                             }
                         </td>

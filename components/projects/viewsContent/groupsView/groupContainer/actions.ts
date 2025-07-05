@@ -3,9 +3,10 @@ import sql from 'mssql';
 import connection from '@/services/database';
 import { CustomError } from '@/utils/customError';
 import { ItemData } from '@/utils/types/views';
+import { insertNewLog } from '@/actions/logger';
 
 export async function addEmptyItem(groupId: string, itemName: string): Promise<ItemData> {
-  if(!groupId){
+  if (!groupId) {
     throw new CustomError(
       400,
       'ID de grupo no proporcionado',
@@ -33,7 +34,9 @@ export async function addEmptyItem(groupId: string, itemName: string): Promise<I
           )
         `);
 
-      await transaction.commit();     
+      await insertNewLog(result.recordset[0].id, itemName, 'Item', 'CREATE');
+
+      await transaction.commit();
 
       return {
         id: result.recordset[0].id,
@@ -42,7 +45,7 @@ export async function addEmptyItem(groupId: string, itemName: string): Promise<I
         name: itemName,
         position: result.recordset[0].position,
         values: []
-      } 
+      }
     } catch (error) {
       console.error('Error while adding empty item:', error);
       await transaction.rollback();
@@ -60,5 +63,25 @@ export async function addEmptyItem(groupId: string, itemName: string): Promise<I
       'Error al conectarse a la base de datos',
       'Ocurrió un problema al conectarse a DB o al iniciar la transacción'
     );
+  }
+}
+
+export async function renameGroup(groupId: string, newName: string, prevName: string) {
+  try {
+    await connection.connect();
+    await connection
+      .request()
+      .input('groupId', groupId)
+      .input('newName', newName)
+      .query(`
+        UPDATE Groups
+        SET name = @newName,
+          updated_at = GETDATE()
+        WHERE id = @groupId  
+      `);
+
+    await insertNewLog(groupId, prevName, 'Group', 'UPDATE');
+  } catch (error) {
+    throw error;
   }
 }

@@ -1,15 +1,21 @@
 'use server';
 import connection from '@/services/database';
-import { ItemValue, ItemData, ColumnData } from '@/utils/types/views';
+import { ItemValue, ItemData, ColumnData, SubItemData } from '@/utils/types/views';
 import { CustomError } from '@/utils/customError';
+import { insertNewLog } from '@/actions/logger';
 
-export async function updateDefinedDateValue(item: ItemData, column: ColumnData, value: Partial<ItemValue>): Promise<ItemValue> {
+export async function updateDefinedDateValue(
+  item: ItemData | SubItemData,
+  column: ColumnData,
+  value: Partial<ItemValue>,
+  prevValue: string | undefined
+): Promise<ItemValue> {
   try {
     await connection.connect();
     const parsedValue = value.value;
-    const isUpdateValue = value.itemId !== undefined && value.columnId !== undefined && value.id !== undefined;    
+    const isUpdateValue = value.itemId !== undefined && value.columnId !== undefined && value.id !== undefined;
 
-    if(isUpdateValue){
+    if (isUpdateValue) {
       await connection
         .request()
         .input('id', value.id)
@@ -20,7 +26,9 @@ export async function updateDefinedDateValue(item: ItemData, column: ColumnData,
               updated_at = GETDATE()
           WHERE id = @id  
         `);
-      
+
+      await insertNewLog(value.id!, prevValue || '', 'Value', 'UPDATE');
+
       return {
         id: value.id!,
         itemId: value.itemId!,
@@ -39,6 +47,13 @@ export async function updateDefinedDateValue(item: ItemData, column: ColumnData,
         OUTPUT INSERTED.*
         VALUES (@itemId, @columnId, @value)
       `);
+
+    await insertNewLog(
+      result.recordset[0].id,
+      value.value!,
+      'Value',
+      'CREATE'
+    );
 
     return {
       id: result.recordset[0].id,

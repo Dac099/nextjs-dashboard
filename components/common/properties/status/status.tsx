@@ -2,7 +2,7 @@
 
 import styles from "./styles.module.css";
 import { useBoardStore } from "@/stores/boardStore";
-import { ColumnData, ItemData, ItemValue } from '@/utils/types/views';
+import { ColumnData, ItemData, ItemValue, SubItemData } from '@/utils/types/views';
 import { useState, useRef } from 'react';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { TabMenu } from 'primereact/tabmenu';
@@ -15,7 +15,7 @@ import { ContextMenu } from 'primereact/contextmenu';
 
 type Props = {
   value: ItemValue | undefined;
-  item: ItemData;
+  item: ItemData | SubItemData;
   column: ColumnData;
 };
 
@@ -25,8 +25,8 @@ type Tag = {
 };
 
 export function Status({ value, item, column }: Props) {
-  const defaultValue = value?.value === undefined 
-    ? {color: 'rgba(0,0,0,0.2)', text: 'Sin valor'} as Tag
+  const defaultValue = value?.value === undefined
+    ? { color: 'rgba(0,0,0,0.2)', text: 'Sin valor' } as Tag
     : JSON.parse(value.value) as Tag;
 
   const overlayPanelRef = useRef<OverlayPanel>(null);
@@ -34,35 +34,35 @@ export function Status({ value, item, column }: Props) {
   const boardStatus = useBoardStore((state) => state.boardStatus);
   const addBoardStatus = useBoardStore((state) => state.addStatus);
   const deleteBoardStatus = useBoardStore(state => state.removeStatus);
-  const [ tagLabel, setTagLabel ] = useState<Tag>(defaultValue);
-  const [ menuLabelSelected, setMenuLabelSelected ] = useState<string>('Tags');
-  const [ newValue, setNewValue ] = useState<{ color: string; text: string } | null>(null);
-  const [ valueToDelete, setValueToDelete ] = useState<StatusValue | null>(null);
+  const [tagLabel, setTagLabel] = useState<Tag>(defaultValue);
+  const [menuLabelSelected, setMenuLabelSelected] = useState<string>('Tags');
+  const [newValue, setNewValue] = useState<{ color: string; text: string } | null>(null);
+  const [valueToDelete, setValueToDelete] = useState<StatusValue | null>(null);
 
   const itemsListMenu = [
-    {label: 'Tags', icon: 'pi pi-list', command: () => setMenuLabelSelected('Tags')},
-    {label: 'Nuevo', icon: 'pi pi-plus', command: () => setMenuLabelSelected('New')},
+    { label: 'Tags', icon: 'pi pi-list', command: () => setMenuLabelSelected('Tags') },
+    { label: 'Nuevo', icon: 'pi pi-plus', command: () => setMenuLabelSelected('New') },
   ];
 
-  const handleSelectStatus = async(tag: StatusValue) => {
+  const handleSelectStatus = async (tag: StatusValue) => {
     overlayPanelRef.current?.hide();
-    await setStatusValue(tag, item, column);
+    await setStatusValue(tag, item, column, value?.value);
     const parsedValue = JSON.parse(tag.value) as Tag;
-    setTagLabel(parsedValue);    
+    setTagLabel(parsedValue);
   };
 
-  const handleAddStatus = async() => {
-    if(!newValue || !newValue.text || !newValue.color) return;
+  const handleAddStatus = async () => {
+    if (!newValue || !newValue.text || !newValue.color) return;
     const newStatusValue = await addNewStatusValue(item, column, newValue);
     addBoardStatus(newStatusValue);
     setMenuLabelSelected('Tags');
     setNewValue(null);
   };
 
-  const handleDeleteValue = async() => {
+  const handleDeleteValue = async () => {
     deleteBoardStatus(valueToDelete!.id, column.id);
     await deleteStatusValue(valueToDelete!);
-  }; 
+  };
 
   return (
     <>
@@ -71,17 +71,17 @@ export function Status({ value, item, column }: Props) {
         style={{ backgroundColor: tagLabel.color }}
         onClick={e => overlayPanelRef.current?.toggle(e)}
       >
-        {tagLabel.text}  
+        {tagLabel.text}
       </article>
       <OverlayPanel
         ref={overlayPanelRef}
         showCloseIcon
         onHide={() => overlayPanelRef.current?.hide()}
       >
-        <TabMenu 
+        <TabMenu
           model={itemsListMenu}
         />
-        {menuLabelSelected === 'Tags' && 
+        {menuLabelSelected === 'Tags' &&
           <section className={styles.tagContainer}>
             {boardStatus.get(column.id)?.map(value => (
               <div
@@ -102,26 +102,26 @@ export function Status({ value, item, column }: Props) {
 
         {menuLabelSelected === 'New' &&
           <section className={styles.newContainer}>
-            <InputText 
+            <InputText
               placeholder='Nombre del tag'
               style={{ width: '200px', fontSize: '1.2rem', marginBottom: '1rem', display: 'block' }}
               value={newValue?.text || ''}
-              onChange={e => setNewValue({ 
-                  ...newValue, 
-                  text: e.target.value 
-                } as { color: string; text: string })
+              onChange={e => setNewValue({
+                ...newValue,
+                text: e.target.value
+              } as { color: string; text: string })
               }
             />
-            <ColorPicker 
+            <ColorPicker
               inline
               style={{ width: '200px', marginBottom: '1rem', display: 'block' }}
-              onChange={e => setNewValue({ 
-                  ...newValue, 
-                  color: `#${e.value}` 
-                } as { color: string; text: string })
+              onChange={e => setNewValue({
+                ...newValue,
+                color: `#${e.value}`
+              } as { color: string; text: string })
               }
             />
-            <Button 
+            <Button
               label='Agregar'
               icon='pi pi-plus'
               style={{ width: '200px' }}
@@ -129,8 +129,8 @@ export function Status({ value, item, column }: Props) {
             />
           </section>
         }
-      </OverlayPanel>  
-      <ContextMenu 
+      </OverlayPanel>
+      <ContextMenu
         ref={conexteMenuRef}
         model={[{
           label: 'Eliminar',

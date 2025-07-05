@@ -9,7 +9,6 @@ import { Button } from "primereact/button";
 import { useBoardDataStore } from "@/stores/boardDataStore";
 import { GroupData } from "@/utils/types/views";
 import { addNewGroup } from "./actions";
-import { useBoardConfigurationStore } from "@/stores/boardConfiguration";
 
 type Props = {
   boardId: string;
@@ -21,7 +20,6 @@ export function BoardControllers({ boardId }: Props) {
   const [newGroupName, setNewGroupName] = useState<string>("");
   const [newGroupColor, setNewGroupColor] = useState<string>("");
   const { viewId } = useParams() as { viewId: string };
-  const { expandedGroups, setExpandedGroups } = useBoardConfigurationStore();
 
   const handleAddNewGroup = async () => {
     if (newGroupColor.length < 1 || newGroupName.length < 1) return;
@@ -55,7 +53,7 @@ export function BoardControllers({ boardId }: Props) {
           <i className={`pi pi-plus ${styles.btnIcon}`}></i>
           <p>Agregar grupo</p>
         </button>
-{/* 
+        {/* 
         <button
           type="button"
           className={styles.actionBtn}

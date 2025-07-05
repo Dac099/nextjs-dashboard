@@ -3,13 +3,19 @@ import sql from 'mssql';
 import connection from '@/services/database';
 import { ItemData, ColumnData, ItemValue } from '@/utils/types/views';
 import { CustomError } from '@/utils/customError';
+import { insertNewLog } from '@/actions/logger';
 
-export async function setPercentageValue(item: ItemData, column: ColumnData, value: Partial<ItemValue>): Promise<[ItemValue, ItemData]>{
+export async function setPercentageValue(
+  item: ItemData,
+  column: ColumnData,
+  value: Partial<ItemValue>,
+  prevValue: string | undefined
+): Promise<[ItemValue, ItemData]> {
   try {
     await connection.connect();
     const transacction = new sql.Transaction(connection);
     await transacction.begin();
-    
+
     try {
       const parsedValue = parseFloat(value.value!);
       const lastPosition = await getLastGroupId(transacction, item.groupId);
@@ -17,30 +23,34 @@ export async function setPercentageValue(item: ItemData, column: ColumnData, val
       const isUpdateValue = value.id !== undefined;
 
       /** When the value is less than 100 just update or create tehe record */
-      if(parsedValue < 100){
+      if (parsedValue < 100) {
         if (isUpdateValue) {
           const itemUpdated = await updatePercentageRecord(item, column, value as ItemValue, transacction);
+          await insertNewLog(value.id!, prevValue || '', 'Value', 'UPDATE');
           await transacction.commit();
           return [itemUpdated, item];
-            
+
         } else {
           const itemCreated = await createPercentageRecord(item, column, value.value!, transacction);
+          await insertNewLog(itemCreated.id, value.value!, 'Value', 'CREATE');
           await transacction.commit();
           return [itemCreated, item];
         }
       }
-      
+
       /** The value is equal to 100  */
-      let itemToReturn : ItemValue;
-      if(isUpdateValue){
+      let itemToReturn: ItemValue;
+      if (isUpdateValue) {
         const valueToRecord = groupPosition === lastPosition ? value.value! : '0';
-        itemToReturn = await updatePercentageRecord(item, column, {...value as ItemValue, value: valueToRecord}, transacction);
-      }else{
+        itemToReturn = await updatePercentageRecord(item, column, { ...value as ItemValue, value: valueToRecord }, transacction);
+        await insertNewLog(value.id!, prevValue || '', 'Value', 'UPDATE');
+      } else {
         const valueToRecord = groupPosition === lastPosition ? value.value! : '0';
         itemToReturn = await createPercentageRecord(item, column, valueToRecord, transacction);
+        await insertNewLog(itemToReturn.id, value.value!, 'Value', 'CREATE');
       }
 
-      if(groupPosition === lastPosition){
+      if (groupPosition === lastPosition) {
         await transacction.commit();
         return [itemToReturn, item];
       }
@@ -76,7 +86,7 @@ async function updatePercentageRecord(item: ItemData, column: ColumnData, value:
         updated_at = GETDATE()
       WHERE id = @id`
     );
- 
+
   return {
     id: value.id!,
     itemId: item.id,
@@ -105,7 +115,7 @@ async function createPercentageRecord(item: ItemData, column: ColumnData, value:
   };
 }
 
-async function getLastGroupId (transacction: sql.Transaction, groupId: string): Promise<number> {
+async function getLastGroupId(transacction: sql.Transaction, groupId: string): Promise<number> {
   const requestLastPositionGroups = await transacction
     .request()
     .input('groupId', groupId)

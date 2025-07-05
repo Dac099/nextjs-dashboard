@@ -59,3 +59,15 @@
   height: 100%;
   color: var(--accent-color);
 }
+
+.infoMsg
+{
+  background-color: var(--action-color);
+  color: var(--sec-bg-color);
+  font-size: 1.2rem;
+  text-wrap: nowrap;
+  padding: 5px;
+  border-radius: 5px;
+  margin: 0;
+  user-select: none;
+}

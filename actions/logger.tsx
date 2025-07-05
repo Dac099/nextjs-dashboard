@@ -32,6 +32,10 @@ export async function insertNewLog(
       message += ` de ${valueLog}`;
     }
 
+    if (type === 'CREATE') {
+      message += ` con el valor ${valueLog}`
+    }
+
     await connection
       .request()
       .input('message', message)

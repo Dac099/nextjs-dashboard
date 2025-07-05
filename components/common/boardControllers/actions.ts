@@ -1,6 +1,7 @@
 'use server';
 import connection from '@/services/database';
 import { CustomError } from '@/utils/customError';
+import { insertNewLog } from '@/actions/logger';
 
 export async function addNewGroup(boardId: string, groupName: string, color: string): Promise<string> {
   try {
@@ -20,6 +21,8 @@ export async function addNewGroup(boardId: string, groupName: string, color: str
           @boardId
         )
       `);
+
+    await insertNewLog(result.recordset[0].id, groupName, 'Group', 'CREATE');
     return result.recordset[0].id;
   } catch (error) {
     console.error('Error adding group:', error);
