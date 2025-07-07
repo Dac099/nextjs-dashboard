@@ -4,7 +4,9 @@ import { useSortable } from "@dnd-kit/sortable";
 import { GroupContainer } from "./groupContainer";
 import { GroupData } from "@/utils/types/views";
 import { CSS } from "@dnd-kit/utilities";
-import { useBoardConfigurationStore } from '@/stores/boardConfiguration';
+import { GroupController } from './groupController';
+import { useState } from 'react';
+import { renameGroup } from './actions';
 
 type Props = {
     groupData: GroupData;
@@ -14,6 +16,9 @@ type Props = {
 };
 
 export function GroupContainerWrapper({ groupData, id, isThisGroupActive, activeDndId }: Props) {
+    const [groupName, setGroupName] = useState(groupData.name);
+    const [showInputName, setShowInputName] = useState(false);
+
     const {
         attributes: sortableAttributes,
         listeners: sortableListeners,
@@ -22,7 +27,7 @@ export function GroupContainerWrapper({ groupData, id, isThisGroupActive, active
         transition,
     } = useSortable({
         id: id,
-        data: { 
+        data: {
             type: 'group',
             groupData: groupData,
         },
@@ -32,7 +37,7 @@ export function GroupContainerWrapper({ groupData, id, isThisGroupActive, active
         isOver,
     } = useDroppable({
         id: id,
-        data: { 
+        data: {
             type: 'group',
             groupData: groupData,
         },
@@ -51,28 +56,62 @@ export function GroupContainerWrapper({ groupData, id, isThisGroupActive, active
         opacity: isThisGroupActive ? 0 : 1, // Opacidad para el grupo original
     };
 
+    const handleRenameGroup = async (e: React.FocusEvent | React.KeyboardEvent) => {
+        if (e.type === 'blur' || e.type === 'KeyboardEvent' && (e as React.KeyboardEvent).key === 'Enter') {
+            if (groupName.length < 1 || groupName === groupData.name) {
+                setShowInputName(false);
+                setGroupName(groupData.name);
+                return;
+            }
+
+            try {
+                setShowInputName(false);
+                await renameGroup(groupData.id, groupName, groupData.name);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    }
+
     return (
         <div
             ref={combinedRef}
             style={style}
         >
-            <section 
+            <section
                 className={styles.groupContainerTitle}
-                style={{ color: groupData.color}}
+                style={{ color: groupData.color }}
             >
                 <section className={styles.groupContainerControls}>
-                    <i 
-                        className={`pi pi-ellipsis-v ${styles.iconControl}`}
-                        style={{ cursor: 'pointer' }}
-                    ></i>
-                    <i 
+                    <GroupController
+                        groupData={groupData}
+                        setShowInputName={setShowInputName}
+                    />
+                    <i
                         className={`pi pi-bars ${styles.iconControl}`}
                         style={{ cursor: 'grab' }}
                         {...sortableListeners}
                         {...sortableAttributes}
                     ></i>
                 </section>
-                <p className={styles.groupContainerText}>{groupData.name}</p>
+
+                {showInputName
+                    ?
+                    <input
+                        type="text"
+                        value={groupName}
+                        onChange={(e) => setGroupName(e.target.value)}
+                        onKeyDown={handleRenameGroup}
+                        onBlur={handleRenameGroup}
+                        className={styles.groupNameInput}
+                        style={{
+                            color: groupData.color
+                        }}
+                        autoFocus
+                    />
+                    :
+                    <p className={styles.groupContainerText}>{groupName}</p>
+                }
             </section>
             <GroupContainer
                 groupData={groupData}

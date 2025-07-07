@@ -1,14 +1,20 @@
 'use server';
 import connection from '@/services/database';
-import { ItemValue, ItemData, ColumnData } from '@/utils/types/views';
+import { ItemValue, ItemData, ColumnData, SubItemData } from '@/utils/types/views';
 import { CustomError } from '@/utils/customError';
+import { insertNewLog } from '@/actions/logger';
 
-export async function setTimeLineValue(item: ItemData, column: ColumnData, value: Partial<ItemValue>): Promise<ItemValue> {
+export async function setTimeLineValue(
+  item: ItemData | SubItemData,
+  column: ColumnData,
+  value: Partial<ItemValue>,
+  prevValue: string | undefined
+): Promise<ItemValue> {
   try {
     await connection.connect();
     const isUpdateItem = value.id !== undefined;
 
-    if(isUpdateItem){
+    if (isUpdateItem) {
       await connection
         .request()
         .input('value', value.value)
@@ -19,6 +25,8 @@ export async function setTimeLineValue(item: ItemData, column: ColumnData, value
             updated_at = GETDATE()
           WHERE id = @id
         `);
+
+      await insertNewLog(value.id!, prevValue || '', 'Value', 'UPDATE');
       return value as ItemValue;
     }
 
@@ -32,7 +40,9 @@ export async function setTimeLineValue(item: ItemData, column: ColumnData, value
         OUTPUT inserted.id
         VALUES (@itemId, @columnId, @value);
       `);
-    
+
+    await insertNewLog(result.recordset[0].id, value.value!, 'Value', 'CREATE');
+
     return {
       id: result.recordset[0].id,
       itemId: item.id,
@@ -43,9 +53,9 @@ export async function setTimeLineValue(item: ItemData, column: ColumnData, value
   } catch (error) {
     console.error(error);
     throw new CustomError(
-      500, 
-      'Error al actualizar el valor de timeline', 
+      500,
+      'Error al actualizar el valor de timeline',
       'Intente de nuevo o recargue la página'
-  );
+    );
   }
 }

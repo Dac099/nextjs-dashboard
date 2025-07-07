@@ -3,3 +3,36 @@
   border: 1px solid var(--accent-color);
   height: 40px;
 }
+
+.addSubItemBtn
+{
+  height: 10px;
+  border: 1px solid var(--accent-color);
+  opacity: 0.8;
+  font-size: 1.2rem;
+  font-style: italic;
+  user-select: none;
+  cursor: pointer;
+  padding: 5px;
+  background-color: rgba(0,0,0,0.04);
+}
+
+.addSubItemBtn p 
+{
+  margin: 0;
+}
+
+.addSubItemBtn:hover
+{
+  background-color: var(--accent-color);
+  color: var(--font-color);
+}
+
+.addSubItemInput
+{
+  outline: none;
+  border: none;
+  background-color: transparent;
+  font-family: inherit;
+  font-size: 1.3rem;
+}

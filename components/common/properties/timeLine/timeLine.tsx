@@ -8,13 +8,13 @@ import { useRoleUserActions } from "@/stores/roleUserActions";
 import { Nullable } from "primereact/ts-helpers";
 import { calculatePercentageBetweenDates } from "@/utils/helpers";
 import { formatTimeLineItemValue } from "@/utils/helpers";
-import { ColumnData, ItemData, ItemValue } from '@/utils/types/views';
+import { ColumnData, ItemData, ItemValue, SubItemData } from '@/utils/types/views';
 import { setTimeLineValue } from './actions';
 
 type Props = {
   value: ItemValue | undefined;
   column: ColumnData;
-  item: ItemData;
+  item: ItemData | SubItemData;
 };
 
 export const TimeLine = ({ value, column, item }: Props) => {
@@ -49,12 +49,12 @@ export const TimeLine = ({ value, column, item }: Props) => {
     if (!dates || (Array.isArray(dates) && dates.some((date) => date === null)))
       return;
     const parsedValues = JSON.stringify(dates.map((date) => date.toISOString()));
-    try{
+    try {
       await setTimeLineValue(item, column, {
         ...value,
         value: parsedValues,
       } as ItemValue);
-    }catch (error) {
+    } catch (error) {
       console.log(error);
       return;
     }

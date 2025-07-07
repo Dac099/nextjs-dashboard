@@ -118,7 +118,7 @@ export async function getViewType(viewId: string): Promise<string> {
 }
 
 export async function getWorkspaceAndBoardData(boardId: string) {
-    try{
+    try {
         await connection.connect();
         const query: string = `
         SELECT
@@ -130,15 +130,15 @@ export async function getWorkspaceAndBoardData(boardId: string) {
         LEFT JOIN Workspaces w ON b.workspace_id = w.id
         WHERE b.id = @boardId AND b.deleted_at IS NULL
       `;
-    
+
         const result = await connection
             .request()
             .input('boardId', boardId)
             .query(query);
-    
+
         return result.recordset[0];
-    }catch(error){
-        if(error instanceof Error){
+    } catch (error) {
+        if (error instanceof Error) {
             console.error('Error al obtener la información del tablero', error.message);
         }
 
@@ -150,10 +150,10 @@ export async function getWorkspaceAndBoardData(boardId: string) {
 export async function getBoardData(boardId: string): Promise<GroupData[]> {
     try {
         await connection.connect();
-        
+
         // Delay artificial de 3 segundos para testing del skeleton
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         const result: GroupData[] = [];
 
         const valuesQuery: string = `
@@ -222,7 +222,7 @@ export async function getBoardData(boardId: string): Promise<GroupData[]> {
             const { recordset: valueRecords } = valuesResult;
 
             const itemsByGroup = itemRecords.filter(item => item.groupId === group.id);
-            
+
             itemsByGroup.forEach(item => {
                 const itemValues = valueRecords.filter(value => value.itemId === item.id);
                 const itemData = {
@@ -240,7 +240,7 @@ export async function getBoardData(boardId: string): Promise<GroupData[]> {
         });
 
         return result;
-    } catch(error){
+    } catch (error) {
         throw new CustomError(500, 'Error al obtener los datos del tablero', error instanceof Error ? error.message : error?.toString());
     }
 }

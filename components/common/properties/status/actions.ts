@@ -2,20 +2,28 @@
 import connection from '@/services/database'
 import sql from 'mssql';
 import { StatusValue } from '@/utils/types/groups';
-import { ItemData, ColumnData } from '@/utils/types/views';
+import { ItemData, ColumnData, SubItemData } from '@/utils/types/views';
 import { CustomError } from '@/utils/customError';
+import { insertNewLog } from '@/actions/logger';
 
-export async function setStatusValue(tag: StatusValue, item: ItemData, column: ColumnData) {
+export async function setStatusValue(
+  tag: StatusValue,
+  item: ItemData | SubItemData,
+  column: ColumnData,
+  prevValue: string | undefined,
+) {
   try {
     await connection.connect();
     const recordOnTableValue: boolean = await itemExists(item.id, column.id, connection);
 
-    if(recordOnTableValue) {
-      await updateTableValue(tag.value, item.id, column.id, connection);
+    if (recordOnTableValue) {
+      const valueId = await updateTableValue(tag.value, item.id, column.id, connection);
+      await insertNewLog(valueId, prevValue || '', 'Value', 'UPDATE');
       return;
     }
 
-    await createTableValue(tag.value, item.id, column.id, connection);
+    const valueId = await createTableValue(tag.value, item.id, column.id, connection);
+    await insertNewLog(valueId, tag.value!, 'Value', 'CREATE');
     return;
 
   } catch (error) {
@@ -24,7 +32,7 @@ export async function setStatusValue(tag: StatusValue, item: ItemData, column: C
   }
 }
 
-export async function addNewStatusValue(item: ItemData, column: ColumnData, value: {color: string, text: string}): Promise<StatusValue>{
+export async function addNewStatusValue(item: ItemData | SubItemData, column: ColumnData, value: { color: string, text: string }): Promise<StatusValue> {
   try {
     await connection.connect();
     const statusValueId = await addStatusValueRecord(value, connection, column.id);
@@ -40,7 +48,7 @@ export async function addNewStatusValue(item: ItemData, column: ColumnData, valu
   }
 }
 
-export async function deleteStatusValue(value: StatusValue){
+export async function deleteStatusValue(value: StatusValue) {
   try {
     await connection.connect();
     await connection
@@ -72,7 +80,7 @@ async function itemExists(itemId: string, columnId: string, connection: sql.Conn
   return queryRequestExistense.recordset[0].totalItems > 0;
 }
 
-async function updateTableValue(value: string, itemId: string, columnId: string, connection: sql.ConnectionPool) {
+async function updateTableValue(value: string, itemId: string, columnId: string, connection: sql.ConnectionPool): Promise<string> {
   await connection
     .request()
     .input('value', value)
@@ -83,23 +91,40 @@ async function updateTableValue(value: string, itemId: string, columnId: string,
       SET value = @value, updated_at = GETDATE() 
       WHERE item_id = @itemId 
         AND column_id = @columnId
-        AND deleted_at IS NULL
+        AND deleted_at IS NULL;
     `);
+
+  const result = await connection
+    .request()
+    .input('itemId', itemId)
+    .input('columnId', columnId)
+    .query(`
+      SELECT id 
+      FROM TableValues 
+      WHERE item_id = @itemId 
+        AND column_id = @columnId 
+        AND deleted_at IS NULL
+    `)
+
+
+  return result.recordset[0].id;
 }
 
-async function createTableValue(value: string, itemId: string, columnId: string, connection: sql.ConnectionPool) {
-  await connection
+async function createTableValue(value: string, itemId: string, columnId: string, connection: sql.ConnectionPool): Promise<string> {
+  const result = await connection
     .request()
     .input('value', value)
     .input('itemId', itemId)
     .input('columnId', columnId)
     .query(`
       INSERT INTO TableValues (value, item_id, column_id) 
+      OUTPUT inserted.id
       VALUES (@value, @itemId, @columnId)
     `);
+  return result.recordset[0].id;
 }
 
-async function addStatusValueRecord(value: {color: string, text: string}, connection: sql.ConnectionPool, columnId: string) {
+async function addStatusValueRecord(value: { color: string, text: string }, connection: sql.ConnectionPool, columnId: string) {
   const result = await connection
     .request()
     .input('value', JSON.stringify({ color: value.color, text: value.text }))
