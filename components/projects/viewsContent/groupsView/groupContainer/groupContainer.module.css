@@ -143,3 +143,37 @@
   border-radius: 5px;
   padding: 5px;
 }
+
+/* Nuevos estilos para el Dialog y componentes internos */
+.dialogContainer {
+  width: 500px;
+}
+
+.dialogTitle {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.dialogDescription {
+  font-size: 1.3rem;
+  margin: 10px 0;
+}
+
+.dialogHighlightText {
+  font-size: 1.3rem;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.dialogSelect {
+  width: 100%;
+  font-size: 1.2rem;
+}
+
+.dialogActions
+{
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  margin-top: 20px;
+}
