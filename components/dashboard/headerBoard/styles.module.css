@@ -12,88 +12,64 @@
     gap: 10px;
 }
 
-.addIcon
-{
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-}
-
-.control
-{
-    position: relative;
-}
-
-.controlMenu
-{
-    position: absolute;
-    border: 1px solid var(--accent-color);
-    padding: 5px;
-    border-radius: 5px;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    background-color: var(--bg-color);
-    z-index: 2;
-}
-
-.menuOption
-{
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 1.3rem;
-    width: 100px;
-    padding: 3px;
-    border-radius: 3px;
-}
-
-.menuOption:hover
-{
-    background-color: var(--action-color);
-    cursor: pointer;
-    color: var(--bg-color);
-}
-
-.viewInput
-{
-    border: 1px solid var(--action-color);
-    border-radius: 5px;
-    height: 30px;
-    outline: none;
-    font-family: inherit;
-    padding-left: 3px;
-    width: 140px;
-    background-color: var(--bg-color);
-    color: var(--font-color);
-}
-
-.viewInput::placeholder
-{
-    color: var(--font-color);
-}
-
 .viewLink
 {
+    background-color: var(--action-color);
+    color: var(--bg-color);
     font-size: 1.3rem;
-    margin-right: 10px;
-    padding: 5px;
-    border-radius: 3px;
-    display: inline-block;
+    padding: 3px;
+    border-radius: 5px;
+    display: block;
+    width: 100px;
+    text-align: center;
+    transition: all 0.3s ease;
 }
 
 .viewLink:hover
 {
     background-color: var(--accent-color);
+    color: var(--action-color);
 }
 
-.viewLinkActive
+.addViewButton
+{
+    background-color: var(--accent-color);
+    color: var(--action-color);
+}
+
+.viewNameLabel
+{
+    color: var(--action-color);
+}
+
+.viewNameInput
+{
+    margin-top: 5px;
+    font-size: 1.5rem;
+}
+
+.createViewButton
 {
     background-color: var(--action-color);
     color: var(--bg-color);
+    font-size: 1.3rem;
+    padding: 3px;
+    border-radius: 5px;
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin: 10px 0;
+    outline: none;
 }
 
-.filters
+.createViewForm
+{
+    padding-top: 10px;
+}
+
+.viewTypeSelect
 {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    justify-content: center;
+    margin: 10px 0;
 }

@@ -31,6 +31,9 @@ export async function getBoardViews(boardId: string): Promise<ViewWithSettings[]
         FROM Views v
         LEFT JOIN ViewSettings vs ON vs.view_id = v.id
         WHERE v.board_id = @boardId
+            AND v.deleted_at IS NULL
+            AND vs.deleted_at IS NULL
+        ORDER BY v.position ASC
     `;
     const result = await connection
         .request()

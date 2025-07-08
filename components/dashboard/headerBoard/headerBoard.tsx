@@ -1,25 +1,16 @@
 'use client';
 import styles from './styles.module.css';
-import Link from 'next/link';
-import { IoMdAdd } from "react-icons/io";
-import { Tooltip } from "@/components/common/tooltip/tooltip";
-import { ViewWithSettings } from "@/utils/types/views";
-import {
-    useState,
-    useRef,
-    RefObject,
-    useEffect,
-    KeyboardEvent
-} from "react";
-import {
-    LuChartGantt,
-    LuChartColumnBig,
-    LuTable2,
-} from "react-icons/lu";
-import useClickOutside from "@/hooks/useClickOutside";
-import { addViewBoard } from "@/actions/boards";
-import { useParams } from "next/navigation";
+import { ViewWithSettings, ViewDB } from "@/utils/types/views";
 import { Actions } from '@/utils/types/roles';
+import Link from 'next/link';
+import { OverlayPanel } from 'primereact/overlaypanel';
+import { FormEvent, useRef, useState } from 'react';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { FloatLabel } from 'primereact/floatlabel';
+import { SelectButton } from 'primereact/selectbutton';
+import { createNewView, deleteView } from './actions';
+import { ContextMenu } from 'primereact/contextmenu';
 
 type Props = {
     views: ViewWithSettings[];
@@ -28,138 +19,107 @@ type Props = {
 };
 
 export function HeaderBoard({ views, boardId, userActions }: Props) {
-    const params = useParams();
-    const viewId: string = params.viewId as string || '';
-    const viewMenuRef = useRef<HTMLDivElement>(null);
-    const inputViewRef = useRef<HTMLInputElement>(null);
-    const [filteredViews, setFilteredViews] = useState<ViewWithSettings[]>(views);
-    const [showViewMenu, setShowViewMenu] = useState<boolean>(false);
-    const [showViewInput, setShowViewInput] = useState<boolean>(false);
-    const [newViewType, setNewViewType] = useState<string>('');
-    const translateViewType = new Map<string, string>([
-        ['groups', 'Grupo'],
-        ['gantt.tsx', 'Gantt'],
-        ['chart', 'Gráfico'],
-    ]);
+    const panelRef = useRef<OverlayPanel>(null);
+    const contextRef = useRef<ContextMenu>(null);
+    const viewOptions: string[] = ['Grupos', 'Gantt'];
+    const [ viewTypeForm, setViewTypeForm ] = useState<string>(viewOptions[0]);
+    const [ viewsList, setViewsList ] = useState<ViewWithSettings[]>(views);
+    const [ viewDelete, setViewDelete ] = useState<ViewDB | null>(null);
 
-
-    useClickOutside(viewMenuRef as RefObject<HTMLDivElement>, () => {
-        setShowViewMenu(false);
-        setShowViewInput(false);
-    });
-
-    function handleShowViewInput(viewType: string): void {
-        setShowViewInput(true);
-        setShowViewMenu(false);
-        setNewViewType(viewType);
-    }
-
-    function handleShowViewMenu() {
-        setShowViewMenu(true);
-        setShowViewInput(false);
-    }
-
-    async function handleSubmitView(e: KeyboardEvent<HTMLInputElement>) {
-        if (e.code === 'Escape') {
-            setShowViewInput(false);
+    const handleCreateView = async(e: FormEvent) => {
+        e.preventDefault();
+        try {
+            const data = new FormData(e.currentTarget as HTMLFormElement);
+            const newView = await createNewView(boardId, data.get('viewName') as string, viewTypeForm);
+            setViewsList((prev) => [...prev, newView]);
+            panelRef.current?.hide();
+        } catch (error) {
+            console.error(error);
         }
+    };
 
-        if (e.code === 'Enter') {
-            const inputValue: string = inputViewRef.current!.value;
-            const updatedViews: ViewWithSettings[] = filteredViews;
-            const newView: ViewWithSettings = {
-                view: {
-                    type: newViewType,
-                    name: inputValue,
-                    is_default: false,
-                    id: Math.random().toString()
-                },
-                settings: [],
-            };
-            updatedViews.push(newView);
-            setFilteredViews(updatedViews);
-            setShowViewInput(false);
-            await addViewBoard(boardId, newView);
+    const handleDeleteView = async() => {
+        if(!viewDelete) return;
+        const viewId = viewDelete.id;
+        try {            
+            await deleteView(viewId);
+            setViewsList((prev) => prev.filter(({view}) => view.id !== viewId));
+        } catch (error) {
+            console.error(error);
         }
-    }
-
-    useEffect(() => {
-        if (showViewInput) {
-            const placeholderViewType: string = translateViewType.get(newViewType) || 'Elemento';
-            inputViewRef.current!.focus();
-            inputViewRef.current!.placeholder = `Nombre del ${placeholderViewType}`
-        }
-    }, [showViewInput]);
+    };
 
     return (
-        <article className={styles.headerContainer}>
+        <section className={styles.headerContainer}>
+
             <section className={styles.views}>
-                <section>
-                    {
-                        filteredViews.map(({ view }) => (
-                            <div
-                                key={view.id}
-                                className={`${styles.viewLink} ${viewId === view.id ? styles.viewLinkActive : ''}`}
-                            >
-
-                                <Link href={`/board/${boardId}/view/${view.id}`}>
-                                    {view.name}
-                                </Link>
-                            </div>
-                        ))
-                    }
-                    {showViewInput &&
-                        <input
-                            type="text"
-                            ref={inputViewRef}
-                            className={styles.viewInput}
-                            onKeyUp={(e) => handleSubmitView(e)}
-                        />
-                    }
-                </section>
-                <section className={styles.control} ref={viewMenuRef}>
-                    <Tooltip text={'Nueva vista'}>
-                        <div
-                            className={styles.addIcon}
-                            onClick={() => {
-                                if (userActions.includes('create')) {
-                                    handleShowViewMenu();
-                                }
-                            }}
-                        >
-                            <IoMdAdd size={20} />
-                        </div>
-                    </Tooltip>
-                    {showViewMenu &&
-                        <section className={styles.controlMenu}>
-                            <span
-                                className={styles.menuOption}
-                                onClick={() => handleShowViewInput('groups')}
-                            >
-                                <LuTable2 />
-                                <p>Grupos</p>
-                            </span>
-
-                            <span
-                                className={styles.menuOption}
-                                onClick={() => handleShowViewInput('gantt.tsx')}
-                            >
-                                <LuChartGantt />
-                                <p>Gantt</p>
-                            </span>
-
-                            <span
-                                className={styles.menuOption}
-                                onClick={() => handleShowViewInput('chart')}
-                            >
-                                <LuChartColumnBig />
-                                <p>Gráfica</p>
-                            </span>
-
-                        </section>
-                    }
-                </section>
+                <Button 
+                    icon="pi pi-plus"
+                    onClick={(e) => panelRef.current?.toggle(e)}
+                    className={styles.addViewButton}
+                    disabled={!userActions.includes('create')}
+                />
+                {viewsList.map(({view}) => (
+                    <Link 
+                        key={view.id}
+                        href={`/board/${boardId}/view/${view.id}`}
+                        className={styles.viewLink}
+                        onContextMenu={(e) => {
+                            e.preventDefault();
+                            setViewDelete(view);
+                            contextRef.current?.show(e);
+                        }}
+                    >
+                        {view.name}
+                    </Link>
+                ))}
             </section>
-        </article>
+
+            <OverlayPanel ref={panelRef}>
+                <section>
+                    <form className={styles.createViewForm} onSubmit={handleCreateView}>
+                        <FloatLabel>
+                            <InputText 
+                                id='viewName'
+                                name='viewName'
+                                className={styles.viewNameInput}
+                                required
+                                autoComplete='off'
+                            />
+                            <label 
+                                htmlFor="viewName"
+                                className={styles.viewNameLabel}
+                            >
+                                Nombre de la vista
+                            </label>
+                        </FloatLabel>
+
+                        <section className={styles.viewTypeSelect}>
+                            <SelectButton                                 
+                                options={viewOptions}
+                                value={viewTypeForm}
+                                onChange={(e) => setViewTypeForm(e.value)}
+                                allowEmpty={false}
+                                name='viewType'                            
+                            />
+                        </section>
+
+                        <Button
+                            label='Crear vista'
+                            icon="pi pi-plus"
+                            className={styles.createViewButton}
+                            type='submit'
+                        />
+                    </form>
+                </section>
+            </OverlayPanel>
+
+            <ContextMenu 
+                ref={contextRef}
+                model={[
+                    { label: 'Eliminar vista', icon: 'pi pi-trash', command: () => handleDeleteView()},
+                ]}
+            />
+        </section>
     );
 }
