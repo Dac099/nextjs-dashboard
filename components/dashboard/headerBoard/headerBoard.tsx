@@ -4,13 +4,14 @@ import { ViewWithSettings, ViewDB } from "@/utils/types/views";
 import { Actions } from '@/utils/types/roles';
 import Link from 'next/link';
 import { OverlayPanel } from 'primereact/overlaypanel';
-import { FormEvent, useRef, useState } from 'react';
+import { FormEvent, useRef, useState, useEffect } from 'react';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { FloatLabel } from 'primereact/floatlabel';
 import { SelectButton } from 'primereact/selectbutton';
 import { createNewView, deleteView } from './actions';
 import { ContextMenu } from 'primereact/contextmenu';
+import { useRoleUserActions } from '@/stores/roleUserActions';
 
 type Props = {
     views: ViewWithSettings[];
@@ -20,11 +21,16 @@ type Props = {
 
 export function HeaderBoard({ views, boardId, userActions }: Props) {
     const panelRef = useRef<OverlayPanel>(null);
+    const { setUserActions } = useRoleUserActions();
     const contextRef = useRef<ContextMenu>(null);
     const viewOptions: string[] = ['Grupos', 'Gantt'];
     const [ viewTypeForm, setViewTypeForm ] = useState<string>(viewOptions[0]);
     const [ viewsList, setViewsList ] = useState<ViewWithSettings[]>(views);
     const [ viewDelete, setViewDelete ] = useState<ViewDB | null>(null);
+
+    useEffect(() => {
+        setUserActions(userActions);
+    }, [userActions, setUserActions]);
 
     const handleCreateView = async(e: FormEvent) => {
         e.preventDefault();

@@ -2,7 +2,7 @@
 import sql from 'mssql';
 import connection from '@/services/database';
 import { CustomError } from '@/utils/customError';
-import { GroupData, ItemData } from '@/utils/types/views';
+import { ColumnData, ColumnTypes, GroupData, ItemData } from '@/utils/types/views';
 import { insertNewLog } from '@/actions/logger';
 
 export async function addEmptyItem(groupId: string, itemName: string): Promise<ItemData> {
@@ -264,5 +264,31 @@ export async function duplicateGroup(groupId: string, selectedColumns: {id: stri
         'Ocurrió un problema durante la operación de duplicación'
       );
     }
+  }
+}
+
+export async function createNewColumn(name: string, type: ColumnTypes, boardId: string): Promise<ColumnData> {
+  try {
+    await connection.connect();
+    const result = await connection
+      .request()
+      .input('name', name)
+      .input('type', type)
+      .input('boardId', boardId)
+      .query(`
+        INSERT INTO Columns (board_id, name, type, position)  
+        OUTPUT INSERTED.*
+        VALUES (@boardId, @name, @type, 
+          (SELECT ISNULL(MAX(position), 0) + 1 FROM Columns WHERE board_id = @boardId))
+      `);
+
+    return {
+      id: result.recordset[0].id,
+      name: result.recordset[0].name,
+      type: result.recordset[0].type,
+      postion: result.recordset[0].position,    
+    } as ColumnData;
+  } catch (error) {
+    throw error;
   }
 }

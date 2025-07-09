@@ -50,7 +50,9 @@ export type GroupData = {
 export type ColumnData = {
     id: string;
     name: string;
-    type: 'text' | 'number' | 'status' | 'date' | 'timeline' | 'percentage';
+    type: ColumnTypes;
     postion: number;
     columnWidth?: number;
 };
+
+export type ColumnTypes = 'text' | 'number' | 'status' | 'date' | 'timeline' | 'percentage' | 'user';
