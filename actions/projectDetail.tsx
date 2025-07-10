@@ -91,8 +91,6 @@ export async function getItemsForBilling(groupId: string): Promise<Item[]> {
     .input("groupId", groupId)
     .query(getDataQuery);
 
-  console.log(result.recordset);
-
   return groupItemsByType(result.recordset);
 }
 

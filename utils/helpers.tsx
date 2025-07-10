@@ -3,9 +3,9 @@ import { SubItem, TableValue } from "./types/groups";
 import { Task } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
 import { ItemValue } from './types/views';
-import { CustomError } from './customError';
 
 export function formatDate(date: Date): string {
+  if(!date) return '';
   const options: Intl.DateTimeFormatOptions = {
     day: "numeric",
     month: "short",
@@ -35,8 +35,8 @@ export function groupItemsByType(data: ValueDB[]): Item[] {
         groupedByItemId[itemId].invoice = parseFloat(JSON.parse(value));
         break;
       case "Payment date":
-        const paymentDateClean = JSON.parse(value);
-        groupedByItemId[itemId].paymentDate = new Date(paymentDateClean);
+        // const paymentDateClean = JSON.parse(value);
+        groupedByItemId[itemId].paymentDate = new Date(value);
         break;
       case "Paid":
         groupedByItemId[itemId].paid = parseFloat(JSON.parse(value));

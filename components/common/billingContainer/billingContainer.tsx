@@ -22,7 +22,6 @@ export function BillingContainer({ idProject, projectName }: Props) {
             const itemsRes: Item[] = await getItemsForBilling(id);
             setGroupId(id);
             setItems(itemsRes);
-            console.log(itemsRes)
         }
 
         fetchData()
