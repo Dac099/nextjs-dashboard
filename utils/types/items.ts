@@ -91,3 +91,10 @@ export type ChatTask = {
   message: string;
   completed: boolean;
 };
+
+export type UserData = {
+  id: string;
+  username: string;
+  name: string;
+  department: string;
+};

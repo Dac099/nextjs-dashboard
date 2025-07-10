@@ -7,6 +7,7 @@ import { DefinedDate } from '@/components/common/properties/definedDate/definedD
 import { Percentage } from '@/components/common/properties/percentage/percentage';
 import { TimeLine } from '@/components/common/properties/timeLine/timeLine';
 import { Status } from '@/components/common/properties/status/status';
+import { UserColumn } from '@/components/common/properties/userColumn/userColumn';
 
 type Props = {
   column: ColumnData;
@@ -31,6 +32,8 @@ export function RowValue({ column, itemData, isSubItem = false }: Props) {
         return <TextColumn value={itemValue} item={itemData} column={column} isSubItem={isSubItem} />;
       case 'timeline':
         return <TimeLine value={itemValue} column={column} item={itemData} />;
+      case 'user':
+        return <UserColumn value={itemValue} column={column} itemData={itemData} isSubItem={isSubItem}/>
     }
   };
 
