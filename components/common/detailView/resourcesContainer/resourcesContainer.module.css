@@ -1,0 +1,92 @@
+.mainContainer
+{
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.sectionTitle
+{
+  font-size: 2rem;
+  margin: 0 0 20px 0;
+}
+
+.errorLabel
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: max-content;
+  margin: 40px auto 0 auto;
+  font-size: 1.7rem;
+  font-weight: bold;
+  padding: 10px;
+  background-color: #fb8a8acb;
+  border-radius: 5px;
+  color: darkred;
+}
+
+.resourcesContainer
+{
+  display: grid;
+  grid-auto-rows: max-content;
+  grid-template-columns: minmax(50%, 400px);
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.cardManager
+{
+  border: 1px solid var(--accent-color);
+  border-radius: 5px;
+  position: relative;
+}
+
+.userIcon
+{
+  color: var(--accent-color);
+  position: absolute;
+  top: -15px;
+  left: -10px;
+  backdrop-filter: blur(5px);;
+}
+
+.cardHeader
+{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerTitle
+{
+  font-size: 1.5rem;
+  margin: 10px 0;
+  padding-left: 40px;
+  color: var(--action-color);
+  font-weight: bold;
+}
+
+.managerArea
+{
+  background-color: var(--action-color);
+  color: var(--bg-color);
+  font-size: 1.5rem;
+  text-align: right;
+  padding: 5px;
+  margin: 0;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  width: 150px;
+}
+
+.itemPerson
+{
+  margin: 5px 0;
+  font-size: 1.3rem;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}

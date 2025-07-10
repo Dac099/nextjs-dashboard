@@ -45,6 +45,7 @@
   gap: 5px;
   padding: 5px 3px;
   border-radius: 5px;
+  margin-bottom: 10px;
 }
 
 .projectItem:hover
@@ -58,6 +59,7 @@
   text-wrap: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+  margin: 0;
 }
 
 .projectItem span

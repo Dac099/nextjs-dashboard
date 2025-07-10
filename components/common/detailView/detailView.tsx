@@ -16,6 +16,8 @@ import { FaMoneyBillWave } from "react-icons/fa";
 import { BillingContainer } from "@/components/common/billingContainer/billingContainer";
 import { getItemChats } from '@/actions/projectDetail';
 import { FaToolbox } from "react-icons/fa6";
+import { FaArrowsDownToPeople as ResourcesIcon} from "react-icons/fa6";
+import { ResourcesContainer } from './resourcesContainer/resourcesContainer';
 
 type Props = {
   itemId: string;
@@ -116,13 +118,23 @@ export function DetailView({ itemId, closeContainer }: Props) {
         </article>
 
         {isProject &&
-          <article
-            className={`${styles.viewBtn} ${viewSelected == 'billing' ? styles.viewBtnSelected : ''}`}
-            onClick={() => setViewSelected('billing')}
-          >
-            <FaMoneyBillWave />
-            Cobranza
-          </article>
+          <>
+            <article
+              className={`${styles.viewBtn} ${viewSelected == 'billing' ? styles.viewBtnSelected : ''}`}
+              onClick={() => setViewSelected('billing')}
+            >
+              <FaMoneyBillWave />
+              Cobranza
+            </article>
+
+            <article
+              className={`${styles.viewBtn} ${viewSelected == 'resources' ? styles.viewBtnSelected : ''}`}
+              onClick={() => setViewSelected('resources')}
+            >
+              <ResourcesIcon />
+              Recursos 
+            </article>
+          </>
         }
       </section>
       <hr className={styles.division} />
@@ -133,6 +145,7 @@ export function DetailView({ itemId, closeContainer }: Props) {
         {viewSelected === 'projectDetail' && <ProjectContainer data={projectData as ProjectData} />}
         {viewSelected === 'logs' && <LogsContainer />}
         {viewSelected === 'billing' && <BillingContainer idProject={projectData!.id} projectName={projectData!.name} />}
+        {viewSelected === 'resources' && <ResourcesContainer projectData={projectData} itemId={itemId}/>}
       </section>
     </>
   );

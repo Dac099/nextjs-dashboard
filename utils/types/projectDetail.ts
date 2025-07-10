@@ -152,3 +152,19 @@ export type EmployeeField = {
 };
 
 export type FieldWithEmployees = { [key: string]: {username: string; userId: string}[] };
+
+export type ManagersId = {
+    electricalDesigner: string | null;
+    mechanicalDesigner: string | null;
+    developer: string | null;
+    assembler: string | null;
+    projectManager: string | null;
+};
+
+export type ManagersData = {
+    id: string;
+    name: string;
+    username: string;
+    profile: string;
+    area: string;
+};
