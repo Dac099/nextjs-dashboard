@@ -1,6 +1,6 @@
 "use client";
 import styles from "./boardControllers.module.css";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { InputText } from "primereact/inputtext";
@@ -8,7 +8,11 @@ import { ColorPicker, ColorPickerChangeEvent } from "primereact/colorpicker";
 import { Button } from "primereact/button";
 import { useBoardDataStore } from "@/stores/boardDataStore";
 import { GroupData } from "@/utils/types/views";
-import { addNewGroup } from "./actions";
+import { addNewGroup, getListedUsersInProjects, getLinkedProjects } from "./actions";
+import { TbUsers } from "react-icons/tb";
+import { Dialog } from 'primereact/dialog';
+import { linkedUserProject, UserData } from '@/utils/types/items';
+import { FaClipboardUser } from "react-icons/fa6";
 
 type Props = {
   boardId: string;
@@ -16,10 +20,13 @@ type Props = {
 
 export function BoardControllers({ boardId }: Props) {
   const overlayPanelRef = useRef<OverlayPanel>(null);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
   const { groups, addGroup } = useBoardDataStore();
   const [newGroupName, setNewGroupName] = useState<string>("");
   const [newGroupColor, setNewGroupColor] = useState<string>("");
   const { viewId } = useParams() as { viewId: string };
+  const [linkedUsersInBoard, setLinkedUsersInBoard] = useState<UserData[]>([]);
+  const [usersWithProjects, setUsersWithProjects] = useState<linkedUserProject[]>([]);
 
   const handleAddNewGroup = async () => {
     if (newGroupColor.length < 1 || newGroupName.length < 1) return;
@@ -42,6 +49,29 @@ export function BoardControllers({ boardId }: Props) {
     overlayPanelRef.current?.hide();
   };
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const usersInBoard = await getListedUsersInProjects(boardId);
+        setLinkedUsersInBoard(usersInBoard);
+      }catch(error){
+        console.error(error);
+      }
+    }
+
+    fetchData();
+  }, [boardId]);
+
+  const handleShowUsersInBoard = async() => {
+    setShowDialog(true);
+    try {
+      const results = await getLinkedProjects(linkedUsersInBoard);
+      setUsersWithProjects(results);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <article className={styles.container}>
       <section className={styles.buttonsContainer}>
@@ -53,21 +83,6 @@ export function BoardControllers({ boardId }: Props) {
           <i className={`pi pi-plus ${styles.btnIcon}`}></i>
           <p>Agregar grupo</p>
         </button>
-        {/* 
-        <button
-          type="button"
-          className={styles.actionBtn}
-          onClick={() => setExpandedGroups(!expandedGroups)}
-        >
-          <i
-            className={`pi pi-${
-              !expandedGroups
-                ? "arrow-down-left-and-arrow-up-right-to-center"
-                : "arrow-up-right-and-arrow-down-left-from-center"
-            } ${styles.btnIcon}`}
-          ></i>
-          <p>{!expandedGroups ? "Colapsar" : "Expandir"} grupos</p>
-        </button> */}
 
         <a
           href={`/board/${boardId}/view/${viewId}/api`}
@@ -76,6 +91,16 @@ export function BoardControllers({ boardId }: Props) {
           <i className={`pi pi-file-export ${styles.btnIcon}`}></i>
           <p>Exportar tablero</p>
         </a>
+
+        { linkedUsersInBoard.length > 0 &&         
+          <button
+            className={styles.actionBtn}
+            onClick={() => handleShowUsersInBoard()}
+          >
+            <TbUsers size={18}/>
+            <p>Usuarios activos</p>
+          </button>
+        }
       </section>
 
       <OverlayPanel
@@ -108,6 +133,47 @@ export function BoardControllers({ boardId }: Props) {
           onClick={handleAddNewGroup}
         />
       </OverlayPanel>
+
+      <Dialog
+        visible={showDialog}
+        draggable={false}
+        onHide={() => setShowDialog(false)}
+        header={HeaderElement}
+        maximizable
+        className={styles.dialogContainer}
+      >
+
+        <section className={styles.usersContainer}>          
+          {usersWithProjects.map(({user, projects}) => (
+            <article key={user.id} className={styles.userCard}>
+              
+              <div className={styles.userInfo}>
+                <FaClipboardUser size={25} />
+                <p>{user.name} <i>({user.username})</i></p>
+              </div>
+
+              <details className={styles.userProjectsDetails}>
+                <summary>Proyectos asignados</summary>
+                <ol className={styles.userProjects}>
+                  {projects.map((project) => (
+                    <li key={project.projectId}>
+                      {project.projectName}
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            </article>
+          ))}
+        </section>
+
+      </Dialog>
     </article>
   );
 }
+
+const HeaderElement =  (
+  <section className={styles.headerElement}>
+    <TbUsers size={30} className={styles.headerIcon}/>
+    <h2 className={styles.headerTitle}>Usuarios activos en proyectos</h2>
+  </section>
+);

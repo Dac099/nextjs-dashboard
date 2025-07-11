@@ -61,10 +61,10 @@ body
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
-ul, ol 
+/* ul, ol 
 {
   list-style: none;
-}
+} */
 
 a 
 {

@@ -49,3 +49,71 @@
   flex-wrap: nowrap;
   gap: 10px;
 }
+
+.dialogContainer
+{
+  width: 800px;
+}
+
+.headerElement {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.headerIcon
+{
+  color: var(--action-color);
+}
+
+.headerTitle
+{
+  font-size: 2rem;
+}
+
+.userCard
+{
+  border: 1px solid var(--accent-color);
+  border-radius: 5px;
+  padding: 5px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.userInfo
+{
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+
+  p {
+    font-size: 1.4rem;
+  }
+}
+
+.usersContainer
+{
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.userProjectsDetails
+{
+  font-size: 1.2rem;
+  user-select: none;
+}
+
+.userProjectsDetails summary
+{
+  font-size: 1.4rem;
+  cursor: pointer;
+
+}
+
+.userProjectsDetails[open] summary
+{
+  font-weight: bold;
+  color: var(--action-color);
+}

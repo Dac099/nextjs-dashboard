@@ -98,3 +98,11 @@ export type UserData = {
   name: string;
   department: string;
 };
+
+export type linkedUserProject = {
+  user: UserData;
+  projects: {
+    projectName: string; 
+    projectId: string;
+  }[];
+};

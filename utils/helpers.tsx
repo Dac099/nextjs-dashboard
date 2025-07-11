@@ -1,6 +1,6 @@
 import { Item, ProjectFormData, ValueDB } from "@/utils/types/projectDetail";
 import { SubItem, TableValue } from "./types/groups";
-import { Task } from "./types/items";
+import { Task, UserData } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
 import { ItemValue } from './types/views';
 
@@ -344,4 +344,19 @@ export const formatTimeLineItemValue = (value: ItemValue | undefined): Date[] | 
 export function formatFileData(fileData: string): string[][] {
   const fileLines = fileData.replaceAll('\t', '|').split('\n');
   return fileLines.map(line => line.split('|'));
+}
+
+export function formatFileDataToObject(fileData: string[]): UserData[] {
+  if(!fileData || fileData.length === 0) return [];
+  
+  const result = fileData.map(value => {
+    try {
+      const parsedValue = JSON.parse(value) as UserData;
+      return parsedValue;
+    }catch{
+      return undefined;
+    }
+  });
+
+  return result.filter(user => user !== undefined);
 }
