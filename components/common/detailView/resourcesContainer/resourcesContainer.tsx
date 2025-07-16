@@ -1,101 +1,223 @@
 "use client";
 import styles from './resourcesContainer.module.css';
-import { ProjectData } from "@/utils/types/items";
-import { FaUserCircle as UserIcon } from "react-icons/fa";
-import { getManagersData, getValuesLinkedToItem } from "./actions";
-import { useEffect, useState, useMemo } from "react";
-import { ManagersData } from '@/utils/types/projectDetail';
-import { LuServerOff as ErrorIcon} from "react-icons/lu";
-import { ItemValue } from '@/utils/types/views';
+import { assignEmployeeToItem, deleteEmployeeFromItem, getFilteresEmployees, getItemEmployees } from './actions';
+import { InputText } from 'primereact/inputtext';
+import { Button } from 'primereact/button';
+import { useState, useEffect, useRef } from 'react';
+import { FilteredEmployee, userAsignedToItem } from '@/utils/types/projectDetail';
+import { ProgressSpinner } from 'primereact/progressspinner';
+import { useDebounce } from '@/hooks/useDebounce';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Tag } from 'primereact/tag';
+import { getSession } from '@/actions/auth';
+import { transformDateObjectToLocalString } from '@/utils/helpers';
+import { ContextMenu } from 'primereact/contextmenu';
 
 type Props = {
-  projectData: ProjectData | null;
   itemId: string;
 };
 
-export function ResourcesContainer({ projectData, itemId }: Props) {
-  const [managersData, setManagersData] = useState<ManagersData[]>([]);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [itemLinkedPersons, setItemLinkedPersons] = useState<string[]>([]);
-
-  const managers = useMemo(() => ({
-    electricalDesigner: projectData?.electrical_designer || null,
-    mechanicalDesigner: projectData?.mechanical_designer || null,
-    developer: projectData?.developer || null,
-    assembler: projectData?.assembler || null,
-    projectManager: projectData?.project_manager || null,
-  }), [projectData]);
-
-  const areasTranslation: Record<string, string> = {
-    'Assembly' : 'Ensamble',
-    'Electrical' : 'Eléctrico',
-    'Mechanical' : 'Mecánico',
-    'Projects': 'Project Manager'
-  };
+export function ResourcesContainer({ itemId }: Props) {
+  const [filteredEmployees, setFilteredEmployees] = useState<FilteredEmployee[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filterValue, setFilterValue] = useState<string | null>(null);
+  const debouncedQuery = useDebounce(filterValue, 200);
+  const [onError, setOnError] = useState<{msg: string, detail: object} | null>(null);
+  const [employeeSelected, setEmployeeSelected] = useState<FilteredEmployee | null>(null);
+  const [itemEmployees, setItemEmployees] = useState<userAsignedToItem[]>([]);
+  const [employeeToDelete, setEmployeeToDelete] = useState<userAsignedToItem | null>(null);
+  const contextRef = useRef<ContextMenu>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const responseManagers = await getManagersData(managers);
-        const responseLinkedPersons = await getValuesLinkedToItem(itemId);        
-        setManagersData(responseManagers);
-        setItemLinkedPersons(responseLinkedPersons.map(responsable => {
-          try {
-            const parsedValue = JSON.parse(responsable.value);
-            if(!parsedValue.id) throw new Error('Invalid format');
-            return parsedValue.name;
-          }catch{
-            return responsable.value;
-          }
-        }))
-
-        setErrorMsg(null);
+        const employees = await getItemEmployees(itemId);
+        setItemEmployees(employees);
       } catch (error) {
-        setErrorMsg((error as Error).message);
+        console.error(error);
       }
     }
-
     fetchData();
-  }, [itemId, managers]);
+  }, [itemId]);
+
+  useEffect(() => {
+    if(debouncedQuery){
+      setLoading(true);
+      getFilteresEmployees(debouncedQuery)
+        .then((data) => {
+          setFilteredEmployees(data);
+        })
+        .catch((error) => {
+          console.error(error);
+          setOnError({
+            msg: 'Ocurrió un error al obtener los empleados',
+            detail: error
+          });
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [debouncedQuery]);
+
+  const handleSelectedEmployee = async(employee: FilteredEmployee) => {
+    try {
+      setEmployeeSelected(employee);
+      
+      const { id, username } = await getSession();
+      await assignEmployeeToItem(itemId, employee.id, id);
+
+      setItemEmployees(prev => [...prev, {
+        id: employee.id,
+        name: employee.name,
+        department: employee.department,
+        position: employee.position,
+        asignedDate: new Date().toISOString(),
+        asignedBy: username
+      }]);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const handleDeleteAsignation = async() => {
+    try {
+      await deleteEmployeeFromItem(itemId, employeeToDelete!.id);
+      setItemEmployees(prev => prev.filter(emp => emp.id !== employeeToDelete!.id));
+      setEmployeeToDelete(null);
+    } catch (error) {
+      console.error(error);
+      setOnError({
+        msg: 'Ocurrió un error al eliminar la asignación',
+        detail: error as object
+      });
+    }
+  };
 
   return (
-    <article className={styles.mainContainer}>
-      <h3 className={styles.sectionTitle}>Personas asignadas al proyecto</h3>
-      
-      {errorMsg &&
-        <p className={styles.errorLabel}>
-          <ErrorIcon size={30}/>
-          {errorMsg}
-        </p>
-      }
+    <section className={styles.mainContainer}>
+      <h3 className={styles.headerTitle}>Recursos asignados al Item</h3>
 
-      <section className={styles.resourcesContainer}>
-        {
-          managersData.length > 0 && managersData.map(manager => (
-            <article key={manager.id} className={styles.cardManager}>
-              
-              <section className={styles.cardHeader}>
-                <UserIcon size={40} className={styles.userIcon}/>
-                <p className={styles.headerTitle}>{manager.name}</p>
-                <p className={styles.managerArea}>{areasTranslation[manager.area]}</p>
-              </section>
+      <section className={styles.filterContainer}>
 
-            </article>
-          ))
-        }
+        <section className={styles.filterInput}>
+          <div className='p-inputgroup'>
+            
+            <span className='p-inputgroup-addon'>
+              <i className='pi pi-search'></i>              
+            </span>
+
+            <InputText 
+            value={filterValue || ''}
+              onChange={(e) => setFilterValue(e.target.value.toLowerCase())}
+              placeholder='Busca por nombre, posición o departamento'  
+              className={styles.inputText}            
+            />            
+
+            <Button 
+              icon='pi pi-trash'
+              severity='danger'
+              onClick={() => {
+                setFilterValue(null);
+                setOnError(null);
+              }}
+            />
+          </div>          
+        </section>
+
+        <section className={styles.filteredEmployeesContainer}>
+
+          {onError &&
+            <section className={styles.errorContainer}>
+              <p>{onError.msg}</p>
+            </section>
+          }
+          
+          {loading && !onError &&
+            <section className={styles.loadingElement}>
+              <ProgressSpinner 
+                style={{ width: '30px', height: '30px' }}
+                strokeWidth='8'
+                fill="var(--surface-ground)"
+                animationDuration='.5s'
+              />
+            </section>
+          }
+
+          {!loading && filterValue && filterValue.length > 0 &&
+            <>
+              {
+                filteredEmployees.length === 0
+                ?
+                <section className={styles.emptyResults}>
+                  <p>Sin resultados</p>
+                </section>
+                :
+                <section className={styles.filteredEmployeesList}>
+                  <DataTable 
+                    value={filteredEmployees}
+                    stripedRows
+                    size='large'
+                    selectionMode='single'
+                    selection={employeeSelected}
+                    onSelectionChange={(e) => handleSelectedEmployee(e.value as FilteredEmployee)}
+                    dataKey={'id'}
+                    scrollable
+                    scrollHeight='300px'
+                  >
+                    <Column field='name' header='Nombre'/>
+                    <Column field='department' header='Departamento'/>
+                    <Column field='position' header='Posición'/>
+                    <Column header='Asignaciones' body={(employee) => (
+                      <Tag 
+                        severity='info' 
+                        value={`${employee.assignedItems.length}`}
+                        className={styles.tagAssigned}                        
+                      />
+                    )}/>
+                  </DataTable>
+                </section>  
+              }
+            </>
+          }
+        </section>
       </section>
 
-      { itemLinkedPersons.length > 0 && 
-        <>
-          <h3 className={styles.sectionTitle}>Personas definidas en el item</h3>
-          {itemLinkedPersons.map((person, index) => (
-            <section key={index} className={styles.itemPerson}>
-              <UserIcon size={20} />
-              {person.replaceAll('"', '')}
-            </section>
-          ))}
-        </>
-      }
-    </article>
+      <section className={styles.itemEmployeesContainer}>
+        {itemEmployees.length === 0
+          ?
+            <Tag 
+              severity={'info'}
+              value='No hay recursos asignados al item'
+              className={styles.emptyEmployeesTag}
+            />
+          :
+            <DataTable
+              value={itemEmployees}
+              stripedRows
+              size='large'  
+              onContextMenu={e => contextRef.current?.show(e.originalEvent)}          
+              contextMenuSelection={employeeToDelete as userAsignedToItem}
+              onContextMenuSelectionChange={(e) => setEmployeeToDelete(e.value as userAsignedToItem)}
+            >
+              <Column header='Nombre' field='name'/>
+              <Column header='Departamento' field='department'/>
+              <Column header='Posición' field='position'/>
+              <Column header='Fecha de asignación' body={({asignedDate}: {asignedDate: object}) => (
+                <p>{transformDateObjectToLocalString(asignedDate)}</p>
+              )}/>
+              <Column header='Asignado por' field='asignedBy'/>
+            </DataTable>
+        }
+      </section>
+      <ContextMenu 
+        ref={contextRef}
+        onHide={() => setEmployeeToDelete(null)}
+        model={[
+          {label: 'Eliminar', icon: 'pi pi-trash', command: () => handleDeleteAsignation()}
+        ]}
+      />
+    </section>
   );
 }

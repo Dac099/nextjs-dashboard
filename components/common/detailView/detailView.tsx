@@ -145,7 +145,7 @@ export function DetailView({ itemId, closeContainer }: Props) {
         {viewSelected === 'projectDetail' && <ProjectContainer data={projectData as ProjectData} />}
         {viewSelected === 'logs' && <LogsContainer />}
         {viewSelected === 'billing' && <BillingContainer idProject={projectData!.id} projectName={projectData!.name} />}
-        {viewSelected === 'resources' && <ResourcesContainer projectData={projectData} itemId={itemId}/>}
+        {viewSelected === 'resources' && <ResourcesContainer itemId={itemId}/>}
       </section>
     </>
   );

@@ -5,88 +5,84 @@
   overflow: auto;
 }
 
-.sectionTitle
-{
-  font-size: 2rem;
-  margin: 0 0 20px 0;
-}
-
-.errorLabel
-{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: max-content;
-  margin: 40px auto 0 auto;
-  font-size: 1.7rem;
-  font-weight: bold;
-  padding: 10px;
-  background-color: #fb8a8acb;
-  border-radius: 5px;
-  color: darkred;
-}
-
-.resourcesContainer
-{
-  display: grid;
-  grid-auto-rows: max-content;
-  grid-template-columns: minmax(50%, 400px);
-  gap: 20px;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.cardManager
-{
-  border: 1px solid var(--accent-color);
-  border-radius: 5px;
-  position: relative;
-}
-
-.userIcon
-{
-  color: var(--accent-color);
-  position: absolute;
-  top: -15px;
-  left: -10px;
-  backdrop-filter: blur(5px);;
-}
-
-.cardHeader
-{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .headerTitle
 {
-  font-size: 1.5rem;
-  margin: 10px 0;
-  padding-left: 40px;
+  font-size: 2rem;
+  margin: 0;
   color: var(--action-color);
   font-weight: bold;
+  margin-bottom: 10px;
 }
 
-.managerArea
+.inputText
 {
-  background-color: var(--action-color);
-  color: var(--bg-color);
-  font-size: 1.5rem;
-  text-align: right;
-  padding: 5px;
-  margin: 0;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  width: 150px;
+  font-size: 1.4rem;
 }
 
-.itemPerson
+.filterInput
 {
-  margin: 5px 0;
-  font-size: 1.3rem;
+  width: 80%;
+  margin: 10px auto;
+}
+
+.loadingElement
+{
+  margin: 30px auto;
+  width: max-content;
+}
+
+.errorContainer
+{
   display: flex;
-  gap: 10px;
+  justify-content: center;
   align-items: center;
+  font-size: 1.5rem;
+  width: 80%;
+  height: 40px;
+  margin: 0 auto;
+  color: rgb(85, 5, 5);
+  background-color: rgba(252, 188, 188, 0.432);
+  border-radius: 5px;
+  user-select: none;
+}
+
+.emptyResults
+{
+  display: flex;
+  place-content: center;
+  width: 80%;
+  margin: 0 auto;
+  font-size: 1.5rem;
+  color: var(--action-color);
+  font-weight: bold;
+  text-align: center;
+}
+
+.filteredEmployeesList
+{
+  width: 80%;
+  margin: 0 auto;
+}
+
+.tagAssigned
+{
+  width: 100%;
+  text-align: center;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.itemEmployeesContainer
+{
+  width: 100%;
+  margin: 20px 0;
+}
+
+.emptyEmployeesTag
+{
+  font-size: 1.5rem;
+  margin: 20px auto;
+  display: block;
+  text-align: center;
+  max-width: 30%;
 }

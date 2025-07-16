@@ -1,4 +1,4 @@
-import { Item, ProjectFormData, ValueDB } from "@/utils/types/projectDetail";
+import { FilteredEmployee, FilteredEmployeeWithItems, Item, ProjectFormData, ValueDB } from "@/utils/types/projectDetail";
 import { SubItem, TableValue } from "./types/groups";
 import { Task, UserData } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
@@ -359,4 +359,37 @@ export function formatFileDataToObject(fileData: string[]): UserData[] {
   });
 
   return result.filter(user => user !== undefined);
+}
+
+export function formatEmployeesData(employees: FilteredEmployeeWithItems[]): FilteredEmployee[] {
+  return employees.map(employee => {
+    const itemIds = employee.itemIds ? employee.itemIds.split(',').map(id => parseInt(id)) : [];
+    const itemNames = employee.itemNames ? employee.itemNames.split(',') : [];
+
+    return {
+      id: employee.id,
+      name: employee.name,
+      department: employee.department,
+      position: employee.position,
+      assignedItems: itemIds.map((itemId, index) => ({
+        itemId: itemId.toString(),
+        itemName: itemNames[index] || "Item sin nombre",
+      })),
+    };
+  });
+}
+
+export function transformDateObjectToLocalString(date: object) {
+  if (!date || typeof date !== 'object') return '';
+
+  const dateString = date.toString();
+  const dateObject = new Date(dateString);
+
+  return dateObject.toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }

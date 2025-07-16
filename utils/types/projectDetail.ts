@@ -153,18 +153,28 @@ export type EmployeeField = {
 
 export type FieldWithEmployees = { [key: string]: {username: string; userId: string}[] };
 
-export type ManagersId = {
-    electricalDesigner: string | null;
-    mechanicalDesigner: string | null;
-    developer: string | null;
-    assembler: string | null;
-    projectManager: string | null;
-};
-
-export type ManagersData = {
+export type FilteredEmployee = {
     id: string;
     name: string;
-    username: string;
-    profile: string;
-    area: string;
+    department: string;
+    position: string;
+    assignedItems: {itemId: string; itemName: string}[];
+};
+
+export type FilteredEmployeeWithItems = {
+    id: string;
+    name: string;
+    department: string;
+    position: string;
+    itemIds: string;
+    itemNames: string;
+}
+
+export type userAsignedToItem = {
+    id: string;
+    name: string;
+    department: string;
+    position: string;
+    asignedDate: string;
+    asignedBy: string;
 };
