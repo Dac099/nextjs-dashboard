@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { FilteredEmployee, userAsignedToItem } from '@/utils/types/projectDetail';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { useDebounce } from '@/hooks/useDebounce';
-import { DataTable } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableValueArray } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Tag } from 'primereact/tag';
 import { getSession } from '@/actions/auth';
@@ -28,6 +28,7 @@ export function ResourcesContainer({ itemId }: Props) {
   const [itemEmployees, setItemEmployees] = useState<userAsignedToItem[]>([]);
   const [employeeToDelete, setEmployeeToDelete] = useState<userAsignedToItem | null>(null);
   const contextRef = useRef<ContextMenu>(null);
+  const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined);
 
   useEffect(() => {
     async function fetchData() {
@@ -62,6 +63,10 @@ export function ResourcesContainer({ itemId }: Props) {
   }, [debouncedQuery]);
 
   const handleSelectedEmployee = async(employee: FilteredEmployee) => {
+    const userInAssignedList = itemEmployees.find(emp => emp.id === employee.id);
+
+    if(userInAssignedList) return;
+
     try {
       setEmployeeSelected(employee);
       
@@ -93,6 +98,18 @@ export function ResourcesContainer({ itemId }: Props) {
         detail: error as object
       });
     }
+  };
+
+  const allowExpansion = (employee: FilteredEmployee) => {
+    return employee.assignedItems.length > 0;
+  };
+
+  const RowExpansionTemplate = (employee: FilteredEmployee) => {
+    return (
+      <DataTable value={employee.assignedItems}>
+        <Column header='Nombre del item asignado' field='itemName'/>
+      </DataTable>
+    );
   };
 
   return (
@@ -161,11 +178,15 @@ export function ResourcesContainer({ itemId }: Props) {
                     size='large'
                     selectionMode='single'
                     selection={employeeSelected}
-                    onSelectionChange={(e) => handleSelectedEmployee(e.value as FilteredEmployee)}
+                    onSelectionChange={(e) => {handleSelectedEmployee(e.value as FilteredEmployee)}}
                     dataKey={'id'}
                     scrollable
                     scrollHeight='300px'
+                    rowExpansionTemplate={RowExpansionTemplate}
+                    expandedRows={expandedRows}
+                    onRowToggle={(e) => setExpandedRows(e.data)}
                   >
+                    <Column expander={allowExpansion}/>
                     <Column field='name' header='Nombre'/>
                     <Column field='department' header='Departamento'/>
                     <Column field='position' header='Posición'/>
@@ -173,7 +194,7 @@ export function ResourcesContainer({ itemId }: Props) {
                       <Tag 
                         severity='info' 
                         value={`${employee.assignedItems.length}`}
-                        className={styles.tagAssigned}                        
+                        className={styles.tagAssigned}                       
                       />
                     )}/>
                   </DataTable>
