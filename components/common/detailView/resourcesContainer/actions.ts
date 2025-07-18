@@ -3,7 +3,6 @@ import connection from '@/services/database';
 import sql from 'mssql';
 import type { FilteredEmployee, FilteredEmployeeWithItems, userAsignedToItem } from '@/utils/types/projectDetail';
 import { formatEmployeesData } from '@/utils/helpers';
-import { getSession } from '@/actions/auth';
 
 export async function getFilteresEmployees(filterValue: string) {
   try {

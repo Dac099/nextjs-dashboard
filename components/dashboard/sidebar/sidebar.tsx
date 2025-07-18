@@ -50,6 +50,16 @@ export async function SideBar() {
         <p>Reporte SAP</p>
       </SideBarItem>
 
+      {(userRole.name === 'SYSTEMS' || userRole.name === 'PROJECTMANAGER') &&
+        <SideBarItem url='/recursos'>
+          <i
+            className='pi pi-users'
+            style={{ fontSize: '1.8rem' }}
+          ></i>
+          <p>Recursos</p>
+        </SideBarItem>
+      }
+
       {workspaces.map(workspace => (
         <WorkspaceItem
           workspace={workspace}

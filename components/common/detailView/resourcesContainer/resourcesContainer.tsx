@@ -81,6 +81,8 @@ export function ResourcesContainer({ itemId }: Props) {
         asignedDate: new Date().toISOString(),
         asignedBy: username
       }]);
+
+      setFilterValue(null);
     } catch (error) {
       console.error(error);
     }

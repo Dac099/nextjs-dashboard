@@ -16,6 +16,13 @@ export async function validateAccessResources(req: NextRequest, res: NextRespons
     return res;
   }
 
+  if(req.nextUrl.pathname.startsWith('/recursos')){
+    const userRole = req.cookies.get('userRole')?.value;
+    if(!userRole || !['SYSTEMS', 'PROJECTMANAGER'].includes(userRole)) {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+  }
+
   // Para todas las demás rutas, verificamos la autenticación con cookies nativas
   const isLoggedIn = req.cookies.get('isLoggedIn')?.value === 'true';
 
