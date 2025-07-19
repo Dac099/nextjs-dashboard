@@ -1,6 +1,6 @@
 import styles from './page.module.css';
 import { getResources } from './actions';
-import { ResourcesTable } from '@/components/reports/tableReports/tableReports';
+import { ResourcesTable } from '@/components/resources/tableReports/tableReports';
 
 export default async function Page() {
   const resources = await getResources();  
