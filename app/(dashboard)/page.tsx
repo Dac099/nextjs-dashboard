@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './page.module.css';
 import { TabView, TabPanel } from 'primereact/tabview';
+import { ProgressProyects } from '@/components/home/progressProyects/progressProyects';
 
 export default async function Page() {
   const tabStyles: React.CSSProperties = {
@@ -11,6 +12,9 @@ export default async function Page() {
     <article className={styles.mainContainer}>
       <TabView>
         <TabPanel header="Progreso de proyectos" style={tabStyles}>
+          <section className={styles.tabContent}>
+            <ProgressProyects />
+          </section>
         </TabPanel>
       </TabView>
     </article>

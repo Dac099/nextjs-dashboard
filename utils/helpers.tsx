@@ -379,17 +379,22 @@ export function formatEmployeesData(employees: FilteredEmployeeWithItems[]): Fil
   });
 }
 
-export function transformDateObjectToLocalString(date: object) {
+export function transformDateObjectToLocalString(date: object, showTime: boolean = true) {
   if (!date || typeof date !== 'object') return '';
 
   const dateString = date.toString();
   const dateObject = new Date(dateString);
 
-  return dateObject.toLocaleDateString('es-MX', {
+  const options: Intl.DateTimeFormatOptions = {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  };
+
+  if (showTime) {
+    options.hour = '2-digit';
+    options.minute = '2-digit';
+  }
+
+  return dateObject.toLocaleDateString('es-MX', options);
 }
