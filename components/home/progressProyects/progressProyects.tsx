@@ -1,32 +1,33 @@
 'use client';
 import styles from './progressProyects.module.css';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta, DataTableValueArray } from 'primereact/datatable';
 import { Column, ColumnFilterElementTemplateOptions } from 'primereact/column';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { ProyectDataType } from '@/schemas/homeSchemas';
-import { proyectData } from '@/schemas/homeSchemas';
 import { FilterMatchMode } from 'primereact/api';
 import { MultiSelect } from 'primereact/multiselect';
 import { Calendar } from 'primereact/calendar';
 import { getProjects, getProjectTypes } from './actions';
 import { InputText } from 'primereact/inputtext';
-import { transformDateObjectToLocalString } from '@/utils/helpers';
+import { ExpandedRow } from './expandedRowOrder/expandedRowOrder';
 
 export function ProgressProyects() {
-  const [projects, setProjects] = useState<ProyectDataType[]>([]);
+  const [allProjects, setAllProjects] = useState<ProyectDataType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [globalFilter, setGlobalFilter] = useState<string>('');
   const [proyectTypes, setProyectType] = useState<string[]>([]);
   const [emptyMessage, setEmptyMessage] = useState<string>('No hay proyectos registrados');
+  const [startDateFilterValue, setStartDateFilterValue] = useState<Date | null>(null);
+  const [endDateFilterValue, setEndDateFilterValue] = useState<Date | null>(null);
+  const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined);
   const [ filters, setFilters ] = useState<DataTableFilterMeta>({
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
     name: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
     createdBy: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
-    startDate: {value: null, matchMode: FilterMatchMode.DATE_IS},
-    endDate: {value: null, matchMode: FilterMatchMode.DATE_IS},
     client: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
     quoteNumber: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
-    type: {value: null, matchMode: FilterMatchMode.EQUALS}
+    type: {value: null, matchMode: FilterMatchMode.EQUALS},
+    id: {value: null, matchMode: FilterMatchMode.STARTS_WITH}
   });
 
   useEffect(() => {
@@ -37,12 +38,12 @@ export function ProgressProyects() {
           getProjectTypes()
         ]);
 
-        setProjects(proyectsRes);
+        setAllProjects(proyectsRes);
         setProyectType(typesRes);
       } catch (error) {
         console.error(error);
         setEmptyMessage('Error al cargar los proyectos');
-        setProjects([]);
+        setAllProjects([]);
       } finally
       {
         setLoading(false);
@@ -59,10 +60,68 @@ export function ProgressProyects() {
   const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const _filters = { ...filters };
-    _filters['global'].value = value;
+    if (
+      _filters['global'] &&
+      typeof _filters['global'] === 'object' &&
+      'value' in _filters['global']
+    ) {
+      (_filters['global'] as { value: string | null }).value = value;
+    }
     setFilters(_filters);
     setGlobalFilter(value);
   };
+
+  // Función para convertir string de fecha a Date para comparación
+  const parseSpanishDate = (dateInput: string | Date): Date | null => {
+    if (!dateInput) return null;
+    
+    // Si ya es un Date, devolverlo
+    if (dateInput instanceof Date) {
+      return dateInput;
+    }
+    
+    try {
+      const months: { [key: string]: number } = {
+        'ene': 0, 'feb': 1, 'mar': 2, 'abr': 3, 'may': 4, 'jun': 5,
+        'jul': 6, 'ago': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dic': 11
+      };
+      
+      const parts = dateInput.split(' ');
+      if (parts.length < 3) return null;
+      
+      const day = parseInt(parts[0]);
+      const month = months[parts[1].toLowerCase()];
+      const year = parseInt(parts[2]);
+      
+      if (isNaN(day) || month === undefined || isNaN(year)) return null;
+      
+      const parsedDate = new Date(year, month, day);
+      return parsedDate;
+    } catch {
+      return null;
+    }
+  };
+
+  // Filtrar proyectos basado en las fechas seleccionadas
+  const filteredProjects = useMemo(() => {
+    let filtered = [...allProjects];
+
+    if (startDateFilterValue) {
+      filtered = filtered.filter(project => {
+        const projectDate = parseSpanishDate(project.startDate);
+        return projectDate && projectDate >= startDateFilterValue;
+      });
+    }
+
+    if (endDateFilterValue) {
+      filtered = filtered.filter(project => {
+        const projectDate = parseSpanishDate(project.endDate);
+        return projectDate && projectDate <= endDateFilterValue;
+      });
+    }
+
+    return filtered;
+  }, [allProjects, startDateFilterValue, endDateFilterValue]);
 
   const SelectProyectTypes = (options: ColumnFilterElementTemplateOptions) => {
     return (
@@ -72,6 +131,44 @@ export function ProgressProyects() {
         onChange={e => options.filterApplyCallback(e.value)}
         placeholder='Filtro por tipo'
         maxSelectedLabels={1}
+      />
+    );
+  };
+
+  const startDateFilterTemplate = () => {
+    return (
+      <Calendar 
+        value={startDateFilterValue}
+        onChange={e => {
+          const dateValue = e.value;
+          if (dateValue instanceof Date && !isNaN(dateValue.getTime())) {
+            setStartDateFilterValue(dateValue);
+          } else {
+            setStartDateFilterValue(null);
+          }
+        }}
+        dateFormat='dd/mm/yy'
+        placeholder='Fecha desde'
+        showIcon
+      />
+    );
+  };
+
+  const endDateFilterTemplate = () => {
+    return (
+      <Calendar 
+        value={endDateFilterValue}
+        onChange={e => {
+          const dateValue = e.value;
+          if (dateValue instanceof Date && !isNaN(dateValue.getTime())) {
+            setEndDateFilterValue(dateValue);
+          } else {
+            setEndDateFilterValue(null);
+          }
+        }}
+        dateFormat='dd/mm/yy'
+        placeholder='Fecha hasta'
+        showIcon
       />
     );
   };
@@ -91,7 +188,7 @@ export function ProgressProyects() {
 
   return (
     <DataTable 
-      value={projects} 
+      value={filteredProjects} 
       paginator 
       rows={50}
       size='large'
@@ -106,7 +203,27 @@ export function ProgressProyects() {
       globalFilterFields={['name', 'createdBy', 'client', 'quoteNumber']}
       emptyMessage={emptyMessage}
       header={<TableHeader />}
+      onFilter={(e) => setFilters(e.filters)}
+      expandedRows={expandedRows}
+      onRowToggle={(e) => {
+        setExpandedRows(e.data);
+        console.log('Expanded Rows:', e.data);
+      }}
+      rowExpansionTemplate={data => <ExpandedRow rowData={data} />}
     >
+      <Column 
+        expander={proyect => proyect.orders.length > 0}
+      />
+
+      <Column 
+        header="ID"
+        field='id'
+        style={columnStyles}
+        filter
+        showFilterMenu={false}
+        filterPlaceholder='Filtra por ID'
+      />
+
       <Column 
         header="Nombre del proyecto" 
         field='name'
@@ -146,6 +263,7 @@ export function ProgressProyects() {
         filter
         showFilterMenu={false}
         filterField="startDate"
+        filterElement={startDateFilterTemplate}
       />
 
       <Column 
@@ -156,6 +274,7 @@ export function ProgressProyects() {
         filter
         showFilterMenu={false}
         filterField="endDate"
+        filterElement={endDateFilterTemplate}
       />
 
       <Column 

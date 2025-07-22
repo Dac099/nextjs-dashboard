@@ -11,7 +11,7 @@ export default async function Page() {
   return (
     <article className={styles.mainContainer}>
       <TabView>
-        <TabPanel header="Progreso de proyectos" style={tabStyles}>
+        <TabPanel header="Compras de proyectos" style={tabStyles}>
           <section className={styles.tabContent}>
             <ProgressProyects />
           </section>
@@ -21,11 +21,3 @@ export default async function Page() {
   );
 }
 
-/**
- * Datos requeridos
- * - Lista de proyectos (tb_proyectos)
- *  - Requisiciones asignadas al proyecto (tb_requisiciones)
- *  - Ordenes de compra asignadas al proyecto (Archivo del servidor)
- *    - La relación entre las requisiciones y las órdenes de compra se hace por medio del RFQ o del proyecto
- *  - Agrupar items del archivo por proyecto
- */

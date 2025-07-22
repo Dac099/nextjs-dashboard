@@ -4,10 +4,11 @@ export const PurchaseItem = z.object({
   number: z.string(),
   description: z.string(),
   measurementUnit: z.string(),
-  quantity: z.number(),
+  quantity: z.string(),
   placementFolio: z.optional(z.string()),
-  placementDate: z.optional(z.date()),
-  placementQuantity: z.optional(z.number()),
+  placementDate: z.optional(z.string()),
+  placementQuantity: z.optional(z.string()),
+  requestedPurchase: z.optional(z.string()),
 });
 
 export type PurchaseItemType = z.infer<typeof PurchaseItem>;
@@ -17,35 +18,25 @@ export const PurchaseOrder = z.object({
   sapUser: z.string(),
   purchaseRequester: z.string(),
   sapUserName: z.string(),
-  requestedDate: z.date(),
+  requestedDate: z.string(),
   rfqNumber: z.optional(z.string()),
   projectNumber: z.string(),
-  deliveryDate: z.date(),  
+  deliveryDate: z.string(),
   items: z.array(PurchaseItem),
 });
 
 export type PurchaseOrderType = z.infer<typeof PurchaseOrder>;
-
-export const Requisition = z.object({
-  number: z.string(),
-  createdBy: z.string(),
-  authorDepartment: z.string(),
-  createdAt: z.date(),
-  purchases: z.array(PurchaseOrder),
-});
-
-export type RequisitionType = z.infer<typeof Requisition>;
 
 export const proyectData  = z.object({
   id: z.string(),
   name: z.string(),
   createdBy: z.string(),
   type: z.string(),
-  startDate: z.date(),
-  endDate: z.date(),
+  startDate: z.string(),
+  endDate: z.string(),
   quoteNumber: z.string(),
   client: z.string(),
-  requisitions: z.array(Requisition),
+  orders: z.array(PurchaseOrder),
 });
 
 export type ProyectDataType = z.infer<typeof proyectData>;
