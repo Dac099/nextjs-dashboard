@@ -1,8 +1,8 @@
 'use client';
 import styles from './progressProyects.module.css';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta, DataTableValueArray } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { Column, ColumnFilterElementTemplateOptions } from 'primereact/column';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { ProyectDataType } from '@/schemas/homeSchemas';
 import { FilterMatchMode } from 'primereact/api';
 import { MultiSelect } from 'primereact/multiselect';
@@ -19,9 +19,8 @@ export function ProgressProyects() {
   const [emptyMessage, setEmptyMessage] = useState<string>('No hay proyectos registrados');
   const [startDateFilterValue, setStartDateFilterValue] = useState<Date | null>(null);
   const [endDateFilterValue, setEndDateFilterValue] = useState<Date | null>(null);
-  const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | DataTableValueArray | undefined>(undefined);
+  const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | undefined>(undefined);
   const [ filters, setFilters ] = useState<DataTableFilterMeta>({
-    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
     name: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
     createdBy: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
     client: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
@@ -40,6 +39,8 @@ export function ProgressProyects() {
 
         setAllProjects(proyectsRes);
         setProyectType(typesRes);
+        console.log('Projects loaded:', proyectsRes);
+        console.log('Sample project structure:', proyectsRes[0]);
       } catch (error) {
         console.error(error);
         setEmptyMessage('Error al cargar los proyectos');
@@ -57,19 +58,99 @@ export function ProgressProyects() {
     fontSize: '1.3rem',
   };
 
-  const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const _filters = { ...filters };
-    if (
-      _filters['global'] &&
-      typeof _filters['global'] === 'object' &&
-      'value' in _filters['global']
-    ) {
-      (_filters['global'] as { value: string | null }).value = value;
+  // Función personalizada para filtro global que incluye datos anidados
+  const customGlobalFilter = (value: ProyectDataType, filter: string): boolean => {
+    if (!filter) return true;
+    
+    const filterLower = filter.toLowerCase();
+    
+    // Buscar en campos principales del proyecto
+    const mainFields = [
+      value.id,
+      value.name,
+      value.createdBy,
+      value.type,
+      value.client,
+      value.quoteNumber,
+      value.startDate,
+      value.endDate
+    ];
+    
+    const mainFieldsMatch = mainFields.some(field => {
+      const fieldMatch = field?.toString().toLowerCase().includes(filterLower);
+      if (fieldMatch) {
+        console.log('✅ Match found in main field:', field, 'for project:', value.id);
+      }
+      return fieldMatch;
+    });
+    
+    if (mainFieldsMatch) {
+      return true;
     }
-    setFilters(_filters);
-    setGlobalFilter(value);
+    
+    // Si no hay coincidencias en campos principales, buscar en orders (si las hay)
+    if (!value.orders || value.orders.length === 0) {
+      return false;
+    }
+    
+    // Buscar en orders y sus campos
+    const ordersMatch = value.orders.some(order => {
+      const orderFields = [
+        order.purchaseNumber,
+        order.sapUser,
+        order.purchaseRequester,
+        order.sapUserName,
+        order.requestedDate,
+        order.rfqNumber,
+        order.projectNumber,
+        order.deliveryDate
+      ];
+      
+      const orderFieldsMatch = orderFields.some(field => {
+        const fieldMatch = field?.toString().toLowerCase().includes(filterLower);
+        if (fieldMatch) {
+          console.log('✅ Match found in order field:', field, 'for project:', value.id);
+        }
+        return fieldMatch;
+      });
+      
+      if (orderFieldsMatch) return true;
+      
+      // Buscar en items de cada order
+      if (!order.items || order.items.length === 0) {
+        return false;
+      }
+      
+      const itemsMatch = order.items.some(item => {
+        const itemFields = [
+          item.number,
+          item.description,
+          item.measurementUnit,
+          item.quantity,
+          item.placementFolio,
+          item.placementDate,
+          item.placementQuantity
+        ];
+        
+        return itemFields.some(field => {
+          const fieldMatch = field?.toString().toLowerCase().includes(filterLower);
+          if (fieldMatch) {
+            console.log('✅ Match found in item field:', field, 'for project:', value.id);
+          }
+          return fieldMatch;
+        });
+      });
+      
+      return itemsMatch;
+    });
+    
+    return ordersMatch;
   };
+
+  const onGlobalFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setGlobalFilter(value);
+  }, []);
 
   // Función para convertir string de fecha a Date para comparación
   const parseSpanishDate = (dateInput: string | Date): Date | null => {
@@ -120,8 +201,15 @@ export function ProgressProyects() {
       });
     }
 
+    // Aplicar filtro global personalizado
+    if (globalFilter) {
+      filtered = filtered.filter(project => 
+        customGlobalFilter(project, globalFilter)
+      );
+    }
+
     return filtered;
-  }, [allProjects, startDateFilterValue, endDateFilterValue]);
+  }, [allProjects, startDateFilterValue, endDateFilterValue, globalFilter]);
 
   const SelectProyectTypes = (options: ColumnFilterElementTemplateOptions) => {
     return (
@@ -173,18 +261,16 @@ export function ProgressProyects() {
     );
   };
 
-  const TableHeader = () => {
-    return (
-      <section className={styles.tableGlobalFilterContainer}>
-        <InputText 
-          placeholder='Filtro global'
-          style={{ width: '300px', fontSize: '1.3rem' }}
-          value={globalFilter}
-          onChange={onGlobalFilterChange}
-        />
-      </section>
-    );
-  };
+  const TableHeader = useMemo(() => (
+    <section className={styles.tableGlobalFilterContainer}>
+      <InputText 
+        placeholder='Buscar en proyectos, órdenes e items...'
+        style={{ width: '400px', fontSize: '1.3rem' }}
+        value={globalFilter}
+        onChange={onGlobalFilterChange}
+      />
+    </section>
+  ), [globalFilter, onGlobalFilterChange]);
 
   return (
     <DataTable 
@@ -200,15 +286,11 @@ export function ProgressProyects() {
       filters={filters}
       filterDisplay='row'
       loading={loading}
-      globalFilterFields={['name', 'createdBy', 'client', 'quoteNumber']}
       emptyMessage={emptyMessage}
-      header={<TableHeader />}
+      header={TableHeader}
       onFilter={(e) => setFilters(e.filters)}
       expandedRows={expandedRows}
-      onRowToggle={(e) => {
-        setExpandedRows(e.data);
-        console.log('Expanded Rows:', e.data);
-      }}
+      onRowToggle={(e) => setExpandedRows(e.data as DataTableExpandedRows)}
       rowExpansionTemplate={data => <ExpandedRow rowData={data} />}
     >
       <Column 

@@ -9,6 +9,7 @@ export const PurchaseItem = z.object({
   placementDate: z.optional(z.string()),
   placementQuantity: z.optional(z.string()),
   requestedPurchase: z.optional(z.string()),
+  supplier: z.optional(z.string()),
 });
 
 export type PurchaseItemType = z.infer<typeof PurchaseItem>;

@@ -71,6 +71,11 @@ export function ExpandedRowItem({ itemOrder }: Props) {
         style={columnStyles}
       />
       <Column 
+        header='Proveedor'
+        field='supplier'
+        style={columnStyles}
+      />
+      <Column 
         header='Cantidad solicitada'
         field='quantity'
         style={columnStyles}                

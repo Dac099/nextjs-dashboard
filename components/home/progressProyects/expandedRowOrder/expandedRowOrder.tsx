@@ -38,15 +38,6 @@ export function ExpandedRow({ rowData }: Props) {
         style={columnStyles}
       />
       <Column 
-        header='Creado por'
-        field='sapUser'
-        sortable
-        filter
-        showFilterMenu={false}
-        filterPlaceholder=''
-        style={columnStyles}
-      />
-      <Column 
         header='Nombre de usuario'
         field='sapUserName'
         sortable

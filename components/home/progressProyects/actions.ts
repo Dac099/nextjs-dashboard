@@ -45,7 +45,7 @@ export async function getProjects(): Promise<ProyectDataType[]> {
           requestedDate: item['FechaSOL'],
           purchaseRequester: item['Solicitante'],
           sapUser: item['Usuario'],
-          sapUserName: item['Nombre de usuario'],
+          sapUserName: item['NombreUsr'],
           rfqNumber: item['RFQSys'],
           items: [{
             number: item['Número de artículo'],
@@ -55,7 +55,8 @@ export async function getProjects(): Promise<ProyectDataType[]> {
             placementFolio: item['EM#'] || undefined,
             placementDate: item['FechaEM'] || undefined,
             placementQuantity: item['CantEM'] || undefined,
-            requestedPurchase: item['OC#'] || undefined
+            requestedPurchase: item['OC#'] || undefined,
+            supplier: item['NombreProvSol'] || undefined
           }]
         });
 
@@ -70,7 +71,8 @@ export async function getProjects(): Promise<ProyectDataType[]> {
         placementFolio: item['EM#'] || undefined,
         placementDate: item['FechaEM'] || undefined,
         placementQuantity: item['CantEM'] || undefined,
-        requestedPurchase: item['OC#'] || undefined
+        requestedPurchase: item['OC#'] || undefined,
+        supplier: item['NombreProvSol'] || undefined
       } as PurchaseItemType);
 
       return acc;

@@ -4,3 +4,12 @@
   align-items: center;
   justify-content: flex-end;
 }
+
+.highlightedRow {
+  background-color: rgba(255, 235, 59, 0.3) !important;
+  border-left: 4px solid #ffc107 !important;
+}
+
+.highlightedRow:hover {
+  background-color: rgba(255, 235, 59, 0.5) !important;
+}
