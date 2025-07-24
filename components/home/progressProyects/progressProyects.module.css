@@ -1,15 +1,68 @@
-.tableGlobalFilterContainer
+.mainContainer
+{
+  height: calc(95vh - 20px);
+  width: 100%;
+  display: grid;
+  grid-template-rows: 80px calc(95vh - 100px);
+}
+
+.filtersContainer
 {
   display: flex;
+}
+
+.unmatchedSapButton
+{
+  padding: 10px;
+  background-color: var(--action-color);
+  color: var(--bg-color);
+  border: 1px solid var(--accent-color);
+  border-radius: 5px;
+  cursor: pointer;
+  width: max-content;
+  display: block;
+  margin: 0 0 0 auto
+}
+
+.recordsContainer
+{
+  display: grid;
+  grid-template-rows: auto 40px;
+  gap: 5px;
+}
+
+.tableWrapper
+{
+  overflow: auto;
+  height: calc(95vh - 150px);
+  width: 100%;
+}
+
+.recordsTable 
+{
+  border-collapse: collapse;
+  width: 100%;
+  display: table;
+  font-size: 1.3rem;
+}
+
+.recordsTable th,
+.recordsTable td
+{
+  border: 1px solid var(--accent-color);
+  padding: 10px;
+}
+
+.rfqTypeTag
+{
+  font-size: 1.3rem;
+  width: 100%;
+}
+
+.pagination
+{
+  display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: flex-end;
-}
-
-.highlightedRow {
-  background-color: rgba(255, 235, 59, 0.3) !important;
-  border-left: 4px solid #ffc107 !important;
-}
-
-.highlightedRow:hover {
-  background-color: rgba(255, 235, 59, 0.5) !important;
+  gap: 10px;
 }

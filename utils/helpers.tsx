@@ -1,5 +1,4 @@
 import { FilteredEmployee, FilteredEmployeeWithItems, Item, ProjectFormData, ValueDB } from "@/utils/types/projectDetail";
-import { SubItem, TableValue } from "./types/groups";
 import { Task, UserData } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
 import { ItemValue } from './types/views';
@@ -78,50 +77,6 @@ export function groupItemsByType(data: ValueDB[]): Item[] {
       lastUpdate: item.lastUpdate || new Date(),
     } as Item;
   });
-}
-export function subItemValueByColumnId(
-  columnId: string,
-  subItem: SubItem
-): TableValue {
-  const tableValue = subItem.values.find(
-    (value) => value && value.columnId === columnId
-  ) as TableValue;
-
-  return (
-    tableValue ?? {
-      id: "",
-      itemId: subItem.id,
-      columnId: columnId,
-      value: "",
-      groupId: "",
-    }
-  );
-}
-
-export function findParentKeyBySubItemId(
-  subItemsMap: Map<string, SubItem[]>,
-  subItemId: string
-): string | null {
-  for (const [key, subItems] of subItemsMap) {
-    if (subItems.some((subItem) => subItem.id === subItemId)) {
-      return key;
-    }
-  }
-  return null;
-}
-
-export function findParentKeyByValueId(
-  subItemsMap: Map<string, SubItem[]>,
-  valueId: string
-): string | null {
-  for (const [key, subItems] of subItemsMap) {
-    for (const subItem of subItems) {
-      if (subItem.values.some((value) => value.id === valueId)) {
-        return key;
-      }
-    }
-  }
-  return null;
 }
 
 export function extractTasksFromHTML(htmlString: string): Task[] {
@@ -397,4 +352,20 @@ export function transformDateObjectToLocalString(date: object, showTime: boolean
   }
 
   return dateObject.toLocaleDateString('es-MX', options);
+}
+
+export function formatStringToDate(dateString: string): Date | null {
+  const dateElements = dateString.split('/');  
+  if (dateElements.length !== 3) return null;
+
+  const [day, month, year] = dateElements.map(Number);  
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+
+  return new Date(year, month - 1, day);  
+}
+
+export const RFQTypeMap : Record<string, string> = {
+  'Meca' : 'Mecánica',
+  'Elect' : 'Eléctrica',
+  'Maqui' : 'Maquinado',
 }
