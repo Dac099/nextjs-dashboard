@@ -1,3 +1,13 @@
+export type Requisition = {
+  number: string;
+  statusCode: string;
+  sysStatusText: string;
+  createdAt: Date;
+  createdBy: string;
+  type: string;
+  purchaseItems: ItemReport[];  
+};
+
 export type ItemRequisition = {
   partNumber: string;
   description: string;
@@ -10,54 +20,53 @@ export type ItemRequisition = {
   statusCode: string;
   sysStatusText: string;
 }
+
 export type SapRecord = {
   '#': string;
-  'SOL#': string;
-  Usuario: string;
-  Solicitante: string;
-  NombreUsr: string;
-  FechaSOL: string;
-  ProveedorSol: string;
-  NombreProvSol: string;
-  'Número de artículo': string;
-  Descripcion: string;
-  UM: string;
-  RFQSys: string;
-  Proyecto: string;
-  CantSolicitada: string;
-  'Cot#': string;
-  FechaCot: string;
-  CantCot: string;
-  'OC#': string;
-  CodProvOC: string;
-  ProvOC: string;
-  FechaOC: string;
-  CantOC: string;
-  CantPendRec: string;
-  ProyOC: string;
-  FechaPromesa: string;
-  'EM#': string;
-  FechaEM: string;
-  CantEM: string;
-  Almacen: string;
-  ProyEM: string;
-  'FP#': string;
-  FechaFP: string;
-  CantFacturada: string;
-  ProyFP: string;
+  'RFQ-Sys': string;
+  'Fecha Orden': string;
+  'Número Orden': string;
+  'Código Proveedor': string;
+  'Nombre Proveedor': string;
+  'Proyecto': string;
+  'Código de Artículo': string;
+  'Numero de Fabricante': string;
+  'Descripción Artículo': string;
+  'Moneda Precio': string;
+  'Precio Unitario (Orden)': string;
+  'Cantidad Ordenada': string;
+  'Importe Total Orden (ME)': string;
+  'Importe Total Orden': string;
+  'Fecha Recepción': string;
+  'Número Recepción(es)': string;
+  'Cantidad Recibida': string;
+  'Importe Total Recibido': string;
+  'Importe Total Recibido (ME)': string;
+  'Fecha Factura': string;
+  'Número Factura(s)': string;
+  'Cantidad Facturada': string;
+  'Importe Total Facturado': string;
+  'Importe Total Facturado (ME)': string;
+  'Cant. Pendiente Facturar': string;
+  'Importe Pendiente Facturar': string;
+  'Importe Pendiente Facturar (ME)': string;
+  'Cant. Pendiente Recibir': string;
+  'Importe Pendiente Recibir': string;
+  'Importe Pendiente Recibir (ME)': string;
+  '% Recibido (Importe)': string;
+  '% Facturado (Importe)': string;
+  '% Recibido (Cantidad)': string;
+  '% Facturado (Cantidad)': string;
 };
 
 export type ItemReport = ItemRequisition & {
   sapPartNumber: string | null;
   sapDescription: string | null;
-  sapUM: string | null;
   poDate: Date | null;
   poQuantity: number | null;
-  deliveryDate: Date | null;
   warehouseTicket: string | null;
   warehouseTicketDate: Date | null;
   warehouseTicketQuantity: number | null;
-  warehouse: string | null;
   registerSap: number;
   stateText: string;
 };

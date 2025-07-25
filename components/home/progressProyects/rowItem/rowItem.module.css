@@ -1,0 +1,10 @@
+.expanderIcon
+{
+  cursor: pointer;
+}
+
+.expanderIcon:hover
+{
+  background-color: var(--action-color);
+  color: var(--accent-color);
+}

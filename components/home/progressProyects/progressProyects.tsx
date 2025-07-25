@@ -1,17 +1,17 @@
 'use client';
 import styles from './progressProyects.module.css';
 import { getRFQsData } from './actions';
-import { useEffect, useState } from 'react';
-import { RFQsData } from '@/utils/types/requisitionsTracking';
+import { useEffect, useState, useMemo } from 'react';
+import { ItemReport, SapRecord } from '@/utils/types/requisitionsTracking';
 import { CommonLoader } from '@/components/common/commonLoader/commonLoader';
-import { Tag } from 'primereact/tag';
-import { RFQTypeMap } from '@/utils/helpers';
-import { transformDateObjectToLocalString } from '@/utils/helpers';
-
-//TODO: Hacer la agrupación de valores por RFQ
+import { 
+  groupItemsReportByRFQ,
+} from '@/utils/helpers';
+import { RowItem } from './rowItem/rowItem';
 
 export function ProgressProyects() {
-  const [rfqsItemsFetched, setRfqsItemsFetched] = useState<RFQsData | null>(null);
+  const [rfqsItemsFetched, setRfqsItemsFetched] = useState<ItemReport[] | null>(null);
+  const [unmatchedSapItems, setUnmatchedSapItems] = useState<SapRecord[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -19,7 +19,8 @@ export function ProgressProyects() {
       try {
         setLoading(true);
         const rfqsData = await getRFQsData(0, 300);
-        setRfqsItemsFetched(rfqsData);        
+        setRfqsItemsFetched(rfqsData.items);        
+        setUnmatchedSapItems(rfqsData.unmatchedSapItems);
       } catch (error) {
         console.error('Fetching RFQs data BAD RESULT: ', error);
       }finally {
@@ -30,89 +31,47 @@ export function ProgressProyects() {
     fetchData();
   }, []);
 
-  if(loading){
-    return <article className={styles.mainContainer}><CommonLoader /></article>;
-  }
+  const groupedItems = useMemo(() => {
+    if (!rfqsItemsFetched) return [];
+    return groupItemsReportByRFQ(rfqsItemsFetched);
+  }, [rfqsItemsFetched]);
 
-  const severitySAPStatus = (status: number) => {
-    switch (status) {
-      case -1 :
-        return 'info';
-      case 0:
-        return 'danger'
-      case 1:
-        return 'warning';
-      case 2:
-        return 'success';
-      default:
-        return 'secondary';
-    }
-  };
+  if(loading){
+    return <article className={styles.loadContainer}><CommonLoader /></article>;
+  }
 
   return (
     <article className={styles.mainContainer}>
-
-      <section className={styles.filtersContainer}>
-        <div className={styles.filterBuilder}>
-          {/* Filtro que busca sobre el archivo de SAP */}
-          Constructor de filtros
-        </div>
-
-        <div className={styles.filterMaster}>
-          {/* Filtro que busca sobre la tabla de RFQs */}
-          Filtro master
-        </div>
+      <section className={styles.header}>
+        <h2 className={styles.headerTitle}>Seguimiento de compras</h2>
       </section>
 
-      <section className={styles.recordsContainer}>
-        {rfqsItemsFetched && rfqsItemsFetched.items.length > 0 &&
-          <>
-            <div className={styles.tableWrapper}>
-              <table className={styles.recordsTable}>
-                <thead>
-                  <tr>
-                    <th>No. Parte</th>
-                    <th>RFQ</th>
-                    <th>Proyecto</th>   
-                    <th>Tipo RFQ</th>    
-                    <th>Fecha Creación</th>
-                    <th>Estado SAP</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rfqsItemsFetched.items.map((item, index) => (
-                    <tr key={index}>
-                      <td>{item.partNumber}</td>
-                      <td>{item.rfqNumber}</td> 
-                      <td>{item.projectId}</td>                     
-                      <td>
-                        <Tag 
-                          value={RFQTypeMap[item.rfqType.trim()] || item.rfqType}
-                          severity="info"
-                          className={styles.rfqTypeTag}
-                        />
-                      </td>
-                      <td>{transformDateObjectToLocalString(item.createdAt)}</td>
-                      <td>
-                        <Tag 
-                          value={item.stateText}
-                          className={styles.rfqTypeTag}
-                          severity={severitySAPStatus(item.registerSap)}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+      <section className={styles.dataContainer}>
 
-            <div className={styles.pagination}>
-              {/* Aquí puedes agregar la lógica de paginación si es necesario */}
-              <button>Atras</button>
-              <button>Adelante</button>
-            </div>
-          </>
-      }
+        <div className={styles.datTableContainer}>
+          <table className={styles.dataTable}>
+            <thead>
+              <tr>
+                <th></th>
+                <th>RFQ</th>
+                <th>Tipo</th>
+                <th>Fecha Creación</th>
+                <th>Creador Por</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupedItems.map((item) => (
+                <RowItem key={item.number} item={item} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className={styles.dataTablePaginator}>
+          <button><i className='pi pi-caret-left'/></button>
+          <button><i className='pi pi-caret-right'/></button>
+        </div>
       </section>
     </article>
   );

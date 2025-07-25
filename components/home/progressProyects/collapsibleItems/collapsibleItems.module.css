@@ -1,0 +1,54 @@
+.container {
+  width: 100%;
+  border: 1px solid var(--accent-color);
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: var(--bg-color);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  gap: 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--action-color);
+}
+
+.content {
+  padding: 10px;
+  border-top: 1px solid var(--accent-color);
+}
+
+.itemsTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--sec-bg-color);
+}
+
+.itemsTable th,
+.itemsTable td {
+  border: 1px solid var(--accent-color);
+  padding: 8px;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.itemsTable th {
+  font-size: 1.1rem;
+}
+
+.item {
+  padding: 5px 0;
+}
+
+.stateTag
+{
+  font-size: 1.2rem;
+  width: 100%;
+}

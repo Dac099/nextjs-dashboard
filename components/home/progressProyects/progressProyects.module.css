@@ -1,68 +1,98 @@
+:root {
+  --pageHeight: calc(95vh - 20px)
+}
+
+.loadContainer
+{
+  height: var(--pageHeight);
+  width: 100%;
+}
+
 .mainContainer
 {
-  height: calc(95vh - 20px);
-  width: 100%;
+  height: var(--pageHeight);
   display: grid;
-  grid-template-rows: 80px calc(95vh - 100px);
+  grid-template-rows: 80px auto;
+  gap: 20px;
 }
 
-.filtersContainer
+.header 
 {
   display: flex;
-}
-
-.unmatchedSapButton
-{
+  background-color: var(--bg-color);
+  border-radius: 10px;
   padding: 10px;
-  background-color: var(--action-color);
-  color: var(--bg-color);
-  border: 1px solid var(--accent-color);
-  border-radius: 5px;
-  cursor: pointer;
-  width: max-content;
-  display: block;
-  margin: 0 0 0 auto
 }
 
-.recordsContainer
+.headerTitle
+{
+  color: var(--action-color);
+  font-size: 2rem;
+}
+
+.dataContainer
 {
   display: grid;
-  grid-template-rows: auto 40px;
-  gap: 5px;
+  grid-template-rows: 1fr 40px;
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  padding: 10px;
+  height: 100%;
+  gap: 10px;
 }
 
-.tableWrapper
+.datTableContainer 
 {
-  overflow: auto;
-  height: calc(95vh - 150px);
-  width: 100%;
+  overflow-y: auto; 
+  overflow-x: hidden;
+  height: 100%; 
+  position: relative;
 }
 
-.recordsTable 
+.dataTable
 {
   border-collapse: collapse;
+  height: 100%; 
+  position: absolute;
   width: 100%;
-  display: table;
-  font-size: 1.3rem;
+  background-color: var(--sec-bg-color);
+  border-radius: 10px;
 }
 
-.recordsTable th,
-.recordsTable td
+.dataTable th,
+.dataTable td
 {
+  padding: 8px;
+  text-align: left;
   border: 1px solid var(--accent-color);
-  padding: 10px;
 }
 
-.rfqTypeTag
+.dataTable th
 {
   font-size: 1.3rem;
-  width: 100%;
+  overflow-y: auto;
 }
 
-.pagination
+.dataTable td
+{
+  font-size: 1.2rem;
+}
+
+.dataTablePaginator
 {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
+  background-color: var(--sec-bg-color);
+  border-radius: 10px;
+}
+
+.dataTablePaginator button
+{
+  background-color: var(--action-color);
+  color: var(--bg-color);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
 }

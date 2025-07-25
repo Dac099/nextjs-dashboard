@@ -58,6 +58,7 @@ export async function getRFQsData(offset: number = 0, limit: number = 300) : Pro
 {
   try {
     const sapItems = await getDataFromSapReport();
+    console.log(sapItems)
     const requisitionItems = await getItemsFromRequisition(offset, limit);
 
     const itemsReport: ItemReport[] = requisitionItems.reduce((acc: ItemReport[], item: ItemRequisition) => {
@@ -65,14 +66,11 @@ export async function getRFQsData(offset: number = 0, limit: number = 300) : Pro
         ...item, 
         sapPartNumber: null,
         sapDescription: null,
-        sapUM: null,
         poDate: null,
         poQuantity: null,
-        deliveryDate: null,
         warehouseTicket: null,
         warehouseTicketDate: null,
         warehouseTicketQuantity: null,
-        warehouse: null,
         registerSap: -2,
         stateText: ''
       };
@@ -87,9 +85,9 @@ export async function getRFQsData(offset: number = 0, limit: number = 300) : Pro
 
       const indexSapItem = sapItems.findIndex(
         (sapItem: SapRecord) => {
-          if(!sapItem["Número de artículo"] || !sapItem.Proyecto) return false;
+          if(!sapItem["Numero de Fabricante"] || !sapItem.Proyecto) return false;
 
-          const sapPartNumber = sapItem["Número de artículo"].trim().toLowerCase()
+          const sapPartNumber = sapItem["Numero de Fabricante"].trim().toLowerCase()
           const itemPartNumber = item.partNumber.trim().toLowerCase()
           const sapProject = sapItem.Proyecto.trim().toLowerCase()
           const itemProject = item.projectId.trim().toLowerCase()
@@ -109,21 +107,18 @@ export async function getRFQsData(offset: number = 0, limit: number = 300) : Pro
       const sapItem = sapItems[indexSapItem];
       itemReport = {
         ...item, 
-        sapPartNumber: sapItem['Número de artículo'],
-        sapDescription: sapItem.Descripcion ? sapItem.Descripcion.trim() : null,
-        sapUM: sapItem.UM ? sapItem.UM.trim() : null,
-        poDate: sapItem.FechaOC ? formatStringToDate(sapItem.FechaOC) : null,
-        poQuantity: sapItem.CantOC ? parseFloat(sapItem.CantOC) : null,
-        deliveryDate: sapItem.FechaPromesa ? formatStringToDate(sapItem.FechaPromesa) : null,
-        warehouseTicket: sapItem['EM#'] ? sapItem['EM#'].trim() : null,
-        warehouseTicketDate: sapItem.FechaEM ? formatStringToDate(sapItem.FechaEM) : null,
-        warehouseTicketQuantity: sapItem.CantEM ? parseFloat(sapItem.CantEM) : null,
-        warehouse: sapItem.Almacen ? sapItem.Almacen.trim() : null,
+        sapPartNumber: sapItem['Código de Artículo'],
+        sapDescription: sapItem['Descripción Artículo'] ? sapItem['Descripción Artículo'].trim() : null,
+        poDate: sapItem['Fecha Orden'] ? formatStringToDate(sapItem['Fecha Orden']) : null,
+        poQuantity: sapItem['Cantidad Ordenada'] ? parseFloat(sapItem['Cantidad Ordenada']) : null,
+        warehouseTicket: sapItem['Número Recepción(es)'] ? sapItem['Número Recepción(es)'].trim() : null,
+        warehouseTicketDate: sapItem['Fecha Recepción'] ? formatStringToDate(sapItem['Fecha Recepción']) : null,
+        warehouseTicketQuantity: sapItem['Cantidad Recibida'] ? parseFloat(sapItem['Cantidad Recibida']) : null,
         registerSap: -2,
         stateText: ''
       };
 
-      if(sapItem.RFQSys.trim().toLowerCase() === item.rfqNumber.trim().toLowerCase()) {
+      if(sapItem['RFQ-Sys'].trim().toLowerCase() === item.rfqNumber.trim().toLowerCase()) {
         itemReport.registerSap = 2;
         itemReport.stateText = 'Registrado en SAP';
       }else{

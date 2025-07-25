@@ -2,6 +2,7 @@ import { FilteredEmployee, FilteredEmployeeWithItems, Item, ProjectFormData, Val
 import { Task, UserData } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
 import { ItemValue } from './types/views';
+import { ItemReport, Requisition } from './types/requisitionsTracking';
 
 export function formatDate(date: Date): string {
   if(!date) return '';
@@ -368,4 +369,40 @@ export const RFQTypeMap : Record<string, string> = {
   'Meca' : 'Mecánica',
   'Elect' : 'Eléctrica',
   'Maqui' : 'Maquinado',
+}
+
+export function groupItemsReportByRFQ(items: ItemReport[]): Requisition[] {
+  return items.reduce((acc: Requisition[] ,item: ItemReport) => {
+    const rfqNumber = item.rfqNumber;
+    const existingRequisition = acc.find(req => req.number === rfqNumber);
+
+    if (existingRequisition) {
+      existingRequisition.purchaseItems.push(item);
+    } else {
+      acc.push({
+        number: rfqNumber,
+        statusCode: item.statusCode,
+        sysStatusText: item.sysStatusText,
+        createdAt: item.createdAt,
+        createdBy: item.createdBy,
+        type: item.rfqType,
+        purchaseItems: [item],
+      });
+    }
+
+    return acc;
+  }, [] as Requisition[]);
+}
+
+export function getRFQStatusText(rfq: Requisition): string {
+  const statusBySYS = rfq.sysStatusText || 'Sin datos';
+  const statusByType = rfq.purchaseItems.every(item => item.poDate) 
+  ? 'PO generada'
+  : rfq.purchaseItems.some(item => item.poDate) 
+  ? 'PO parcial'
+  : rfq.purchaseItems.some(item => item.registerSap === 1 || item.registerSap === 2)
+  ? 'Registrada en SAP'
+  : null;
+
+  return statusByType || statusBySYS;
 }
