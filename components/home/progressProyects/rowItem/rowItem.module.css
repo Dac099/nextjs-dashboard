@@ -18,3 +18,9 @@
 {
   background-color: rgba(0, 0, 0, 0.1);
 }
+
+.highlight {
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
+}

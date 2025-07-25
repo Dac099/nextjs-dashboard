@@ -19,14 +19,21 @@ async function getDataFromSapReport(): Promise<SapRecord[]> {
   }
 }
 
-async function getItemsFromRequisition(offset: number, limit: number): Promise<ItemRequisition[]> {
+async function getItemsFromRequisition(
+  offset: number, 
+  limit: number,
+  globalFilter: string | null = null
+): Promise<ItemRequisition[]> {
   try {
     //TODO: Get data from Maquinados
     await connection.connect();
+    
+    globalFilter = globalFilter?.toLowerCase() || null;
     const resultQuery = await connection
     .request()
     .input('limit', limit)
     .input('offset', offset)
+    .input('globalFilter', globalFilter)
     .query(`
       SELECT
         trd.no_parte AS partNumber,
@@ -43,6 +50,17 @@ async function getItemsFromRequisition(offset: number, limit: number): Promise<I
       INNER JOIN tb_requisicion tr ON tr.id_req = trd.id_req
       LEFT JOIN tb_user tu ON tu.id_user = tr.id_usuario 
       LEFT JOIN Maquinados_Estatus me ON me.Id_Estatus = tr.Id_Estatus 
+      ${globalFilter 
+        ? `
+          WHERE LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
+            OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
+            OR LOWER(tu.nom_user) LIKE '%' + @globalFilter + '%'
+        `
+        : ''
+      }
       ORDER BY tr.fecha_registro DESC
       OFFSET @offset ROWS
       FETCH NEXT @limit ROWS ONLY
@@ -54,12 +72,15 @@ async function getItemsFromRequisition(offset: number, limit: number): Promise<I
   }
 }
 
-export async function getRFQsData(offset: number = 0, limit: number = 300) : Promise<RFQsData> 
+export async function getRFQsData(
+  offset: number = 0, 
+  limit: number = 300, 
+  globalFilter: string | null = null
+) : Promise<RFQsData> 
 {
   try {
     const sapItems = await getDataFromSapReport();
-    console.log(sapItems)
-    const requisitionItems = await getItemsFromRequisition(offset, limit);
+    const requisitionItems = await getItemsFromRequisition(offset, limit, globalFilter);
 
     const itemsReport: ItemReport[] = requisitionItems.reduce((acc: ItemReport[], item: ItemRequisition) => {
       let itemReport: ItemReport = {

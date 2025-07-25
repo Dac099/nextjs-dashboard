@@ -8,10 +8,33 @@ import { transformDateObjectToLocalString, getItemReportStatus } from '@/utils/h
 type Props = {
   title: string;
   items: ItemReport[];
+  expandAll: boolean;
+  globalFilterValue: string;
 };
 
-export function CollapsibleItems({ title, items }: Props) {
+export function CollapsibleItems({ title, items, expandAll, globalFilterValue }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const highlightText = (text: string, filter: string) => {
+    if (!filter) {
+      return text;
+    }
+    const regex = new RegExp(`(${filter})`, 'gi');
+    const parts = text.split(regex);
+    return (
+      <>
+        {parts.map((part, i) =>
+          regex.test(part) ? (
+            <span key={i} className={styles.highlight}>
+              {part}
+            </span>
+          ) : (
+            part
+          )
+        )}
+      </>
+    );
+  };
 
   if (items.length === 0) {
     return null;
@@ -23,7 +46,7 @@ export function CollapsibleItems({ title, items }: Props) {
         <i className={`pi ${isOpen ? 'pi-chevron-down' : 'pi-chevron-right'}`} />
         <h3 className={styles.title}>{`${title} (${items.length})`}</h3>
       </header>
-      {isOpen && (
+      {isOpen || expandAll && (
         <div className={styles.content}>
           <table className={styles.itemsTable}>
             <thead>
@@ -44,11 +67,11 @@ export function CollapsibleItems({ title, items }: Props) {
             <tbody>
               {items.map((item) => (
                 <tr key={item.partNumber}>
-                  <td>{item.partNumber}</td>
-                  <td>{item.description}</td>
-                  <td>{item.projectId}</td>
-                  <td>{item.rfqType}</td>
-                  <td>{item.machineType}</td>
+                  <td>{highlightText(item.partNumber, globalFilterValue)}</td>
+                  <td>{highlightText(item.description, globalFilterValue)}</td>
+                  <td>{highlightText(item.projectId, globalFilterValue)}</td>
+                  <td>{highlightText(item.rfqType, globalFilterValue)}</td>
+                  <td>{highlightText(item.machineType, globalFilterValue)}</td>
                   <td>
                     <Tag 
                       value={getItemReportStatus(item).text} 
@@ -78,7 +101,7 @@ export function CollapsibleItems({ title, items }: Props) {
                   </td>
                   <td>
                     {item.warehouseTicket
-                      ? item.warehouseTicket
+                      ? highlightText(item.warehouseTicket, globalFilterValue)
                       : <Tag 
                           value='Sin Recepción' 
                           severity='warning' 
