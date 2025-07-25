@@ -3,6 +3,8 @@ import { Task, UserData } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
 import { ItemValue } from './types/views';
 import { ItemReport, Requisition } from './types/requisitionsTracking';
+import { Tag } from 'primereact/tag';
+import { JSX } from 'react';
 
 export function formatDate(date: Date): string {
   if(!date) return '';
@@ -394,15 +396,54 @@ export function groupItemsReportByRFQ(items: ItemReport[]): Requisition[] {
   }, [] as Requisition[]);
 }
 
-export function getRFQStatusText(rfq: Requisition): string {
-  const statusBySYS = rfq.sysStatusText || 'Sin datos';
-  const statusByType = rfq.purchaseItems.every(item => item.poDate) 
-  ? 'PO generada'
-  : rfq.purchaseItems.some(item => item.poDate) 
-  ? 'PO parcial'
-  : rfq.purchaseItems.some(item => item.registerSap === 1 || item.registerSap === 2)
-  ? 'Registrada en SAP'
-  : null;
+export function getRFQStatusText(rfq: Requisition): JSX.Element {
+  const tagStyle = {
+    fontSize: '1.2rem',
+    width: '100%'
+  };
 
-  return statusByType || statusBySYS;
+  if(rfq.purchaseItems.every(item => item.warehouseTicket)){
+    return <Tag value='RFQ recibida' severity='success' style={tagStyle}/>;
+  }
+
+  if(rfq.purchaseItems.some(item => item.warehouseTicket)){
+    return <Tag value='Parcialmente recibida' severity='info' style={tagStyle}/>;
+  }
+
+  if(rfq.purchaseItems.some(item => item.poDate)){
+    return <Tag value='PO generada' severity='contrast' style={tagStyle}/>;
+  }
+
+  if(rfq.purchaseItems.every(item => item.registerSap === 0)) {
+    return <Tag value='Sin registro SAP' severity='danger' style={tagStyle}/>;
+  }
+
+  if(rfq.purchaseItems.some(item => item.registerSap === 2)) {
+    return <Tag value='Registrada en SAP' severity='secondary' style={tagStyle}/>;
+  }
+
+  return <Tag value='Parcialmente registrada' severity='warning' style={tagStyle}/>;
+}
+
+export function getItemReportStatus(item: ItemReport): {
+  text: string, 
+  severity: "success" | "info" | "warning" | "danger" | "secondary" | "contrast" | null | undefined 
+} 
+{
+  if(item.warehouseTicket){
+    return { text: 'En almacén', severity: 'success' };
+  }
+
+  if(item.poDate){
+    return { text: 'PO generada', severity: 'info' };
+  }
+
+  return { 
+    text: item.stateText, 
+    severity: item.registerSap === 2 
+      ? 'contrast' 
+      : item.registerSap === 1 
+      ?  'warning' 
+      : 'danger'
+  };
 }

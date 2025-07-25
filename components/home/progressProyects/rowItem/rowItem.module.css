@@ -8,3 +8,13 @@
   background-color: var(--action-color);
   color: var(--accent-color);
 }
+
+.rowItem:hover
+{
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.rowExpanded
+{
+  background-color: rgba(0, 0, 0, 0.1);
+}

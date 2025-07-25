@@ -3,6 +3,7 @@ import styles from './collapsibleItems.module.css';
 import { ItemReport } from '@/utils/types/requisitionsTracking';
 import { useState } from 'react';
 import { Tag } from 'primereact/tag';
+import { transformDateObjectToLocalString, getItemReportStatus } from '@/utils/helpers';
 
 type Props = {
   title: string;
@@ -33,6 +34,11 @@ export function CollapsibleItems({ title, items }: Props) {
                 <th>Tipo RFQ</th>
                 <th>Maquinado</th>
                 <th>Estado</th>
+                <th>Fecha Compra</th>
+                <th>Cantidad Solicitada</th>
+                <th>Folio Recepción</th>
+                <th>Fecha Recepción</th>
+                <th>Cantidad Recibida</th>
               </tr>
             </thead>
             <tbody>
@@ -45,15 +51,60 @@ export function CollapsibleItems({ title, items }: Props) {
                   <td>{item.machineType}</td>
                   <td>
                     <Tag 
-                      value={item.stateText} 
-                      severity={
-                        item.registerSap === 2 ? 'success' :
-                        item.registerSap === 1 ? 'warning' :
-                        item.registerSap === 0 ? 'danger' :
-                        'info'
-                      } 
+                      value={getItemReportStatus(item).text} 
+                      severity={getItemReportStatus(item).severity}                      
                       className={styles.stateTag}
                     />
+                  </td>
+                  <td>
+                    {item.poDate 
+                      ? transformDateObjectToLocalString(item.poDate)
+                      : <Tag 
+                          value='Sin PO' 
+                          severity='warning' 
+                          className={styles.stateTag}
+                        />
+                    }
+                  </td>
+                  <td>
+                    {item.poQuantity !== null 
+                      ? item.poQuantity
+                      : <Tag 
+                          value='Sin PO' 
+                          severity='warning' 
+                          className={styles.stateTag}
+                        />
+                    }
+                  </td>
+                  <td>
+                    {item.warehouseTicket
+                      ? item.warehouseTicket
+                      : <Tag 
+                          value='Sin Recepción' 
+                          severity='warning' 
+                          className={styles.stateTag}
+                        />
+                    }
+                  </td>
+                  <td>
+                    {item.warehouseTicketDate
+                      ? transformDateObjectToLocalString(item.warehouseTicketDate)
+                      : <Tag 
+                          value='Sin Recepción' 
+                          severity='warning' 
+                          className={styles.stateTag}
+                        />
+                    }
+                  </td>
+                  <td>
+                    {item.warehouseTicketQuantity !== null && item.warehouseTicketQuantity > 0
+                      ? item.warehouseTicketQuantity
+                      : <Tag 
+                          value='Sin Recepción' 
+                          severity='warning' 
+                          className={styles.stateTag}
+                        />
+                    }
                   </td>
                 </tr>
               ))}

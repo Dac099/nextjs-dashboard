@@ -26,7 +26,9 @@ export function RowItem({ item }: Props){
 
   return (
     <>
-      <tr>
+      <tr
+        className={`${styles.rowItem} ${showItems ? styles.rowExpanded : ''}`}
+      >
         <td 
           className={styles.expanderIcon}
           onClick={() => setShowItems(!showItems)}
