@@ -46,7 +46,7 @@ export function CollapsibleItems({ title, items, expandAll, globalFilterValue }:
         <i className={`pi ${isOpen ? 'pi-chevron-down' : 'pi-chevron-right'}`} />
         <h3 className={styles.title}>{`${title} (${items.length})`}</h3>
       </header>
-      {isOpen || expandAll && (
+      {(isOpen || expandAll) && (
         <div className={styles.content}>
           <table className={styles.itemsTable}>
             <thead>

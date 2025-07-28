@@ -1,6 +1,6 @@
 'use server';
 import connection from '@/services/database';
-import { formatFileData, formatStringToDate } from '@/utils/helpers';
+import { formatFileData, formatStringToDate, groupItemsReportByRFQ } from '@/utils/helpers';
 import { getFileData } from '@/app/(dashboard)/sap-reports/actions';
 import type { ItemRequisition, SapRecord, ItemReport, RFQsData } from '@/utils/types/requisitionsTracking';
 
@@ -71,6 +71,38 @@ async function getItemsFromRequisition(
     throw e;
   }
 }
+
+export async function getTotalItemsFromRequisition(globalFilter: string | null = null): Promise<number> {
+  try {
+    await connection.connect();
+    
+    globalFilter = globalFilter?.toLowerCase() || null;
+    const resultQuery = await connection
+    .request()
+    .input('globalFilter', globalFilter)
+    .query(`
+      SELECT COUNT(tr.num_req) AS totalItems
+      FROM tb_req_deta trd
+      INNER JOIN tb_requisicion tr ON tr.id_req = trd.id_req
+      ${globalFilter 
+        ? `
+          WHERE LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
+            OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
+        `
+        : ''
+      }
+      GROUP BY tr.num_req
+    `);
+
+    return resultQuery.recordset.length;
+  }catch(e){
+    throw e;
+  }
+}
+
 
 export async function getRFQsData(
   offset: number = 0, 

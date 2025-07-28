@@ -71,7 +71,7 @@ export function RowItem({ item, expandAll, globalFilterValue }: Props){
         <td>{getHighlightedText(item.createdBy, globalFilterValue)}</td>     
         <td>{getRFQStatusText(item)}</td>             
       </tr>
-      {showItems || expandAll && (
+      {(showItems || expandAll) && (
         <tr>
           <td colSpan={6} className={styles.collapsibleContainer}>
             <CollapsibleItems title='Registrados en SAP' items={itemsSapRegistered} expandAll={expandAll} globalFilterValue={globalFilterValue} />

@@ -1,28 +1,38 @@
 'use client';
 import styles from './progressProyects.module.css';
-import { getRFQsData } from './actions';
+import { getRFQsData, getTotalItemsFromRequisition } from './actions';
 import { useEffect, useState, useMemo } from 'react';
-import { ItemReport, SapRecord } from '@/utils/types/requisitionsTracking';
+import { ItemReport } from '@/utils/types/requisitionsTracking';
 import { CommonLoader } from '@/components/common/commonLoader/commonLoader';
 import { groupItemsReportByRFQ } from '@/utils/helpers';
 import { RowItem } from './rowItem/rowItem';
 import { useDebounce } from '@/hooks/useDebounce';
+import { Button } from 'primereact/button';
+
+const ITEMS_PER_PAGE = 100;
 
 export function ProgressProyects() {
   const [rfqsItemsFetched, setRfqsItemsFetched] = useState<ItemReport[] | null>(null);
-  const [unmatchedSapItems, setUnmatchedSapItems] = useState<SapRecord[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [globalFilter, setGlobalFilter] = useState<string>('');
   const debounceQuery = useDebounce(globalFilter, 300);
   const [ expandAllResults, setExpandAllResults ] = useState<boolean>(false);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(0);
 
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
-        const rfqsData = await getRFQsData(0, 100);
+        
+        const skip = currentPage * ITEMS_PER_PAGE;
+        const [rfqsData, totalItemsCount] = await Promise.all([ 
+          getRFQsData(skip, ITEMS_PER_PAGE), 
+          getTotalItemsFromRequisition() 
+        ]);
+
         setRfqsItemsFetched(rfqsData.items);        
-        setUnmatchedSapItems(rfqsData.unmatchedSapItems);
+        setTotalItems(totalItemsCount);
       } catch (error) {
         console.error('Fetching RFQs data BAD RESULT: ', error);
       }finally {
@@ -30,23 +40,33 @@ export function ProgressProyects() {
       }
     } 
 
-    fetchData();
-  }, []);
+    if (!debounceQuery) {
+      fetchData();
+    }
+  }, [currentPage, debounceQuery]);
 
   useEffect(() => {
     if(!debounceQuery) {
       setExpandAllResults(false);
+      if (currentPage !== 0) {
+        setCurrentPage(0);
+      }
       return;
     }
 
     async function getData() {
       try {
         setLoading(true);
-        const data = await getRFQsData(0, 100, debounceQuery);
-        setRfqsItemsFetched(data.items);
-        setUnmatchedSapItems(data.unmatchedSapItems);
+        
+        const [rfqsData, totalItemsCount] = await Promise.all([ 
+          getRFQsData(0, ITEMS_PER_PAGE, debounceQuery), 
+          getTotalItemsFromRequisition(debounceQuery) 
+        ]);
 
-        if( data.items.length > 0) {
+        setTotalItems(totalItemsCount);
+        setRfqsItemsFetched(rfqsData.items);
+
+        if( rfqsData.items.length > 0) {
           setExpandAllResults(true);
         }
 
@@ -59,12 +79,30 @@ export function ProgressProyects() {
     }
 
     getData();
-  }, [debounceQuery]);
+  }, [debounceQuery, currentPage]);
 
   const groupedItems = useMemo(() => {
     if (!rfqsItemsFetched) return [];
     return groupItemsReportByRFQ(rfqsItemsFetched);
   }, [rfqsItemsFetched]);
+
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(0, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => prev + 1);
+  };
+
+  const isNextButtonDisabled = useMemo(() => {
+    if (debounceQuery) return true;
+    return (currentPage + 1) * ITEMS_PER_PAGE >= totalItems;
+  }, [currentPage, totalItems, debounceQuery]);
+
+  const isPreviousButtonDisabled = useMemo(() => {
+    if (debounceQuery) return true;
+    return currentPage === 0;
+  }, [currentPage, debounceQuery]);
 
   return (
     <article className={styles.mainContainer}>
@@ -108,8 +146,39 @@ export function ProgressProyects() {
             </div>
 
             <div className={styles.dataTablePaginator}>
-              <button><i className='pi pi-caret-left'/></button>
-              <button><i className='pi pi-caret-right'/></button>
+              <section>
+                <Button 
+                  label={`Total de RFQs: ${totalItems}`} 
+                  text
+                  raised
+                  severity='help'
+                  disabled={true}
+                />
+                <Button 
+                  label={`Pág. ${currentPage + 1} de ${Math.ceil(totalItems / ITEMS_PER_PAGE)}`}
+                  text
+                  raised
+                  severity='help'
+                  disabled
+                />
+              </section>
+              <section>
+                <Button 
+                  icon='pi pi-angle-left'
+                  outlined                  
+                  onClick={handlePreviousPage}
+                  disabled={isPreviousButtonDisabled}
+                  title='Página Anterior'
+                />
+
+                <Button 
+                  icon='pi pi-angle-right'
+                  outlined
+                  onClick={handleNextPage}
+                  disabled={isNextButtonDisabled}
+                  title='Página Siguiente'
+                />
+              </section>
             </div>
           </>
         }
