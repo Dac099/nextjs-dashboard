@@ -110,13 +110,26 @@ export function ProgressProyects() {
         <h2 className={styles.headerTitle}>Seguimiento de compras</h2>
         <div className={styles.filtersContainer}>
           <article className={styles.globalFilter}>
+             <Button 
+              outlined
+              icon='pi pi-trash'
+              severity='danger'
+              disabled={!globalFilter}
+              onClick={() => {
+                setGlobalFilter('');
+                setExpandAllResults(false);
+                setCurrentPage(0);
+              }}
+              title='Limpiar filtro global'
+            />
+            
             <input 
               type="text" 
               placeholder='Filtro global'
               className={styles.globalFilterInput}
               value={globalFilter}
               onChange={e => setGlobalFilter(e.target.value.trimEnd().trimStart())}
-            />
+            />           
           </article>
         </div>
       </section>

@@ -108,7 +108,7 @@
 {
   height: 35px;
   width: 250px;
-  background-color: var(--sec-bg-color);  
+  background-color: var(--accent-color);  
   border: none;
   padding: 10px;
   border-radius: 5px;
@@ -125,5 +125,13 @@
 .globalFilterInput::placeholder
 {
   color: var(--action-color);
-  font-size: 1.3rem;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.globalFilter
+{
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
