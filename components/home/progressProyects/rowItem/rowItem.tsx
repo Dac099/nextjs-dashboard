@@ -69,11 +69,12 @@ export function RowItem({ item, expandAll, globalFilterValue }: Props){
         </td>
         <td>{transformDateObjectToLocalString(item.createdAt)}</td>
         <td>{getHighlightedText(item.createdBy, globalFilterValue)}</td>     
-        <td>{getRFQStatusText(item)}</td>             
+        <td>{getRFQStatusText(item)}</td> 
+        <td>{item.sysStatusText}</td>            
       </tr>
       {(showItems || expandAll) && (
         <tr>
-          <td colSpan={6} className={styles.collapsibleContainer}>
+          <td colSpan={7} className={styles.collapsibleContainer}>
             <CollapsibleItems title='Registrados en SAP' items={itemsSapRegistered} expandAll={expandAll} globalFilterValue={globalFilterValue} />
             <CollapsibleItems title='Coincidentes sin RFQ' items={itemsWithoutRFQ} expandAll={expandAll} globalFilterValue={globalFilterValue} />
             <CollapsibleItems title='Items sin registro en SAP' items={itemsWithoutSap} expandAll={expandAll} globalFilterValue={globalFilterValue} />

@@ -127,7 +127,9 @@ export async function getRFQsData(
         registerSap: -2,
         stateText: '',
         supplier: '',
-        poStatus: null,        
+        poStatus: null,     
+        poNumber: null,
+        deliveryDate: null,   
       };
 
       const sapElements = sapItems.filter(
@@ -135,11 +137,12 @@ export async function getRFQsData(
           if(!sapItem["Numero de Fabricante"] || !sapItem.Proyecto) return false;
 
           const sapPartNumber = sapItem["Numero de Fabricante"].trim().toLowerCase()
+          const sapSupplierPartNumber = sapItem['Código de Artículo'].trim().toLowerCase();
           const itemPartNumber = item.partNumber.trim().toLowerCase()
           const sapProject = sapItem.Proyecto.trim().toLowerCase()
           const itemProject = item.projectId.trim().toLowerCase()
 
-          return sapPartNumber.includes(itemPartNumber) && sapProject === itemProject;
+          return (sapPartNumber.includes(itemPartNumber) || sapSupplierPartNumber.includes(itemPartNumber))&& sapProject === itemProject;
         }
       );
 
@@ -161,10 +164,12 @@ export async function getRFQsData(
           warehouseTicket: sapItem['Número Recepción(es)'] ? sapItem['Número Recepción(es)'].trim() : null,
           warehouseTicketDate: sapItem['Fecha Recepción'] ? formatStringToDate(sapItem['Fecha Recepción']) : null,
           warehouseTicketQuantity: sapItem['Cantidad Recibida'] ? parseFloat(sapItem['Cantidad Recibida']) : null,
+          poNumber: sapItem['Número Orden'] ? sapItem['Número Orden'].trim() : null,
           registerSap: -2,
           stateText: '',
           supplier: sapItem['Nombre Proveedor'] ? sapItem['Nombre Proveedor'].trim() : '',
           poStatus: sapItem['Estatus OC'] ? sapItem['Estatus OC'].trim() : null,
+          deliveryDate: sapItem['Fecha Promesa de Entrega'] ? formatStringToDate(sapItem['Fecha Promesa de Entrega']) : null,
         };
         
         if(sapItem['RFQ-Sys'].trim().toLowerCase() === item.rfqNumber.trim().toLowerCase()) {

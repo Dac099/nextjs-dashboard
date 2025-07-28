@@ -170,7 +170,8 @@ export function ProgressProyects() {
                     <th>Tipo</th>
                     <th>Fecha Creación</th>
                     <th>Creador Por</th>
-                    <th>Estado</th>
+                    <th>Estado General</th>
+                    <th>Estado RFQ</th>
                   </tr>
                 </thead>
                 <tbody>

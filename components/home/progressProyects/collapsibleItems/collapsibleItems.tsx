@@ -57,7 +57,9 @@ export function CollapsibleItems({ title, items, expandAll, globalFilterValue }:
                 <th>Proveedor</th>
                 <th>Maquinado</th>
                 <th>Estado</th>
-                <th>Fecha Compra</th>
+                <th>No. Orden</th>
+                <th>Fecha O. Compra</th>
+                <th>Fecha Promesa</th>
                 <th>Cantidad Solicitada</th>
                 <th>Folio Recepción</th>
                 <th>Fecha Recepción</th>
@@ -78,6 +80,17 @@ export function CollapsibleItems({ title, items, expandAll, globalFilterValue }:
                       severity={getItemReportStatus(item).severity}                      
                       className={styles.stateTag}
                     />
+                  </td>
+                  <td>{item.poNumber}</td>
+                  <td>
+                    {item.deliveryDate
+                      ? transformDateObjectToLocalString(item.deliveryDate)
+                      : <Tag
+                          value='Sin Fecha de Entrega'
+                          severity='warning'
+                          className={styles.stateTag}
+                        />
+                    }
                   </td>
                   <td>
                     {item.poDate 

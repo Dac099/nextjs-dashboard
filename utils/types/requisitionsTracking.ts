@@ -43,6 +43,7 @@ export type SapRecord = {
   'Importe Total Recibido': string;
   'Importe Total Recibido (ME)': string;
   'Fecha Factura': string;
+  'Fecha Promesa de Entrega': string;
   'Número Factura(s)': string;
   'Cantidad Facturada': string;
   'Importe Total Facturado': string;
@@ -64,8 +65,10 @@ export type ItemReport = ItemRequisition & {
   sapPartNumber: string | null;
   sapDescription: string | null;
   poDate: Date | null;
+  deliveryDate: Date | null;
   poQuantity: number | null;
   poStatus: string | null;
+  poNumber: string | null;
   warehouseTicket: string | null;
   warehouseTicketDate: Date | null;
   warehouseTicketQuantity: number | null;
