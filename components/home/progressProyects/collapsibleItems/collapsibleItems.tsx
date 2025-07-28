@@ -54,7 +54,7 @@ export function CollapsibleItems({ title, items, expandAll, globalFilterValue }:
                 <th>Número de parte</th>
                 <th>Descripción</th>
                 <th>Proyecto</th>
-                <th>Tipo RFQ</th>
+                <th>Proveedor</th>
                 <th>Maquinado</th>
                 <th>Estado</th>
                 <th>Fecha Compra</th>
@@ -65,12 +65,12 @@ export function CollapsibleItems({ title, items, expandAll, globalFilterValue }:
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
-                <tr key={item.partNumber}>
+              {items.map((item, index) => (
+                <tr key={index}>
                   <td>{highlightText(item.partNumber, globalFilterValue)}</td>
                   <td>{highlightText(item.description, globalFilterValue)}</td>
                   <td>{highlightText(item.projectId, globalFilterValue)}</td>
-                  <td>{highlightText(item.rfqType, globalFilterValue)}</td>
+                  <td>{highlightText(item.supplier, globalFilterValue)}</td>
                   <td>{highlightText(item.machineType, globalFilterValue)}</td>
                   <td>
                     <Tag 

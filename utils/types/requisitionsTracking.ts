@@ -57,6 +57,7 @@ export type SapRecord = {
   '% Facturado (Importe)': string;
   '% Recibido (Cantidad)': string;
   '% Facturado (Cantidad)': string;
+  'Estatus OC': string;
 };
 
 export type ItemReport = ItemRequisition & {
@@ -64,11 +65,13 @@ export type ItemReport = ItemRequisition & {
   sapDescription: string | null;
   poDate: Date | null;
   poQuantity: number | null;
+  poStatus: string | null;
   warehouseTicket: string | null;
   warehouseTicketDate: Date | null;
   warehouseTicketQuantity: number | null;
   registerSap: number;
   stateText: string;
+  supplier: string;
 };
 
 export type RFQsData = {

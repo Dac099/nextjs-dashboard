@@ -104,6 +104,12 @@
   gap: 10px;
 }
 
+.filtersContainer
+{
+  display: flex;
+  gap: 20px;
+}
+
 .globalFilterInput
 {
   height: 35px;
@@ -134,4 +140,43 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.filterSection
+{
+  border-radius: 5px;
+  box-shadow: 2px 2px 0px 0px var(--accent-color);
+  border: 1px solid var(--accent-color);
+  padding: 5px;
+  width: max-content;
+  margin-bottom: 10px;
+}
+
+.filterSectionTitle
+{
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.filterPanelControls
+{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 30px 0 0 0;
+}
+
+.filterLabel
+{
+  color: var(--action-color);
+  font-size: 1.2rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.filterOptionContainer
+{
+  margin-bottom: 10px;
 }

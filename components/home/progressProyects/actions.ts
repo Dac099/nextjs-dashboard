@@ -1,6 +1,6 @@
 'use server';
 import connection from '@/services/database';
-import { formatFileData, formatStringToDate, groupItemsReportByRFQ } from '@/utils/helpers';
+import { formatFileData, formatStringToDate } from '@/utils/helpers';
 import { getFileData } from '@/app/(dashboard)/sap-reports/actions';
 import type { ItemRequisition, SapRecord, ItemReport, RFQsData } from '@/utils/types/requisitionsTracking';
 
@@ -115,7 +115,7 @@ export async function getRFQsData(
     const requisitionItems = await getItemsFromRequisition(offset, limit, globalFilter);
 
     const itemsReport: ItemReport[] = requisitionItems.reduce((acc: ItemReport[], item: ItemRequisition) => {
-      let itemReport: ItemReport = {
+      const itemReport: ItemReport = {
         ...item, 
         sapPartNumber: null,
         sapDescription: null,
@@ -125,18 +125,12 @@ export async function getRFQsData(
         warehouseTicketDate: null,
         warehouseTicketQuantity: null,
         registerSap: -2,
-        stateText: ''
+        stateText: '',
+        supplier: '',
+        poStatus: null,        
       };
 
-      if(item.rfqType.trim() === 'Maqui' && item.machineType.trim() === 'Interno'){
-        itemReport.registerSap = -1;
-        itemReport.stateText = 'Maquinado Interno';
-
-        acc.push(itemReport);
-        return acc;
-      }
-
-      const indexSapItem = sapItems.findIndex(
+      const sapElements = sapItems.filter(
         (sapItem: SapRecord) => {
           if(!sapItem["Numero de Fabricante"] || !sapItem.Proyecto) return false;
 
@@ -149,7 +143,7 @@ export async function getRFQsData(
         }
       );
 
-      if(indexSapItem === -1) {
+      if(sapElements.length === 0) {
         itemReport.registerSap = 0;
         itemReport.stateText = 'Sin registro SAP';
         
@@ -157,31 +151,33 @@ export async function getRFQsData(
         return acc;
       } 
 
-      const sapItem = sapItems[indexSapItem];
-      itemReport = {
-        ...item, 
-        sapPartNumber: sapItem['Código de Artículo'],
-        sapDescription: sapItem['Descripción Artículo'] ? sapItem['Descripción Artículo'].trim() : null,
-        poDate: sapItem['Fecha Orden'] ? formatStringToDate(sapItem['Fecha Orden']) : null,
-        poQuantity: sapItem['Cantidad Ordenada'] ? parseFloat(sapItem['Cantidad Ordenada']) : null,
-        warehouseTicket: sapItem['Número Recepción(es)'] ? sapItem['Número Recepción(es)'].trim() : null,
-        warehouseTicketDate: sapItem['Fecha Recepción'] ? formatStringToDate(sapItem['Fecha Recepción']) : null,
-        warehouseTicketQuantity: sapItem['Cantidad Recibida'] ? parseFloat(sapItem['Cantidad Recibida']) : null,
-        registerSap: -2,
-        stateText: ''
-      };
+      sapElements.forEach((sapItem) => {
+        const newItemReport: ItemReport = {
+          ...item, 
+          sapPartNumber: sapItem['Código de Artículo'],
+          sapDescription: sapItem['Descripción Artículo'] ? sapItem['Descripción Artículo'].trim() : null,
+          poDate: sapItem['Fecha Orden'] ? formatStringToDate(sapItem['Fecha Orden']) : null,
+          poQuantity: sapItem['Cantidad Ordenada'] ? parseFloat(sapItem['Cantidad Ordenada']) : null,
+          warehouseTicket: sapItem['Número Recepción(es)'] ? sapItem['Número Recepción(es)'].trim() : null,
+          warehouseTicketDate: sapItem['Fecha Recepción'] ? formatStringToDate(sapItem['Fecha Recepción']) : null,
+          warehouseTicketQuantity: sapItem['Cantidad Recibida'] ? parseFloat(sapItem['Cantidad Recibida']) : null,
+          registerSap: -2,
+          stateText: '',
+          supplier: sapItem['Nombre Proveedor'] ? sapItem['Nombre Proveedor'].trim() : '',
+          poStatus: sapItem['Estatus OC'] ? sapItem['Estatus OC'].trim() : null,
+        };
+        
+        if(sapItem['RFQ-Sys'].trim().toLowerCase() === item.rfqNumber.trim().toLowerCase()) {
+          newItemReport.registerSap = 2;
+          newItemReport.stateText = 'Registrado en SAP';
+        }else{
+          newItemReport.registerSap = 1;
+          newItemReport.stateText = 'En SAP sin RFQ';
+        }
 
-      if(sapItem['RFQ-Sys'].trim().toLowerCase() === item.rfqNumber.trim().toLowerCase()) {
-        itemReport.registerSap = 2;
-        itemReport.stateText = 'Registrado en SAP';
-      }else{
-        itemReport.registerSap = 1;
-        itemReport.stateText = 'En SAP sin RFQ';
-      }
+        acc.push(newItemReport);
+      });
 
-      sapItems.splice(indexSapItem, 1);
-
-      acc.push(itemReport);
       return acc;
     }, []);
 
@@ -190,6 +186,24 @@ export async function getRFQsData(
       unmatchedSapItems: sapItems,
     };
 
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getRFQTypes(): Promise<string[]> {
+  try {
+    await connection.connect();
+
+    const resultQuery = await connection
+    .request()
+    .query(`
+      SELECT tr.id_tiporeq AS rfqType
+      FROM tb_requisicion tr
+      GROUP BY tr.id_tiporeq
+    `);
+
+    return resultQuery.recordset.map(row => row.rfqType);
   } catch (error) {
     throw error;
   }

@@ -425,11 +425,32 @@ export function getRFQStatusText(rfq: Requisition): JSX.Element {
   return <Tag value='Parcialmente registrada' severity='warning' style={tagStyle}/>;
 }
 
+export function getSeverityOnRfqStatusTitle(status: string): "success" | "info" | "warning" | "danger" | "secondary" | "contrast" {
+  switch (status){
+    case 'RFQ Recibida':
+      return 'success';
+    case 'Parcialmente recibida':
+      return 'info';
+    case 'PO generada':
+      return 'contrast';
+    case 'Sin registro SAP':
+      return 'danger';
+    case 'Registrada en SAP':
+      return 'secondary';
+    default:
+      return 'warning';
+  }
+}
+
 export function getItemReportStatus(item: ItemReport): {
   text: string, 
   severity: "success" | "info" | "warning" | "danger" | "secondary" | "contrast" | null | undefined 
 } 
 {
+  if(item.poStatus && (item.poStatus.trim() === 'Cancelada'.trim())) {
+    return { text: 'PO cancelada', severity: 'danger' };
+  }
+
   if(item.warehouseTicket){
     return { text: 'En almacén', severity: 'success' };
   }
@@ -446,4 +467,19 @@ export function getItemReportStatus(item: ItemReport): {
       ?  'warning' 
       : 'danger'
   };
+}
+
+export function getSapItemSeverityOnTitle(title: string): "success" | "info" | "warning" | "danger" | "secondary" | "contrast" {
+  switch (title) {
+    case 'inWarehouse':
+      return 'success';
+    case 'poGenerated':
+      return 'info';
+    case 'noSapRecord':
+      return 'danger';
+    case 'noReception':
+      return 'warning';
+    default:
+      return 'contrast';
+  }
 }
