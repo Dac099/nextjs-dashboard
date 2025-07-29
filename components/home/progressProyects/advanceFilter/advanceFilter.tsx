@@ -7,8 +7,14 @@ import { Calendar } from 'primereact/calendar';
 import { getRFQTypes } from '../actions';
 import { RFQTypeMap } from '@/utils/helpers';
 import { Message } from 'primereact/message';
+import { filterBuilder } from '@/utils/helpers';
+import { AdvancedFilter } from '@/utils/types/requisitionsTracking';
 
-export function AdvanceFilter() {
+type Props = {
+  setFilter: (filter: AdvancedFilter | null) => void;
+};
+
+export function AdvanceFilter({ setFilter }: Props) {
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
   const [selectedOperator, setSelectedOperator] = useState<string | null>(null);
   const [userInput, setUserInput] = useState<string | Date | Date[] | null>(null);
@@ -144,6 +150,7 @@ export function AdvanceFilter() {
             onClick={() => {
               setSelectedColumn(null);
               setSelectedOperator(null);
+              setFilter(null);
             }}
             outlined
           />
@@ -151,9 +158,10 @@ export function AdvanceFilter() {
             label="Aplicar"
             icon="pi pi-check"
             severity="success"
-            disabled={!selectedColumn && !selectedOperator}
+            disabled={!selectedColumn && !selectedOperator && !userInput}
             onClick={() => {
-              console.log(`Aplicando filtro en ${selectedColumn} con operador ${selectedOperator}`);
+              if(!selectedColumn || !selectedOperator || !userInput) return;  
+              setFilter(filterBuilder(selectedColumn, selectedOperator, userInput));
             }}
           />
         </div>

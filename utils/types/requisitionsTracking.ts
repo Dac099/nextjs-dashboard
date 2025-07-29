@@ -81,3 +81,10 @@ export type RFQsData = {
   items: ItemReport[];
   unmatchedSapItems: SapRecord[];
 };
+
+export type AdvancedFilter = {
+  origin: string;
+  column: string;
+  operator: string;
+  userInput: string | Date | Date[];
+}

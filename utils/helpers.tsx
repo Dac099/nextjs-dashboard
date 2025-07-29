@@ -2,7 +2,7 @@ import { FilteredEmployee, FilteredEmployeeWithItems, Item, ProjectFormData, Val
 import { Task, UserData } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
 import { ItemValue } from './types/views';
-import { ItemReport, Requisition } from './types/requisitionsTracking';
+import { AdvancedFilter, ItemReport, Requisition } from './types/requisitionsTracking';
 import { Tag } from 'primereact/tag';
 import { JSX } from 'react';
 
@@ -482,4 +482,15 @@ export function getSapItemSeverityOnTitle(title: string): "success" | "info" | "
     default:
       return 'contrast';
   }
+}
+
+export function filterBuilder(column: string, operator: string, userInput: string | Date | Date[]): AdvancedFilter {
+  const dbColumns = ['rfq_type', 'general_state', 'rfq_state', 'created_date'];
+
+  return {
+    origin: dbColumns.includes(column) ? 'db' : 'file',
+    column,
+    operator,
+    userInput
+  };
 }

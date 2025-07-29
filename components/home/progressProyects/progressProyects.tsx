@@ -10,6 +10,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Button } from 'primereact/button';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { AdvanceFilter } from './advanceFilter/advanceFilter';
+import { AdvancedFilter } from '@/utils/types/requisitionsTracking';
 
 const ITEMS_PER_PAGE = 100;
 
@@ -22,67 +23,35 @@ export function ProgressProyects() {
   const [ expandAllResults, setExpandAllResults ] = useState<boolean>(false);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(0);
+  const [advancedFilter, setAdvancedFilter] = useState<AdvancedFilter | null>(null);
+
+  const setFilter = (filter: AdvancedFilter | null) => {
+    setAdvancedFilter(filter);
+  };
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       try {
-        setLoading(true);
-        
         const skip = currentPage * ITEMS_PER_PAGE;
-        const [rfqsData, totalItemsCount] = await Promise.all([ 
-          getRFQsData(skip, ITEMS_PER_PAGE), 
-          getTotalItemsFromRequisition(), 
-        ]);
 
-        setRfqsItemsFetched(rfqsData.items);        
-        setTotalItems(totalItemsCount);
-      } catch (error) {
-        console.error('Fetching RFQs data BAD RESULT: ', error);
-      }finally {
-        setLoading(false);
-      }
-    } 
-
-    if (!debounceQuery) {
-      fetchData();
-    }
-  }, [currentPage, debounceQuery]);
-
-  useEffect(() => {
-    if(!debounceQuery) {
-      setExpandAllResults(false);
-      if (currentPage !== 0) {
-        setCurrentPage(0);
-      }
-      return;
-    }
-
-    async function getData() {
-      try {
-        setLoading(true);
-        
-        const [rfqsData, totalItemsCount] = await Promise.all([ 
-          getRFQsData(0, ITEMS_PER_PAGE, debounceQuery), 
-          getTotalItemsFromRequisition(debounceQuery),
-        ]);
-
-        setTotalItems(totalItemsCount);
+        const rfqsData = await getRFQsData(skip, ITEMS_PER_PAGE, debounceQuery);
+        const totalItemsCount = await getTotalItemsFromRequisition(debounceQuery);
+                
         setRfqsItemsFetched(rfqsData.items);
+        setTotalItems(totalItemsCount);
 
-        if( rfqsData.items.length > 0) {
-          setExpandAllResults(true);
-        }
-
+        setExpandAllResults(rfqsData.items.length > 0 && (debounceQuery.length > 0 || advancedFilter !== null));
       } catch (error) {
-        console.error('Error fetching RFQs data with global filter: ', error);
+        console.error('Error fetching RFQs data: ', error);
         setExpandAllResults(false);
       } finally {
         setLoading(false);
       }
     }
 
-    getData();
-  }, [debounceQuery, currentPage]);
+    fetchData();
+  }, [advancedFilter, currentPage, debounceQuery]);
 
   const groupedItems = useMemo(() => {
     if (!rfqsItemsFetched) return [];
@@ -98,14 +67,12 @@ export function ProgressProyects() {
   };
 
   const isNextButtonDisabled = useMemo(() => {
-    if (debounceQuery) return true;
     return (currentPage + 1) * ITEMS_PER_PAGE >= totalItems;
-  }, [currentPage, totalItems, debounceQuery]);
+  }, [currentPage, totalItems]);
 
   const isPreviousButtonDisabled = useMemo(() => {
-    if (debounceQuery) return true;
     return currentPage === 0;
-  }, [currentPage, debounceQuery]);
+  }, [currentPage]);
 
   return (
     <article className={styles.mainContainer}>
@@ -218,7 +185,7 @@ export function ProgressProyects() {
           showCloseIcon
           draggable={false}          
         >
-          <AdvanceFilter />
+          <AdvanceFilter setFilter={setFilter}/>
         </OverlayPanel>
     </article>
   );
