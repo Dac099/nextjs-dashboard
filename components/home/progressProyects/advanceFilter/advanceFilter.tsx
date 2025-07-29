@@ -12,12 +12,13 @@ import { AdvancedFilter } from '@/utils/types/requisitionsTracking';
 
 type Props = {
   setFilter: (filter: AdvancedFilter | null) => void;
+  filter: AdvancedFilter | null;
 };
 
-export function AdvanceFilter({ setFilter }: Props) {
-  const [selectedColumn, setSelectedColumn] = useState<string | null>(null);
-  const [selectedOperator, setSelectedOperator] = useState<string | null>(null);
-  const [userInput, setUserInput] = useState<string | Date | Date[] | null>(null);
+export function AdvanceFilter({ setFilter, filter }: Props) {
+  const [selectedColumn, setSelectedColumn] = useState<string | null>(filter?.column || null);
+  const [selectedOperator, setSelectedOperator] = useState<string | null>(filter?.operator || null);
+  const [userInput, setUserInput] = useState<string | Date | Date[] | null>(filter?.userInput || null);
   const [rfqTypes, setRfqTypes] = useState<string[]>([]);
 
   useEffect(() => {
@@ -69,6 +70,7 @@ export function AdvanceFilter({ setFilter }: Props) {
             disabled={!selectedColumn}
             className={styles.selectElement}
           >
+            <option value="">Selecciona una operación</option>
             {selectedColumn 
               ?
               OPERATIONS_BY_COLUMN[selectedColumn]!.map((operation) => (
@@ -95,7 +97,10 @@ export function AdvanceFilter({ setFilter }: Props) {
             : selectedColumn === 'rfq_type'
             ? <select
                 className={styles.selectElement}
+                value={userInput as string|| ""}
+                onChange={(e) => setUserInput(e.target.value)}
               >
+                <option value="">Seleccionar un tipo de RFQ</option>
                 {rfqTypes.map((type) => (
                   <option key={type} value={type}>
                     {RFQTypeMap[type.trim()] || type}
@@ -105,7 +110,10 @@ export function AdvanceFilter({ setFilter }: Props) {
             : selectedColumn === 'general_state'
             ? <select
                 className={styles.selectElement}
+                value={userInput as string|| ""}
+                onChange={(e) => setUserInput(e.target.value)}
               >
+                <option value="">Seleccionar un estado</option>
                 <option value="received">RFQ recibida</option>
                 <option value="partial_received">Parcialmente recibida</option>
                 <option value="po_generated">PO generada</option>
@@ -114,19 +122,35 @@ export function AdvanceFilter({ setFilter }: Props) {
                 <option value="partial_sap_record">Parcialmente registrada</option>
               </select>
             : selectedColumn === 'rfq_state'
-            ? <select className={styles.selectElement}>
-                <option value="authorized">Autorizado</option>
-                <option value="canceled">Cancelado</option>
-                <option value="processed">RFQ procesada</option>
-                <option value="unauthorized">Por autorizar</option>
+            ? <select 
+                className={styles.selectElement}
+                value={userInput as string|| ""}
+                onChange={(e) => setUserInput(e.target.value)}
+              >
+                <option value="">Seleccionar un valor</option>
+                <option value="AUTORIZADO">Autorizado</option>
+                <option value="CANCELADO">Cancelado</option>
+                <option value="RFQ PROCESADA">RFQ procesada</option>
+                <option value="POR AUTORIZAR">Por autorizar</option>
               </select>
             : selectedColumn === 'machine_type'
-            ? <select className={styles.selectElement}>
-                <option value="internal">Interno</option>
-                <option value="external">Externo</option>
+            ? <select 
+                className={styles.selectElement}
+                value={userInput as string|| ""}
+                onChange={(e) => setUserInput(e.target.value)}
+              >
+                <option value="">Seleccionar un tipo</option>
+                <option value="Interno">Interno</option>
+                <option value="Externo">Externo</option>
+                <option value="NA">NA</option>
               </select>
             : selectedColumn === 'article_state'
-            ? <select className={styles.selectElement}>
+            ? <select 
+                className={styles.selectElement}
+                value={userInput as string|| ""}
+                onChange={(e) => setUserInput(e.target.value)}
+              >
+                <option value="">Seleccionar un estado</option>
                 <option value="po_canceled">PO cancelada</option>
                 <option value="po_generated">PO generada</option>
                 <option value="on_warehouse">En almacén</option>
@@ -160,8 +184,7 @@ export function AdvanceFilter({ setFilter }: Props) {
             severity="success"
             disabled={!selectedColumn && !selectedOperator && !userInput}
             onClick={() => {
-              if(!selectedColumn || !selectedOperator || !userInput) return;  
-              setFilter(filterBuilder(selectedColumn, selectedOperator, userInput));
+              setFilter(filterBuilder(selectedColumn!, selectedOperator!, userInput!));
             }}
           />
         </div>

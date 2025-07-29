@@ -35,8 +35,8 @@ export function ProgressProyects() {
       try {
         const skip = currentPage * ITEMS_PER_PAGE;
 
-        const rfqsData = await getRFQsData(skip, ITEMS_PER_PAGE, debounceQuery);
-        const totalItemsCount = await getTotalItemsFromRequisition(debounceQuery);
+        const rfqsData = await getRFQsData(skip, ITEMS_PER_PAGE, debounceQuery, advancedFilter);
+        const totalItemsCount = await getTotalItemsFromRequisition(debounceQuery, advancedFilter);
                 
         setRfqsItemsFetched(rfqsData.items);
         setTotalItems(totalItemsCount);
@@ -185,7 +185,7 @@ export function ProgressProyects() {
           showCloseIcon
           draggable={false}          
         >
-          <AdvanceFilter setFilter={setFilter}/>
+          <AdvanceFilter setFilter={setFilter} filter={advancedFilter} />
         </OverlayPanel>
     </article>
   );

@@ -2,7 +2,7 @@
 import connection from '@/services/database';
 import { formatFileData, formatStringToDate } from '@/utils/helpers';
 import { getFileData } from '@/app/(dashboard)/sap-reports/actions';
-import type { ItemRequisition, SapRecord, ItemReport, RFQsData } from '@/utils/types/requisitionsTracking';
+import type { ItemRequisition, SapRecord, ItemReport, RFQsData, AdvancedFilter } from '@/utils/types/requisitionsTracking';
 
 async function getDataFromSapReport(): Promise<SapRecord[]> {
   try {
@@ -22,13 +22,76 @@ async function getDataFromSapReport(): Promise<SapRecord[]> {
 async function getItemsFromRequisition(
   offset: number, 
   limit: number,
-  globalFilter: string | null = null
+  globalFilter: string | null = null,
+  advancedFilter: AdvancedFilter | null = null
 ): Promise<ItemRequisition[]> {
+  console.log(advancedFilter)
   try {
-    //TODO: Get data from Maquinados
     await connection.connect();
-    
     globalFilter = globalFilter?.toLowerCase() || null;
+    let whereClause = '';
+
+    if(globalFilter && !advancedFilter){
+      whereClause = `
+        WHERE LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
+          OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
+          OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
+          OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
+          OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
+          OR LOWER(tu.nom_user) LIKE '%' + @globalFilter + '%'
+      `;
+    }
+
+    if(advancedFilter) {
+      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'between'){
+        const [startDate, endDate] = advancedFilter.userInput as Date[];
+        whereClause = `
+          WHERE CONVERT(date, tr.fecha_registro) BETWEEN '${startDate.toISOString().slice(0, 10)}' AND '${endDate.toISOString().slice(0, 10)}'
+        `;
+      }
+      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'equals'){
+        const createdDate = advancedFilter.userInput as Date;
+        whereClause = `
+          WHERE CONVERT(date, tr.fecha_registro) = '${createdDate.toISOString().slice(0, 10)}'
+        `;
+      }
+      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'greater'){
+        const createdDate = advancedFilter.userInput as Date;
+        whereClause = `
+          WHERE CONVERT(date, tr.fecha_registro) > '${createdDate.toISOString().slice(0, 10)}'
+        `;
+      }
+      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'less'){
+        const createdDate = advancedFilter.userInput as Date;
+        whereClause = `
+          WHERE CONVERT(date, tr.fecha_registro) < '${createdDate.toISOString().slice(0, 10)}'
+        `;
+      }
+      if(advancedFilter.column === 'rfq_state'){
+        const rfqState = advancedFilter.userInput as string;
+        whereClause = `
+          WHERE me.Desc_Estatus = '${rfqState}'
+        `;
+      }
+      if(advancedFilter.column === 'rfq_type'){
+        const rfqType = advancedFilter.userInput as string;
+        whereClause = `
+          WHERE tr.id_tiporeq = '${rfqType}'
+        `;
+      }
+
+      if(globalFilter) {
+        whereClause += `
+          AND (LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
+            OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
+            OR LOWER(tu.nom_user) LIKE '%' + @globalFilter + '%')
+        `;
+      }
+    }
+
     const resultQuery = await connection
     .request()
     .input('limit', limit)
@@ -50,17 +113,7 @@ async function getItemsFromRequisition(
       INNER JOIN tb_requisicion tr ON tr.id_req = trd.id_req
       LEFT JOIN tb_user tu ON tu.id_user = tr.id_usuario 
       LEFT JOIN Maquinados_Estatus me ON me.Id_Estatus = tr.Id_Estatus 
-      ${globalFilter 
-        ? `
-          WHERE LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
-            OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
-            OR LOWER(tu.nom_user) LIKE '%' + @globalFilter + '%'
-        `
-        : ''
-      }
+      ${whereClause}
       ORDER BY tr.fecha_registro DESC
       OFFSET @offset ROWS
       FETCH NEXT @limit ROWS ONLY
@@ -72,9 +125,71 @@ async function getItemsFromRequisition(
   }
 }
 
-export async function getTotalItemsFromRequisition(globalFilter: string | null = null): Promise<number> {
+export async function getTotalItemsFromRequisition(globalFilter: string | null = null, advancedFilter: AdvancedFilter | null = null): Promise<number> {
   try {
     await connection.connect();
+    let whereClause = '';
+
+    if(globalFilter && !advancedFilter){
+      whereClause = `
+        WHERE LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
+          OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
+          OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
+          OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
+          OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
+      `;
+    }
+
+    if(advancedFilter) {
+      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'between'){
+        const [startDate, endDate] = advancedFilter.userInput as Date[];
+        whereClause = `
+          WHERE CONVERT(date, tr.fecha_registro) BETWEEN '${startDate.toISOString().slice(0, 10)}' AND '${endDate.toISOString().slice(0, 10)}'
+        `;
+      }
+      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'equals'){
+        const createdDate = advancedFilter.userInput as Date;
+        whereClause = `
+          WHERE CONVERT(date, tr.fecha_registro) = '${createdDate.toISOString().slice(0, 10)}'
+        `;
+      }
+      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'greater'){
+        const createdDate = advancedFilter.userInput as Date;
+        whereClause = `
+          WHERE CONVERT(date, tr.fecha_registro) > '${createdDate.toISOString().slice(0, 10)}'
+        `;
+      }
+      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'less'){
+        const createdDate = advancedFilter.userInput as Date;
+        whereClause = `
+          WHERE CONVERT(date, tr.fecha_registro) < '${createdDate.toISOString().slice(0, 10)}'
+        `;
+      }
+      if(advancedFilter.column === 'rfq_state'){
+        const rfqState = advancedFilter.userInput as string;
+        whereClause = `
+          WHERE tr.id_estatus = '${rfqState}'
+        `;
+      }
+      if(advancedFilter.column === 'rfq_type'){
+        const rfqType = advancedFilter.userInput as string;
+        whereClause = `
+          WHERE tr.id_tiporeq = '${rfqType}'
+        `;
+      }
+
+      if(globalFilter) {
+        whereClause += `
+          AND (LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
+            OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
+            OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%')
+        `;
+      }
+    }
+
+    console.log('whereClause', whereClause);
     
     globalFilter = globalFilter?.toLowerCase() || null;
     const resultQuery = await connection
@@ -85,13 +200,7 @@ export async function getTotalItemsFromRequisition(globalFilter: string | null =
       FROM tb_req_deta trd
       INNER JOIN tb_requisicion tr ON tr.id_req = trd.id_req
       ${globalFilter 
-        ? `
-          WHERE LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
-            OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
-        `
+        ? whereClause
         : ''
       }
       GROUP BY tr.num_req
@@ -107,12 +216,13 @@ export async function getTotalItemsFromRequisition(globalFilter: string | null =
 export async function getRFQsData(
   offset: number = 0, 
   limit: number = 300, 
-  globalFilter: string | null = null
+  globalFilter: string | null = null,
+  advancedFilter: AdvancedFilter | null = null
 ) : Promise<RFQsData> 
 {
   try {
     const sapItems = await getDataFromSapReport();
-    const requisitionItems = await getItemsFromRequisition(offset, limit, globalFilter);
+    const requisitionItems = await getItemsFromRequisition(offset, limit, globalFilter, advancedFilter);
 
     const itemsReport: ItemReport[] = requisitionItems.reduce((acc: ItemReport[], item: ItemRequisition) => {
       const itemReport: ItemReport = {
