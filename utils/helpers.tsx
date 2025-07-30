@@ -494,3 +494,72 @@ export function filterBuilder(column: string, operator: string, userInput: strin
     userInput
   };
 }
+
+export function buildWhereClause(globalFilter: string | null, advancedFilter: AdvancedFilter | null): string {
+  if(!globalFilter && !advancedFilter) return '';
+  let clause: string = '';
+
+  if(!advancedFilter){
+    globalFilter = `'%${globalFilter!.toLowerCase().replace(/[\'\"]/g, "")}%'`;
+    return `
+      WHERE LOWER(trd.no_parte) LIKE ${globalFilter}
+        OR LOWER(trd.desc_articulo) LIKE ${globalFilter}
+        OR LOWER(trd.id_proyecto) LIKE ${globalFilter}
+        OR LOWER(trd.tipo_maquinado) LIKE ${globalFilter}
+        OR LOWER(tr.num_req) LIKE ${globalFilter}
+        OR LOWER(tu.nom_user) LIKE ${globalFilter}
+    `
+  }
+
+  const { column, operator, userInput } = advancedFilter;
+
+  if(column === 'created_date'){
+    clause = `WHERE CONVERT(date, tr.fecha_registro) `;
+
+    if(operator === 'between'){
+      const startDate = (userInput as Date[])[0].toISOString().slice(0, 10);
+      const endDate = (userInput as Date[])[1].toISOString().slice(0, 10);
+      clause.concat(`${operatorStringToSQL[operator]} '${startDate}' AND '${endDate}'`);
+    }
+
+    const parsedDate = (userInput as Date).toISOString().slice(0, 10);
+    clause.concat(`${operatorStringToSQL[operator]} '${parsedDate}'`);
+  }
+
+  if(column === 'rfq_state'){
+    clause = `WHERE me.Desc_Estatus = '${userInput as string}'`;
+  }
+
+  if(column === 'rfq_type'){
+    clause = `WHERE tr.id_tiporeq = '${userInput as string}'`;
+  }
+
+  if(column === 'machine_type'){
+    clause = `WHERE trd.tipo_maquinado = '${userInput as string}'`;
+  }
+
+  // The final step is to add the global filter to the made up clause of conditions based on the advanced filter
+  // If there is another column to validate in AdvancedFilter, we must add it before this step
+  if(globalFilter){
+    globalFilter = `'%${globalFilter!.toLowerCase().replace(/[\'\"]/g, "")}%'`;
+    clause += ` 
+      AND (LOWER(trd.no_parte) LIKE ${globalFilter}
+        OR LOWER(trd.desc_articulo) LIKE ${globalFilter}
+        OR LOWER(trd.id_proyecto) LIKE ${globalFilter}
+        OR LOWER(trd.tipo_maquinado) LIKE ${globalFilter}
+        OR LOWER(tr.num_req) LIKE ${globalFilter}
+        OR LOWER(tu.nom_user) LIKE ${globalFilter})
+    `;
+  }
+
+  return clause;
+}
+
+
+const operatorStringToSQL: Record<string, string> = {
+  'between': 'BETWEEN',
+  'equals': '=',
+  'contains': 'LIKE',
+  'greater': '>',
+  'less': '<',
+};

@@ -74,6 +74,8 @@ export function ProgressProyects() {
     return currentPage === 0;
   }, [currentPage]);
 
+  const closeOverlayPanel = () => overlayPanelRef.current?.hide();
+
   return (
     <article className={styles.mainContainer}>
       <section className={styles.header}>
@@ -179,14 +181,18 @@ export function ProgressProyects() {
           </>
         }
       </section>
-        <OverlayPanel
-          ref={overlayPanelRef}
-          className={styles.overlayPanel}
-          showCloseIcon
-          draggable={false}          
-        >
-          <AdvanceFilter setFilter={setFilter} filter={advancedFilter} />
-        </OverlayPanel>
+      <OverlayPanel
+        ref={overlayPanelRef}
+        className={styles.overlayPanel}
+        showCloseIcon
+        draggable={false}          
+      >
+        <AdvanceFilter 
+          setFilter={setFilter}   
+          filter={advancedFilter}   
+          closeOverlayPanel={closeOverlayPanel} 
+        />
+      </OverlayPanel>
     </article>
   );
 }

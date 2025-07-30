@@ -1,6 +1,6 @@
 'use server';
 import connection from '@/services/database';
-import { formatFileData, formatStringToDate } from '@/utils/helpers';
+import { buildWhereClause, formatFileData, formatStringToDate } from '@/utils/helpers';
 import { getFileData } from '@/app/(dashboard)/sap-reports/actions';
 import type { ItemRequisition, SapRecord, ItemReport, RFQsData, AdvancedFilter } from '@/utils/types/requisitionsTracking';
 
@@ -27,70 +27,8 @@ async function getItemsFromRequisition(
 ): Promise<ItemRequisition[]> {
   console.log(advancedFilter)
   try {
-    await connection.connect();
-    globalFilter = globalFilter?.toLowerCase() || null;
-    let whereClause = '';
-
-    if(globalFilter && !advancedFilter){
-      whereClause = `
-        WHERE LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
-          OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
-          OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
-          OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
-          OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
-          OR LOWER(tu.nom_user) LIKE '%' + @globalFilter + '%'
-      `;
-    }
-
-    if(advancedFilter) {
-      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'between'){
-        const [startDate, endDate] = advancedFilter.userInput as Date[];
-        whereClause = `
-          WHERE CONVERT(date, tr.fecha_registro) BETWEEN '${startDate.toISOString().slice(0, 10)}' AND '${endDate.toISOString().slice(0, 10)}'
-        `;
-      }
-      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'equals'){
-        const createdDate = advancedFilter.userInput as Date;
-        whereClause = `
-          WHERE CONVERT(date, tr.fecha_registro) = '${createdDate.toISOString().slice(0, 10)}'
-        `;
-      }
-      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'greater'){
-        const createdDate = advancedFilter.userInput as Date;
-        whereClause = `
-          WHERE CONVERT(date, tr.fecha_registro) > '${createdDate.toISOString().slice(0, 10)}'
-        `;
-      }
-      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'less'){
-        const createdDate = advancedFilter.userInput as Date;
-        whereClause = `
-          WHERE CONVERT(date, tr.fecha_registro) < '${createdDate.toISOString().slice(0, 10)}'
-        `;
-      }
-      if(advancedFilter.column === 'rfq_state'){
-        const rfqState = advancedFilter.userInput as string;
-        whereClause = `
-          WHERE me.Desc_Estatus = '${rfqState}'
-        `;
-      }
-      if(advancedFilter.column === 'rfq_type'){
-        const rfqType = advancedFilter.userInput as string;
-        whereClause = `
-          WHERE tr.id_tiporeq = '${rfqType}'
-        `;
-      }
-
-      if(globalFilter) {
-        whereClause += `
-          AND (LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
-            OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
-            OR LOWER(tu.nom_user) LIKE '%' + @globalFilter + '%')
-        `;
-      }
-    }
+    await connection.connect();    
+    const whereClause = buildWhereClause(globalFilter, advancedFilter);
 
     const resultQuery = await connection
     .request()
@@ -125,72 +63,14 @@ async function getItemsFromRequisition(
   }
 }
 
-export async function getTotalItemsFromRequisition(globalFilter: string | null = null, advancedFilter: AdvancedFilter | null = null): Promise<number> {
+export async function getTotalItemsFromRequisition(
+  globalFilter: string | null = null, 
+  advancedFilter: AdvancedFilter | null = null
+): Promise<number> {
   try {
     await connection.connect();
-    let whereClause = '';
+    const whereClause = buildWhereClause(globalFilter, advancedFilter);    
 
-    if(globalFilter && !advancedFilter){
-      whereClause = `
-        WHERE LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
-          OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
-          OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
-          OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
-          OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%'
-      `;
-    }
-
-    if(advancedFilter) {
-      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'between'){
-        const [startDate, endDate] = advancedFilter.userInput as Date[];
-        whereClause = `
-          WHERE CONVERT(date, tr.fecha_registro) BETWEEN '${startDate.toISOString().slice(0, 10)}' AND '${endDate.toISOString().slice(0, 10)}'
-        `;
-      }
-      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'equals'){
-        const createdDate = advancedFilter.userInput as Date;
-        whereClause = `
-          WHERE CONVERT(date, tr.fecha_registro) = '${createdDate.toISOString().slice(0, 10)}'
-        `;
-      }
-      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'greater'){
-        const createdDate = advancedFilter.userInput as Date;
-        whereClause = `
-          WHERE CONVERT(date, tr.fecha_registro) > '${createdDate.toISOString().slice(0, 10)}'
-        `;
-      }
-      if(advancedFilter.column === 'created_date' && advancedFilter.operator === 'less'){
-        const createdDate = advancedFilter.userInput as Date;
-        whereClause = `
-          WHERE CONVERT(date, tr.fecha_registro) < '${createdDate.toISOString().slice(0, 10)}'
-        `;
-      }
-      if(advancedFilter.column === 'rfq_state'){
-        const rfqState = advancedFilter.userInput as string;
-        whereClause = `
-          WHERE tr.id_estatus = '${rfqState}'
-        `;
-      }
-      if(advancedFilter.column === 'rfq_type'){
-        const rfqType = advancedFilter.userInput as string;
-        whereClause = `
-          WHERE tr.id_tiporeq = '${rfqType}'
-        `;
-      }
-
-      if(globalFilter) {
-        whereClause += `
-          AND (LOWER(trd.no_parte) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.desc_articulo) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.id_proyecto) LIKE '%' + @globalFilter + '%'
-            OR LOWER(trd.tipo_maquinado) LIKE '%' + @globalFilter + '%'
-            OR LOWER(tr.num_req) LIKE '%' + @globalFilter + '%')
-        `;
-      }
-    }
-
-    console.log('whereClause', whereClause);
-    
     globalFilter = globalFilter?.toLowerCase() || null;
     const resultQuery = await connection
     .request()
@@ -199,10 +79,7 @@ export async function getTotalItemsFromRequisition(globalFilter: string | null =
       SELECT COUNT(tr.num_req) AS totalItems
       FROM tb_req_deta trd
       INNER JOIN tb_requisicion tr ON tr.id_req = trd.id_req
-      ${globalFilter 
-        ? whereClause
-        : ''
-      }
+      ${whereClause}
       GROUP BY tr.num_req
     `);
 

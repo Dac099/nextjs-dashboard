@@ -62,7 +62,7 @@ export function RowItem({ item, expandAll, globalFilterValue }: Props){
         <td>{getHighlightedText(item.number, globalFilterValue)}</td>
         <td>
           <Tag 
-            value={RFQTypeMap[item.type.trim()] || 'Otro'}
+            value={RFQTypeMap[item.type.trim()] || item.type.trim()}
             severity='info'
             style={{ width: '100%', fontSize: '1.2rem' }}
           />
