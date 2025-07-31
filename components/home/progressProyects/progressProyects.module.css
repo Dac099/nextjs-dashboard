@@ -1,16 +1,12 @@
-:root {
-  --pageHeight: calc(95vh - 20px)
-}
-
 .loadContainer
 {
-  height: var(--pageHeight);
+  height: calc(95vh - 20px);
   width: 100%;
 }
 
 .mainContainer
 {
-  height: var(--pageHeight);
+  height: calc(95vh - 20px);
   display: grid;
   grid-template-rows: 80px auto;
   gap: 20px;
