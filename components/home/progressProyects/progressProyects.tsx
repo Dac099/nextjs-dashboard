@@ -1,6 +1,6 @@
 'use client';
 import styles from './progressProyects.module.css';
-import { getRFQsData, getTotalItemsFromRequisition } from './actions';
+import { getRFQsData } from './actions';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { ItemReport } from '@/utils/types/requisitionsTracking';
 import { CommonLoader } from '@/components/common/commonLoader/commonLoader';
@@ -36,10 +36,9 @@ export function ProgressProyects() {
         const skip = currentPage * ITEMS_PER_PAGE;
 
         const rfqsData = await getRFQsData(skip, ITEMS_PER_PAGE, debounceQuery, advancedFilter);
-        const totalItemsCount = await getTotalItemsFromRequisition(debounceQuery, advancedFilter);
                 
         setRfqsItemsFetched(rfqsData.items);
-        setTotalItems(totalItemsCount);
+        setTotalItems(rfqsData.count);
 
         setExpandAllResults(rfqsData.items.length > 0 && (debounceQuery.length > 0 || advancedFilter !== null));
       } catch (error) {
