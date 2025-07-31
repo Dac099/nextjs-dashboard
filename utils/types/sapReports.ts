@@ -1,4 +1,5 @@
 export type SapReportRecord = {
+  id?: number;
   rfqSys: string | null;
   poStatus: string | null;
   lineStatus: string | null;

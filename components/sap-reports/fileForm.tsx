@@ -6,23 +6,21 @@ import { useRef, useState, useEffect } from 'react';
 import { TableData } from './tableData/tableData';
 import { CustomError } from '@/utils/customError';
 import { Message } from 'primereact/message';
-import { getFileData } from '@/app/(dashboard)/sap-reports/actions';
+import { getSapReports } from '@/app/(dashboard)/sap-reports/actions';
 import { useRoleUserActions } from '@/stores/roleUserActions';
+import type { SapReportRecord } from '@/utils/types/sapReports';
+import { TableDBData } from './tablaDBData/tableDBData';
 
 export function FileForm() {
   const toast = useRef<Toast>(null);
   const { userRoleName } = useRoleUserActions();
   const [ errorMsg, setErrorMsg ] = useState<CustomError | null>(null);
+  const [ sapReportData, setSapReportData ] = useState<SapReportRecord[]>([]);
   const [ fileData, setFileData ] = useState<string | null>(null);
-  const [ fileDate, setFileDate ] = useState<string | null>(null);
 
   useEffect(() => {
-    getFileData()
-      .then(([data, date]) => {
-        setFileData(data);
-        setFileDate(date);
-        setErrorMsg(null);
-      })
+    getSapReports()
+      .then(data => setSapReportData(data))
       .catch(() => {
         setErrorMsg(new CustomError(
           500,
@@ -33,8 +31,6 @@ export function FileForm() {
   }, []);
 
   const handleClearFormFile = () => {
-    setFileData(null);
-    setFileDate(null);
     setErrorMsg(null);
     if (toast.current) {
       toast.current.clear();
@@ -50,11 +46,6 @@ export function FileForm() {
 
       if (fileContent) {
         setFileData(fileContent);
-        setFileDate(new Date(fileToRead.lastModified).toLocaleDateString('es-ES', {
-          year: 'numeric',
-          month: 'short',
-          day: '2-digit',
-        }));
         setErrorMsg(null);
       } else {
         setErrorMsg(new CustomError(
@@ -65,16 +56,13 @@ export function FileForm() {
       }
     };
 
-    reader.readAsText(fileToRead, 'utf-8');
+    reader.readAsText(fileToRead, 'utf16le');
   };
   return (
     <article className={styles.fileFormContainer}>
       <Toast ref={toast} />
       <section className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Seguimiento de compras</h1>
-        {!errorMsg && fileDate &&
-          <p>Fecha del archivo: <span className={styles.dateFileString}>{fileDate}</span></p>
-        }
       </section>
 
       {errorMsg && 
@@ -107,6 +95,7 @@ export function FileForm() {
       }
 
       {fileData && <TableData data={fileData} />}
+      {!fileData && sapReportData.length > 0 && <TableDBData data={sapReportData} />}
     </article>
   );
 }

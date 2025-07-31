@@ -1,19 +1,17 @@
 'use server';
 import connection from '@/services/database';
-import { buildWhereClause, formatFileData, formatStringToDate } from '@/utils/helpers';
-import { getFileData } from '@/app/(dashboard)/sap-reports/actions';
+import { buildWhereClause, formatStringToDate } from '@/utils/helpers';
 import type { ItemRequisition, SapRecord, ItemReport, RFQsData, AdvancedFilter } from '@/utils/types/requisitionsTracking';
 
 async function getDataFromSapReport(): Promise<SapRecord[]> {
   try {
-    const [fileData] = await getFileData();
-    const formatedFileData = formatFileData(fileData);
-    const headerValues = formatedFileData[0];
-    const values = formatedFileData.slice(1).map((row) => {
-      return Object.fromEntries(row.map((value, i) => [headerValues[i], value]));
-    });
-
-    return values as SapRecord[];
+    // const [fileData] = await getFileData();
+    // const formatedFileData = formatFileData(fileData);
+    // const headerValues = formatedFileData[0];
+    // const values = formatedFileData.slice(1).map((row) => {
+      // return Object.fromEntries(row.map((value, i) => [headerValues[i], value]));
+    return [];
+    // return values as SapRecord[];
   } catch (error) {
     throw error;
   }

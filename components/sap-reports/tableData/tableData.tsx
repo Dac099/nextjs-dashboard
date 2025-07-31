@@ -118,11 +118,11 @@ export function TableData({ data }: Props) {
         columnResizeMode="expand"
         tableStyle={{ maxWidth: '100%', overflowX: 'hidden' }}
       >
-        {visibleColumns.map((col) => (
+        {visibleColumns.map((col, index) => (
           <Column
             field={col.field}
             header={col.header}
-            key={col.field}
+            key={index}
             sortable
             style={{ minWidth: '120px', fontSize: '1.2rem' }}
           />
