@@ -2,33 +2,18 @@
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import styles from './fileForm.module.css';
 import { Toast } from 'primereact/toast';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { TableData } from './tableData/tableData';
 import { CustomError } from '@/utils/customError';
 import { Message } from 'primereact/message';
-import { getSapReports } from '@/app/(dashboard)/sap-reports/actions';
 import { useRoleUserActions } from '@/stores/roleUserActions';
-import type { SapReportRecord } from '@/utils/types/sapReports';
 import { TableDBData } from './tablaDBData/tableDBData';
 
 export function FileForm() {
   const toast = useRef<Toast>(null);
   const { userRoleName } = useRoleUserActions();
   const [ errorMsg, setErrorMsg ] = useState<CustomError | null>(null);
-  const [ sapReportData, setSapReportData ] = useState<SapReportRecord[]>([]);
   const [ fileData, setFileData ] = useState<string | null>(null);
-
-  useEffect(() => {
-    getSapReports()
-      .then(data => setSapReportData(data))
-      .catch(() => {
-        setErrorMsg(new CustomError(
-          500,
-          'No se encontró ningún archivo',
-          'Intente subir un archivo de seguimiento de compras'
-        ));
-      });
-  }, []);
 
   const handleClearFormFile = () => {
     setErrorMsg(null);
@@ -61,41 +46,48 @@ export function FileForm() {
   return (
     <article className={styles.fileFormContainer}>
       <Toast ref={toast} />
+      
+      {/* Header siempre visible */}
       <section className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>Seguimiento de compras</h1>
       </section>
 
-      {errorMsg && 
-        <section className={styles.errorSection}>
-          <Message 
-            severity='error'
-            text={errorMsg.message}
-          />
-          <Message 
-            severity='info'
-            text={errorMsg.details}
+      {/* Sección de carga de archivo - condicional */}
+      {userRoleName === 'SYSTEMS' && (
+        <section className={styles.uploadSection}>
+          {errorMsg && 
+            <div className={styles.errorSection}>
+              <Message 
+                severity='error'
+                text={errorMsg.message}
+              />
+              <Message 
+                severity='info'
+                text={errorMsg.details}
+              />
+            </div>
+          }
+
+          <FileUpload 
+            mode='advanced'
+            name='report[]'
+            url='/sap-reports/api/'
+            emptyTemplate={<EmptyFormTemplate />}
+            uploadLabel='Subir el archivo'
+            chooseLabel='Selecciona el archivo'
+            cancelLabel='Cancelar subida'
+            onSelect={handleSelectFile}
+            multiple={false}
+            accept='.txt'
+            onRemove={handleClearFormFile}
           />
         </section>
-      }
+      )}
 
-      { userRoleName === 'SYSTEMS' &&
-        <FileUpload 
-          mode='advanced'
-          name='report[]'
-          url='/sap-reports/api/'
-          emptyTemplate={<EmptyFormTemplate />}
-          uploadLabel='Subir el archivo'
-          chooseLabel='Selecciona el archivo'
-          cancelLabel='Cancelar subida'
-          onSelect={handleSelectFile}
-          multiple={false}
-          accept='.txt'
-          onRemove={handleClearFormFile}
-        />
-      }
-
-      {fileData && <TableData data={fileData} />}
-      {!fileData && sapReportData.length > 0 && <TableDBData data={sapReportData} />}
+      {/* Sección de tabla - siempre visible */}
+      <section className={styles.tableSection}>
+        {fileData ? <TableData data={fileData} /> : <TableDBData />}
+      </section>
     </article>
   );
 }
