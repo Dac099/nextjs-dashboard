@@ -6,15 +6,17 @@ import path from 'path';
 import connection from '@/services/database';
 import { v4 as uuidv4 } from 'uuid';
 import { ConnectionPool } from 'mssql';
-
+import type { SapReportRecord } from '@/utils/types/sapReports';
 
 export async function POST(request: NextRequest) {
   let tempFilePath = '';
   
   try {
+    // The first step is to get the file from the request by the name
     const formData = await request.formData();
     const file = formData.get('report[]') as File;
     
+    // Validate if the file exists
     if (!file) {
       return NextResponse.json(
         { error: 'No se recibió ningún archivo' }, 
@@ -22,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar tipo de archivo
+    // Only accept .txt files
     if (!file.name.endsWith('.txt')) {
       return NextResponse.json(
         { error: 'Solo se permiten archivos .txt' }, 
@@ -30,66 +32,51 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Crear directorio temporal si no existe
+    // We store the file in a temporary directory to stream it later
     const tempDir = path.join(process.cwd(), 'temp');
     await mkdir(tempDir, { recursive: true });
 
-    // Guardar el archivo temporalmente para poder usar streams
     tempFilePath = path.join(tempDir, `${uuidv4()}-${file.name}`);
     const fileBuffer = await file.arrayBuffer();
     await writeFile(tempFilePath, Buffer.from(fileBuffer));
     
-    // Generar un ID de lote para esta carga
-    const batchId = uuidv4();
-    
-    // Obtener conexión a la base de datos
+    // In the DB we use a UUID to track the batch of records
+    const batchId = uuidv4();  
     const pool = await connection.connect();
     
-    // Eliminar registros anteriores
-    await pool.request().query('DELETE FROM dbo.FileDataCache');
-    
-    // Crear stream de lectura del archivo con codificación UTF-16LE para manejar acentos y ñ
+    /**
+      * Every time the file is uploaded, we eliminate the previous records
+      * Since the file contains complete records and thus avoid duplicates
+      * And you don't have to update existing records.
+     */
+    await pool.request().query('TRUNCATE TABLE dbo.FileDataCache');
+
+    // The encoding of the file is UTF-16LE, so we need to read it accordingly
     const fileStream = createReadStream(tempFilePath, { encoding: 'utf16le' });
     const rl = createInterface({
       input: fileStream,
       crlfDelay: Infinity
     });
     
-    // Variables para el proceso de líneas
-    let isFirstLine = true;  // Para omitir la línea de encabezados
-    let lineCount = 0;
-    let processedCount = 0;
-    let errorCount = 0;
+    let isFirstLine = true;  // Omit the first line that contains headers
     let batchRows = [];
-    const batchSize = 500;
+    const batchSize = 500; //Use a batch size of 500 for inserts
     
-    // Procesar el archivo línea por línea
     for await (const line of rl) {
-      // Omitir la primera línea (encabezados)
       if (isFirstLine) {
         isFirstLine = false;
         continue;
       }
       
-      // Omitir líneas vacías
+      // If the line is empty, we dont process it
       if (!line.trim()) continue;
       
       try {
-        // Incrementar contador de líneas
-        lineCount++;
-        
-        // Procesar la línea actual y dividirla en columnas
         const columns = line.split('\t');
-        
-        // Si la línea no tiene suficientes columnas, omitir
-        if (columns.length < 37) {
-          errorCount++;
-          continue;
-        }
-        
+        // The first column is the index of the item, we can ignore it, since we have an identity column in the DB
         columns.shift();
-        
-        // Añadir a la lista de batch con tratamiento seguro para valores
+
+        // Add the object to the batch list
         batchRows.push({
           rfqSys: cleanString(columns[0]),
           poStatus: cleanString(columns[1]),
@@ -104,87 +91,78 @@ export async function POST(request: NextRequest) {
           itemDescription: cleanString(columns[10]),
           priceCurrency: cleanString(columns[11]),
           unitPrice: parseDecimal(columns[12], 4),
-          orderedQuantity: parseDecimal(columns[13], 2),
-          totalOrderAmountFC: parseDecimal(columns[14], 2),
-          totalOrderAmount: parseDecimal(columns[15], 2),
+          orderedQuantity: parseDecimal(columns[13], 4),
+          totalOrderAmountFC: parseDecimal(columns[14], 4),
+          totalOrderAmount: parseDecimal(columns[15], 4),
           promisedDeliveryDate: parseDateDMY(columns[16]),
           receivedDate: parseDateDMY(columns[17]),
           receiptNumbers: cleanString(columns[18]),
-          receivedQuantity: parseDecimal(columns[19], 2),
-          totalReceivedAmount: parseDecimal(columns[20], 2),
-          totalReceivedAmountFC: parseDecimal(columns[21], 2),
+          receivedQuantity: parseDecimal(columns[19], 4),
+          totalReceivedAmount: parseDecimal(columns[20], 4),
+          totalReceivedAmountFC: parseDecimal(columns[21], 4),
           invoiceDate: parseDateDMY(columns[22]),
           invoiceNumbers: cleanString(columns[23]),
-          invoicedQuantity: parseDecimal(columns[24], 2),
-          totalInvoicedAmount: parseDecimal(columns[25], 2),
-          totalInvoicedAmountFC: parseDecimal(columns[26], 2),
-          pendingInvoiceQuantity: parseDecimal(columns[27], 2),
-          pendingInvoiceAmount: parseDecimal(columns[28], 2),
-          pendingInvoiceAmountFC: parseDecimal(columns[29], 2),
-          pendingReceiptQuantity: parseDecimal(columns[30], 2),
-          pendingReceiptAmount: parseDecimal(columns[31], 2),
-          pendingReceiptAmountFC: parseDecimal(columns[32], 2),
-          receivedPercentAmount: parseDecimal(columns[33], 2),
-          invoicedPercentAmount: parseDecimal(columns[34], 2),
-          receivedPercentQuantity: parseDecimal(columns[35], 2),
-          invoicedPercentQuantity: parseDecimal(columns[36], 2),
+          invoicedQuantity: parseDecimal(columns[24], 4),
+          totalInvoicedAmount: parseDecimal(columns[25], 4),
+          totalInvoicedAmountFC: parseDecimal(columns[26], 4),
+          pendingInvoiceQuantity: parseDecimal(columns[27], 4),
+          pendingInvoiceAmount: parseDecimal(columns[28], 4),
+          pendingInvoiceAmountFC: parseDecimal(columns[29], 4),
+          pendingReceiptQuantity: parseDecimal(columns[30], 4),
+          pendingReceiptAmount: parseDecimal(columns[31], 4),
+          pendingReceiptAmountFC: parseDecimal(columns[32], 4),
+          receivedPercentAmount: parseDecimal(columns[33], 4),
+          invoicedPercentAmount: parseDecimal(columns[34], 4),
+          receivedPercentQuantity: parseDecimal(columns[35], 4),
+          invoicedPercentQuantity: parseDecimal(columns[36], 4),
           batchId: batchId
         });
         
-        // Si alcanzamos el tamaño del lote, insertamos en la base de datos
+        // Once complete the batch, we insert it into the database
         if (batchRows.length >= batchSize) {
           try {
             await insertBatch(pool, batchRows);
-            processedCount += batchRows.length;
-          } catch {
-            errorCount += batchRows.length;
+          } catch (error) {
+            throw error;
           }
           
-          batchRows = []; // Limpiar el lote actual
+          // Reset the batch array
+          batchRows = [];
         }
-      } catch {
-        errorCount++;
+      } catch(error) {
+        throw error;
       }
     }
     
-    // Insertar el último lote si quedaron registros
+    // Insert any remaining rows in the last batch
     if (batchRows.length > 0) {
       try {
         await insertBatch(pool, batchRows);
-        processedCount += batchRows.length;
-      } catch {
-        errorCount += batchRows.length;
+      } catch (error) {
+        throw error;
       }
     }
     
-    // Obtener recuento final de registros
-    const countResult = await pool.request().query('SELECT COUNT(*) as total FROM dbo.FileDataCache');
-    const totalRecords = countResult.recordset[0].total;
-    
-    // Eliminar el archivo temporal
+    // Delete the temporary file after processing
     await unlink(tempFilePath);
-    
+
+    console.log(`Successfully processed file`);
     return NextResponse.json({ 
       success: true,
-      message: `Archivo procesado exitosamente.`,
-      stats: {
-        totalLines: lineCount,
-        processed: processedCount,
-        errors: errorCount,
-        totalInDatabase: totalRecords
-      },
+      message: `Successfully file processed and loaded`,
       filename: file.name,
       size: file.size,
       batchId: batchId,
     });
 
   } catch (error) {
-    // Intentar eliminar el archivo temporal si existe
+
+    // If there is an error, we delete the temporary file if it exists
     if (tempFilePath) {
       try {
         await unlink(tempFilePath);
-      } catch {
-        // Ignorar errores al eliminar archivo temporal
+      } catch (error) {
+        throw error;
       }
     }
     
@@ -200,9 +178,9 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Limpia y valida una cadena de texto (preservando acentos y ñ)
- * @param value Valor a limpiar
- * @returns Cadena limpia o null si está vacía
+ * Clean and validate a text chain (preserving accents and ñ)
+ * @param value Value to clean
+ * @returns Cleaned string or null if empty
  */
 function cleanString(value: string): string | null {
   if (!value || value.trim() === '') return null;
@@ -210,79 +188,76 @@ function cleanString(value: string): string | null {
 }
 
 /**
- * Parsea un valor a decimal con manejo seguro de errores
- * @param value Valor a parsear
- * @param decimals Número de decimales (por defecto 2)
- * @returns Valor decimal o 0 si no es válido
+ * Parse a decimal value with safe errors management
+ * @param value Value to parse
+ * @param decimals Number of decimals (default 2)
+ * @returns Decimal value or 0 if invalid
  */
 function parseDecimal(value: string, decimals: number = 2): number {
   if (!value || value.trim() === '') return 0;
   
   try {
-    // Eliminar caracteres no numéricos excepto puntos y comas
+    // Delete any character that is not a digit, comma, dot or minus sign
     const cleanValue = value.replace(/[^\d.,\-]/g, '');
-    
-    // Reemplazar comas por puntos para asegurar formato correcto
+        
+    // Replace commas by points to ensure correct format
     const normalizedValue = cleanValue.replace(/,/g, '.');
     
-    // Intentar convertir a número
+    // Try to parse the value as a float
     const num = parseFloat(normalizedValue);
     
-    // Validar resultado
     if (isNaN(num)) return 0;
     
-    // Redondear al número de decimales especificado
-    return parseFloat(num.toFixed(decimals));
+    // Fix the number to the specified number of decimals 
+    const multiplier = Math.pow(10, decimals);
+    
+    //Truncate to avoid floating point issues
+    return Math.trunc(num * multiplier) / multiplier;
   } catch {
     return 0;
   }
 }
 
 /**
- * Parsea una fecha en formato DD/MM/YYYY (formato español)
- * @param dateStr Cadena de fecha a parsear
- * @returns Objeto Date o null si no es válida
+ * Parea a date in DD/mm/yyyy format (Spanish format)
+ * @param dateStr String to parse
+ * @returns Date object or null if invalid
  */
 function parseDateDMY(dateStr: string): Date | null {
   if (!dateStr || dateStr.trim() === '') return null;
   
   try {
-    // Limpiar la cadena de fecha
+    // Remove extra spaces
     const cleanDateStr = dateStr.trim();
     
-    // Formato específico DD/MM/YYYY
+    // Validate the format DD/mm/yyyy
     if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(cleanDateStr)) {
       const [day, month, year] = cleanDateStr.split('/').map(Number);
       
-      // Crear fecha - el mes se resta 1 porque en JavaScript los meses van de 0 a 11
+      // Create the date object
       const date = new Date(year, month - 1, day);
       
-      // Validar que la fecha sea válida
+      // Validate that the date is valid
       if (!isNaN(date.getTime()) && 
           date.getDate() === day && 
           date.getMonth() === month - 1 && 
           date.getFullYear() === year) {
         return date;
       }
-    }
-    
-    // Intentar otros formatos como fallback
-    const date = new Date(cleanDateStr);
-    if (!isNaN(date.getTime())) return date;
-    
+    }    
     return null;
-  } catch{
-    return null;
+  } catch (error){
+    throw error;
   }
 }
 
 /**
- * Inserta un lote de registros en la base de datos
- * @param pool Pool de conexión a la base de datos
- * @param rows Filas a insertar
+ * Insert a lot of records into the database
+ * @param pool Database connection pool
+ * @param rows Rows to insert
  */
-async function insertBatch(pool: ConnectionPool, rows: any[]) {
-  // Ejecutar inserciones dentro de una transacción para este lote
+async function insertBatch(pool: ConnectionPool, rows: SapReportRecord[]) {
+  // Execute insertions within a transaction for this batch
   const transaction = pool.transaction();
   
   try {
