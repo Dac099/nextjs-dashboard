@@ -79,6 +79,8 @@ export async function getTotalItemsFromRequisition(
       SELECT COUNT(tr.num_req) AS totalItems
       FROM tb_req_deta trd
       INNER JOIN tb_requisicion tr ON tr.id_req = trd.id_req
+      LEFT JOIN tb_user tu ON tu.id_user = tr.id_usuario 
+      LEFT JOIN Maquinados_Estatus me ON me.Id_Estatus = tr.Id_Estatus 
       ${whereClause}
       GROUP BY tr.num_req
     `);
