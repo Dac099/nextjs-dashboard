@@ -1,7 +1,7 @@
 'use client';
 import styles from './rowItem.module.css';
 import { getRFQStatusText, transformDateObjectToLocalString, RFQTypeMap } from '@/utils/helpers';
-import { Requisition } from '@/utils/types/requisitionsTracking';
+import { ItemReport, Requisition } from '@/utils/types/requisitionsTracking';
 import { useState, useMemo } from 'react';
 import { CollapsibleItems } from '../collapsibleItems/collapsibleItems';
 import { Tag } from 'primereact/tag';
@@ -37,15 +37,15 @@ export function RowItem({ item, expandAll, globalFilterValue }: Props){
   };
 
   const itemsSapRegistered = useMemo(() => {
-    return item.purchaseItems.filter(purchase => purchase.registerSap === 2);
+    return item.purchaseItems.filter(({ sapPartNumber, sapRfq }: ItemReport) => sapPartNumber && sapRfq);
   }, [item.purchaseItems]);
 
   const itemsWithoutRFQ = useMemo(() => {
-    return item.purchaseItems.filter(purchase => purchase.registerSap === 1);
+    return item.purchaseItems.filter(({ sapRfq, sapPartNumber }: ItemReport) => sapPartNumber && !sapRfq);
   }, [item.purchaseItems]);
 
   const itemsWithoutSap = useMemo(() => {
-    return item.purchaseItems.filter(purchase => purchase.registerSap === 0);
+    return item.purchaseItems.filter(({ sapRfq, sapPartNumber }: ItemReport) => !sapRfq && !sapPartNumber);
   }, [item.purchaseItems]);
 
   return (

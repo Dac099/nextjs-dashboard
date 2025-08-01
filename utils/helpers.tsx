@@ -402,44 +402,23 @@ export function getRFQStatusText(rfq: Requisition): JSX.Element {
     width: '100%'
   };
 
-  if(rfq.purchaseItems.every(item => item.warehouseTicket)){
+  if(rfq.purchaseItems.filter(item => item.poStatus !== 'Cancelada').every(item => item.warehouseTicket)){
     return <Tag value='RFQ recibida' severity='success' style={tagStyle}/>;
-  }
-
-  if(rfq.purchaseItems.some(item => item.warehouseTicket)){
-    return <Tag value='Parcialmente recibida' severity='info' style={tagStyle}/>;
   }
 
   if(rfq.purchaseItems.some(item => item.poDate)){
     return <Tag value='PO generada' severity='contrast' style={tagStyle}/>;
   }
 
-  if(rfq.purchaseItems.every(item => item.registerSap === 0)) {
+  if(rfq.purchaseItems.every(item => !item.sapPartNumber)) {
     return <Tag value='Sin registro SAP' severity='danger' style={tagStyle}/>;
   }
 
-  if(rfq.purchaseItems.some(item => item.registerSap === 2)) {
+  if(rfq.purchaseItems.every(item => item.sapPartNumber)) {
     return <Tag value='Registrada en SAP' severity='secondary' style={tagStyle}/>;
   }
 
   return <Tag value='Parcialmente registrada' severity='warning' style={tagStyle}/>;
-}
-
-export function getSeverityOnRfqStatusTitle(status: string): "success" | "info" | "warning" | "danger" | "secondary" | "contrast" {
-  switch (status){
-    case 'RFQ Recibida':
-      return 'success';
-    case 'Parcialmente recibida':
-      return 'info';
-    case 'PO generada':
-      return 'contrast';
-    case 'Sin registro SAP':
-      return 'danger';
-    case 'Registrada en SAP':
-      return 'secondary';
-    default:
-      return 'warning';
-  }
 }
 
 export function getItemReportStatus(item: ItemReport): {
@@ -459,14 +438,11 @@ export function getItemReportStatus(item: ItemReport): {
     return { text: 'PO generada', severity: 'info' };
   }
 
-  return { 
-    text: item.stateText, 
-    severity: item.registerSap === 2 
-      ? 'contrast' 
-      : item.registerSap === 1 
-      ?  'warning' 
-      : 'danger'
-  };
+  if(item.sapPartNumber){
+    return { text: 'Registrada en SAP', severity: 'secondary' };  
+  }
+
+  return { text: 'Sin registro SAP', severity: 'warning' };
 }
 
 export function getSapItemSeverityOnTitle(title: string): "success" | "info" | "warning" | "danger" | "secondary" | "contrast" {
@@ -536,6 +512,33 @@ export function buildWhereClause(globalFilter: string | null, advancedFilter: Ad
 
   if(column === 'machine_type'){
     clause = `WHERE trd.tipo_maquinado = '${userInput as string}'`;
+  }
+
+  if(column === 'general_state'){
+    switch(userInput as string) {
+      case 'received': 
+        clause = 'WHERE fdc.receiptNumbers IS NOT NULL';
+      break;
+
+      case 'po_generated':
+        clause = `          
+          WHERE fdc.orderNumber IS NOT NULL
+            AND fdc.receiptNumbers IS NULL
+        `;
+      break;
+
+      case 'no_sap_record':
+        clause = 'WHERE fdc.itemCode IS NULL'
+      break;
+
+      case 'sap_record':
+        clause = 'WHERE fdc.itemCode IS NOT NULL';
+      break;
+    }
+  }
+
+  if(column === 'po_date'){
+    clause = `WHERE CONVERT(date, fdc.) `;
   }
 
   // The final step is to add the global filter to the made up clause of conditions based on the advanced filter

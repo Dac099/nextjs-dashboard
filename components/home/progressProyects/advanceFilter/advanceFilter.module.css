@@ -9,16 +9,9 @@
   border: 2px solid var(--action-color);
   outline: none;
   border-radius: 5px;
-  text-align: center;
   color: var(--action-color);
   font-weight: bold;
   margin-bottom: 15px;
-}
-
-.selectElement:focus
-{
-  border: none;
-  background-color: var(--accent-color);
 }
 
 .selectElement:disabled

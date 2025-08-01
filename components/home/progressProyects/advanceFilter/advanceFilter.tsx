@@ -124,11 +124,9 @@ export function AdvanceFilter({ setFilter, filter, closeOverlayPanel }: Props) {
             >
               <option value="">Seleccionar un estado</option>
               <option value="received">RFQ recibida</option>
-              <option value="partial_received">Parcialmente recibida</option>
               <option value="po_generated">PO generada</option>
               <option value="no_sap_record">Sin registro SAP</option>
               <option value="sap_record">Registrada en SAP</option>
-              <option value="partial_sap_record">Parcialmente registrada</option>
             </select>
           )}
 

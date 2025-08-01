@@ -12,6 +12,8 @@ export async function getRFQsData(
 {
   try {
     await connection.connect();
+    const whereClause = buildWhereClause(globalFilter, advancedFilter);
+
     const totalItemsQuery = await connection
       .request()
       .query(`
@@ -37,6 +39,7 @@ export async function getRFQsData(
             ) AND 
             TRIM(trd.id_proyecto) = fdc.project
           )
+        ${whereClause}
         GROUP BY tr.num_req
       `);
     const itemsQuery = await connection
@@ -47,7 +50,7 @@ export async function getRFQsData(
         SELECT
           trd.no_parte AS partNumber,
           trd.desc_articulo AS description,
-          trd.id_proyecto AS projectId,
+          fdc.project AS projectId,
           trd.tipo_maquinado AS machineType,   
           tr.num_req AS rfqNumber,
           tr.id_tiporeq AS rfqType,
@@ -72,21 +75,15 @@ export async function getRFQsData(
         LEFT JOIN tb_user tu ON tu.id_user = tr.id_usuario 
         LEFT JOIN Maquinados_Estatus me ON me.Id_Estatus = tr.Id_Estatus
         LEFT JOIN FileDataCache fdc 
-          ON (
-            TRIM(tr.num_req) = fdc.rfqSys AND 
-            (
-              TRIM(trd.no_parte) = fdc.manufacturerNumber OR
-              TRIM(trd.no_parte) = fdc.itemCode
-            ) AND 
-            TRIM(trd.id_proyecto) = fdc.project
-          ) OR  
+          ON  
           (
             (
-              TRIM(trd.no_parte) = fdc.manufacturerNumber OR
-              TRIM(trd.no_parte) = fdc.itemCode
+              (TRIM(trd.no_parte) LIKE '%' + TRIM(fdc.manufacturerNumber) + '%') OR
+              (TRIM(trd.no_parte) LIKE '%' + TRIM(fdc.itemCode) + '%')
             ) AND 
-            TRIM(trd.id_proyecto) = fdc.project
+            TRIM(tr.num_req) = fdc.rfqSys
           )
+        ${whereClause}
         ORDER BY tr.fecha_registro DESC
         OFFSET @offset ROWS
         FETCH NEXT @limit ROWS ONLY

@@ -69,11 +69,11 @@ export function CollapsibleItems({ title, items, expandAll, globalFilterValue }:
             <tbody>
               {items.map((item, index) => (
                 <tr key={index}>
-                  <td>{highlightText(item.partNumber, globalFilterValue)}</td>
-                  <td>{highlightText(item.description, globalFilterValue)}</td>
-                  <td>{highlightText(item.projectId, globalFilterValue)}</td>
-                  <td>{highlightText(item.supplier, globalFilterValue)}</td>
-                  <td>{highlightText(item.machineType, globalFilterValue)}</td>
+                  <td>{highlightText(item.partNumber || '', globalFilterValue)}</td>
+                  <td>{highlightText(item.description || '', globalFilterValue)}</td>
+                  <td>{highlightText(item.projectId || '', globalFilterValue)}</td>
+                  <td>{highlightText(item.supplier || '', globalFilterValue)}</td>
+                  <td>{highlightText(item.machineType || '', globalFilterValue)}</td>
                   <td>
                     <Tag 
                       value={getItemReportStatus(item).text} 
