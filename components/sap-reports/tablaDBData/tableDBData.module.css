@@ -1,0 +1,158 @@
+.tableWrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  font-size: 1.2rem;
+}
+
+.tableHeader {
+  background-color: #f8f9fa;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.tableHeaderCell {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--accent-color);
+  min-width: 120px;
+}
+
+.tableHeaderCellRight {
+  padding: 12px;
+  text-align: right;
+  border-bottom: 2px solid var(--accent-color);
+  min-width: 120px;
+}
+
+.tableHeaderCellWide {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--accent-color);
+  min-width: 200px;
+}
+
+.tableHeaderCellExtraWide {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--accent-color);
+  min-width: 250px;
+}
+
+.tableHeaderCellMedium {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--accent-color);
+  min-width: 140px;
+}
+
+.tableHeaderCellLarge {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--accent-color);
+  min-width: 150px;
+}
+
+.tableHeaderCellXLarge {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--accent-color);
+  min-width: 160px;
+}
+
+.tableHeaderCellXXLarge {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--accent-color);
+  min-width: 170px;
+}
+
+.tableHeaderCellPromised {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--accent-color);
+  min-width: 180px;
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--accent-color);
+}
+
+.tableCell {
+  padding: 12px;
+}
+
+.tableCellRight {
+  padding: 12px;
+  text-align: right;
+}
+
+.noDataCell {
+  padding: 20px;
+  text-align: center;
+  color: var(--action-color);
+}
+
+.loadingContainer {
+  text-align: center;
+  padding: 2rem;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+}
+
+.loadingText {
+  margin-top: 0.5rem;
+}
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  margin: 0;
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  flex-shrink: 0;
+}
+
+.paginationInfo {
+  font-size: 0.875rem;
+  color: var(--action-color);
+}
+
+.paginationButtons {
+  display: flex;
+  align-items: center;
+}
+
+.paginationButton {
+  margin-right: 0.25rem;
+}
+
+.paginationButtonNext {
+  margin-left: 0.25rem;
+}

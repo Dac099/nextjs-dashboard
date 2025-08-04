@@ -1,8 +1,10 @@
 import { FilteredEmployee, FilteredEmployeeWithItems, Item, ProjectFormData, ValueDB } from "@/utils/types/projectDetail";
-import { SubItem, TableValue } from "./types/groups";
 import { Task, UserData } from "./types/items";
 import { v4 as uuidV4 } from "uuid";
 import { ItemValue } from './types/views';
+import { AdvancedFilter, ItemReport, Requisition } from './types/requisitionsTracking';
+import { Tag } from 'primereact/tag';
+import { JSX } from 'react';
 
 export function formatDate(date: Date): string {
   if(!date) return '';
@@ -78,50 +80,6 @@ export function groupItemsByType(data: ValueDB[]): Item[] {
       lastUpdate: item.lastUpdate || new Date(),
     } as Item;
   });
-}
-export function subItemValueByColumnId(
-  columnId: string,
-  subItem: SubItem
-): TableValue {
-  const tableValue = subItem.values.find(
-    (value) => value && value.columnId === columnId
-  ) as TableValue;
-
-  return (
-    tableValue ?? {
-      id: "",
-      itemId: subItem.id,
-      columnId: columnId,
-      value: "",
-      groupId: "",
-    }
-  );
-}
-
-export function findParentKeyBySubItemId(
-  subItemsMap: Map<string, SubItem[]>,
-  subItemId: string
-): string | null {
-  for (const [key, subItems] of subItemsMap) {
-    if (subItems.some((subItem) => subItem.id === subItemId)) {
-      return key;
-    }
-  }
-  return null;
-}
-
-export function findParentKeyByValueId(
-  subItemsMap: Map<string, SubItem[]>,
-  valueId: string
-): string | null {
-  for (const [key, subItems] of subItemsMap) {
-    for (const subItem of subItems) {
-      if (subItem.values.some((value) => value.id === valueId)) {
-        return key;
-      }
-    }
-  }
-  return null;
 }
 
 export function extractTasksFromHTML(htmlString: string): Task[] {
@@ -379,17 +337,263 @@ export function formatEmployeesData(employees: FilteredEmployeeWithItems[]): Fil
   });
 }
 
-export function transformDateObjectToLocalString(date: object) {
+export function transformDateObjectToLocalString(date: object, showTime: boolean = true) {
   if (!date || typeof date !== 'object') return '';
 
   const dateString = date.toString();
   const dateObject = new Date(dateString);
 
-  return dateObject.toLocaleDateString('es-MX', {
+  const options: Intl.DateTimeFormatOptions = {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  };
+
+  if (showTime) {
+    options.hour = '2-digit';
+    options.minute = '2-digit';
+  }
+
+  return dateObject.toLocaleDateString('es-MX', options);
 }
+
+export function formatStringToDate(dateString: string): Date | null {
+  const dateElements = dateString.split('/');  
+  if (dateElements.length !== 3) return null;
+
+  const [day, month, year] = dateElements.map(Number);  
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+
+  return new Date(year, month - 1, day);  
+}
+
+export const RFQTypeMap : Record<string, string> = {
+  'Meca' : 'Mecánica',
+  'Elect' : 'Eléctrica',
+  'Maqui' : 'Maquinado',
+}
+
+export function groupItemsReportByRFQ(items: ItemReport[]): Requisition[] {
+  return items.reduce((acc: Requisition[] ,item: ItemReport) => {
+    const rfqNumber = item.rfqNumber;
+    const existingRequisition = acc.find(req => req.number === rfqNumber);
+
+    if (existingRequisition) {
+      existingRequisition.purchaseItems.push(item);
+    } else {
+      acc.push({
+        number: rfqNumber,
+        statusCode: item.statusCode,
+        sysStatusText: item.sysStatusText,
+        createdAt: item.createdAt,
+        createdBy: item.createdBy,
+        type: item.rfqType,
+        purchaseItems: [item],
+      });
+    }
+
+    return acc;
+  }, [] as Requisition[]);
+}
+
+export function getRFQStatusText(rfq: Requisition): JSX.Element {
+  const tagStyle = {
+    fontSize: '1.2rem',
+    width: '100%'
+  };
+
+  if(rfq.purchaseItems.filter(item => item.poStatus !== 'Cancelada').every(item => item.warehouseTicket)){
+    return <Tag value='RFQ recibida' severity='success' style={tagStyle}/>;
+  }
+
+  if(rfq.purchaseItems.some(item => item.poDate)){
+    return <Tag value='PO generada' severity='contrast' style={tagStyle}/>;
+  }
+
+  if(rfq.purchaseItems.every(item => !item.sapPartNumber)) {
+    return <Tag value='Sin registro SAP' severity='danger' style={tagStyle}/>;
+  }
+
+  return <Tag value='Registrada en SAP' severity='secondary' style={tagStyle}/>;
+}
+
+export function getItemReportStatus(item: ItemReport): {
+  text: string, 
+  severity: "success" | "info" | "warning" | "danger" | "secondary" | "contrast" | null | undefined 
+} 
+
+{
+  if(item.poStatus && (item.poStatus.trim() === 'Cancelada'.trim())) {
+    return { text: 'PO cancelada', severity: 'danger' };
+  }
+
+  if(item.warehouseTicket){
+    return { text: 'En almacén', severity: 'success' };
+  }
+
+  if(item.poDate){
+    return { text: 'PO generada', severity: 'info' };
+  }
+
+  if(item.sapPartNumber){
+    return { text: 'Registrada en SAP', severity: 'secondary' };  
+  }
+
+  return { text: 'Sin registro SAP', severity: 'warning' };
+}
+
+export function getSapItemSeverityOnTitle(title: string): "success" | "info" | "warning" | "danger" | "secondary" | "contrast" {
+  switch (title) {
+    case 'inWarehouse':
+      return 'success';
+    case 'poGenerated':
+      return 'info';
+    case 'noSapRecord':
+      return 'danger';
+    case 'noReception':
+      return 'warning';
+    default:
+      return 'contrast';
+  }
+}
+
+export function filterBuilder(column: string, operator: string, userInput: string | Date | Date[]): AdvancedFilter {
+  const dbColumns = ['rfq_type', 'general_state', 'rfq_state', 'created_date'];
+
+  return {
+    origin: dbColumns.includes(column) ? 'db' : 'file',
+    column,
+    operator,
+    userInput
+  };
+}
+
+export function buildWhereClause(globalFilter: string | null, advancedFilter: AdvancedFilter | null): string {
+  if(!globalFilter && !advancedFilter) return '';
+  let clause: string = '';
+
+  if(!advancedFilter){
+    globalFilter = `'%${globalFilter!.toLowerCase().replace(/[\'\"]/g, "")}%'`;
+    return `
+      WHERE LOWER(trd.no_parte) LIKE ${globalFilter}
+        OR LOWER(trd.desc_articulo) LIKE ${globalFilter}
+        OR LOWER(trd.id_proyecto) LIKE ${globalFilter}
+        OR LOWER(trd.tipo_maquinado) LIKE ${globalFilter}
+        OR LOWER(tr.num_req) LIKE ${globalFilter}
+        OR LOWER(tu.nom_user) LIKE ${globalFilter}
+    `
+  }
+
+  const { column, operator, userInput } = advancedFilter;
+
+  if(column === 'created_date'){
+    clause = `WHERE CONVERT(date, tr.fecha_registro) `;
+
+    if(operator === 'between'){
+      const startDate = (userInput as Date[])[0].toISOString().slice(0, 10);
+      const endDate = (userInput as Date[])[1].toISOString().slice(0, 10);
+      clause.concat(`${operatorStringToSQL[operator]} '${startDate}' AND '${endDate}'`);
+    }else{
+      const parsedDate = (userInput as Date).toISOString().slice(0, 10);
+      clause.concat(`${operatorStringToSQL[operator]} '${parsedDate}'`);
+    }
+  }
+
+  if(column === 'rfq_state'){
+    clause = `WHERE me.Desc_Estatus = '${userInput as string}'`;
+  }
+
+  if(column === 'rfq_type'){
+    clause = `WHERE tr.id_tiporeq = '${userInput as string}'`;
+  }
+
+  if(column === 'machine_type'){
+    clause = `WHERE trd.tipo_maquinado = '${userInput as string}'`;
+  }
+
+  if(column === 'general_state'){
+    switch(userInput as string) {
+      case 'received': 
+        clause = 'WHERE fdc.receiptNumbers IS NOT NULL';
+      break;
+
+      case 'po_generated':
+        clause = `          
+          WHERE fdc.orderNumber IS NOT NULL
+            AND fdc.receiptNumbers IS NULL
+        `;
+      break;
+
+      case 'no_sap_record':
+        clause = 'WHERE fdc.itemCode IS NULL'
+      break;
+
+      case 'sap_record':
+        clause = 'WHERE fdc.itemCode IS NOT NULL';
+      break;
+    }
+  }
+
+  if(['po_date', 'promise_date', 'reception_date'].includes(column)){
+    const columnName = column === 'po_date'
+    ? 'orderDate'
+    : column === 'promise_date'
+    ? 'promisedDeliveryDate'
+    : 'receivedDate';
+
+    clause = `WHERE CONVERT(date, fdc.${columnName})`;
+
+    if(operator === 'between'){
+      const startDate = (userInput as Date[])[0].toISOString().slice(0, 10);
+      const endDate = (userInput as Date[])[1].toISOString().slice(0, 10);
+      clause += ` ${operatorStringToSQL[operator]} '${startDate}' AND '${endDate}'`;
+    }else{
+      const parsedDate = (userInput as Date).toISOString().slice(0, 10);
+      clause += ` ${operatorStringToSQL[operator]} '${parsedDate}'`;
+    }    
+  }
+
+  if(column === `article_state`){
+    switch(userInput as string) {
+      case 'po_canceled':
+        clause = `WHERE fdc.poStatus = 'Cancelada'`
+        break;
+      case 'po_generated':
+        clause = 'WHERE fdc.orderDate IS NOT NULL AND fdc.receiptNumbers IS NULL AND fdc.poStatus != \'Cancelada\'';
+        break;
+      case 'on_warehouse':
+        clause =  'WHERE fdc.receiptNumbers IS NOT NULL';
+        break;
+      case 'found_in_sap':
+        clause = 'WHERE fdc.itemCode IS NOT NULL AND fdc.orderNumber IS NULL';
+        break;
+      case 'not_found_in_sap':
+        clause = 'WHERE fdc.itemCode IS NULL';
+        break;
+    }
+  }
+
+  // The final step is to add the global filter to the made up clause of conditions based on the advanced filter
+  // If there is another column to validate in AdvancedFilter, we must add it before this step
+  if(globalFilter){
+    globalFilter = `'%${globalFilter!.toLowerCase().replace(/[\'\"]/g, "")}%'`;
+    clause += ` 
+      AND (LOWER(trd.no_parte) LIKE ${globalFilter}
+        OR LOWER(trd.desc_articulo) LIKE ${globalFilter}
+        OR LOWER(trd.id_proyecto) LIKE ${globalFilter}
+        OR LOWER(trd.tipo_maquinado) LIKE ${globalFilter}
+        OR LOWER(tr.num_req) LIKE ${globalFilter}
+        OR LOWER(tu.nom_user) LIKE ${globalFilter})
+    `;
+  }
+
+  return clause;
+}
+
+const operatorStringToSQL: Record<string, string> = {
+  'between': 'BETWEEN',
+  'equals': '=',
+  'contains': 'LIKE',
+  'greater': '>',
+  'less': '<',
+};

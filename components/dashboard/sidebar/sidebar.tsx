@@ -42,12 +42,22 @@ export async function SideBar() {
         </SideBarItem>
       }
 
-      <SideBarItem url='/sap-reports'>
+      {userRole.name === 'SYSTEMS' &&
+        <SideBarItem url='/sap-reports'>
+          <i
+            className='pi pi-money-bill'
+            style={{ fontSize: '1.8rem' }}
+          ></i>
+          <p>Reporte SAP</p>
+        </SideBarItem>
+      }
+
+      <SideBarItem url='/purchasings'>
         <i
-          className='pi pi-money-bill'
+          className='pi pi-shopping-cart'
           style={{ fontSize: '1.8rem' }}
         ></i>
-        <p>Reporte SAP</p>
+        <p>Seguimiento Compras</p>
       </SideBarItem>
 
       {(userRole.name === 'SYSTEMS' || userRole.name === 'PROJECTMANAGER') &&

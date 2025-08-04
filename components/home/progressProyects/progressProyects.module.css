@@ -1,0 +1,178 @@
+.loadContainer
+{
+  height: calc(95vh - 20px);
+  width: 100%;
+}
+
+.mainContainer
+{
+  height: calc(95vh - 20px);
+  display: grid;
+  grid-template-rows: 80px auto;
+  gap: 20px;
+}
+
+.header 
+{
+  display: flex;
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  padding: 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerTitle
+{
+  color: var(--action-color);
+  font-size: 2rem;
+}
+
+.dataContainer
+{
+  display: grid;
+  grid-template-rows: 1fr 40px;
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  padding: 10px;
+  height: 100%;
+  gap: 10px;
+}
+
+.datTableContainer 
+{
+  overflow-y: auto; 
+  overflow-x: hidden;
+  height: 100%; 
+  position: relative;
+}
+
+.dataTable
+{
+  border-collapse: collapse;
+  /* height: 100%;  */
+  position: absolute;
+  width: 100%;
+  background-color: var(--sec-bg-color);
+  border-radius: 10px;
+}
+
+.dataTable th,
+.dataTable td
+{
+  padding: 8px;
+  text-align: left;
+  border: 1px solid var(--accent-color);
+}
+
+.dataTable th
+{
+  font-size: 1.3rem;
+  overflow-y: auto;
+}
+
+.dataTable td
+{
+  font-size: 1.2rem;
+}
+
+.dataTablePaginator
+{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  background-color: var(--sec-bg-color);
+  border-radius: 10px;
+  padding: 0 20px;
+}
+
+.dataTablePaginator section:nth-child(1)
+{
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.dataTablePaginator section:nth-child(2)
+{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.filtersContainer
+{
+  display: flex;
+  gap: 20px;
+}
+
+.globalFilterInput
+{
+  height: 35px;
+  width: 250px;
+  background-color: var(--accent-color);  
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 1.3rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.globalFilterInput:focus
+{
+  outline: 1px solid var(--action-color);
+}
+
+.globalFilterInput::placeholder
+{
+  color: var(--action-color);
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.globalFilter
+{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filterSection
+{
+  border-radius: 5px;
+  box-shadow: 2px 2px 0px 0px var(--accent-color);
+  border: 1px solid var(--accent-color);
+  padding: 5px;
+  width: max-content;
+  margin-bottom: 10px;
+}
+
+.filterSectionTitle
+{
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.filterPanelControls
+{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 30px 0 0 0;
+}
+
+.filterLabel
+{
+  color: var(--action-color);
+  font-size: 1.2rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.filterOptionContainer
+{
+  margin-bottom: 10px;
+}

@@ -1,10 +1,12 @@
-// Hacer la importación de datos para construir el dashboard
-
+import React from 'react';
+import styles from './page.module.css';
 
 export default async function Page() {
+
   return (
-    <article>
-      <h2>Tus accesos directos</h2>
+    <article className={styles.mainContainer}>
+      <p>Home</p>
     </article>
   );
 }
+
