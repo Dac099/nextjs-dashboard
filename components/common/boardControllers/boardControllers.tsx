@@ -13,6 +13,7 @@ import { TbUsers } from "react-icons/tb";
 import { Dialog } from 'primereact/dialog';
 import { linkedUserProject, UserData } from '@/utils/types/items';
 import { FaClipboardUser } from "react-icons/fa6";
+import { SearchBar } from './searchBar/searchBar';
 
 type Props = {
   boardId: string;
@@ -101,6 +102,8 @@ export function BoardControllers({ boardId }: Props) {
             <p>Usuarios activos</p>
           </button>
         }
+
+        <SearchBar />
       </section>
 
       <OverlayPanel

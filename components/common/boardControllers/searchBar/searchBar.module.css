@@ -1,0 +1,111 @@
+.mainContainer {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--action-color);
+  color: var(--bg-color);
+  transition: background-color 0.2s ease;
+  z-index: 2;
+}
+
+.toggleButton:hover {
+  background-color: var(--accent-color);
+  color: var(--action-color);
+}
+
+.formContainer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 40px;
+  overflow: hidden;
+  width: 40px;
+  transition: width 0.3s ease;
+  border-radius: 20px;
+  background-color: transparent;
+  border: 1px solid var(--accent-color);
+}
+
+.formContainer.expanded {
+  width: 380px;
+}
+
+.formContainer form {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: 40px;
+  padding-right: 8px;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 8px;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s ease 0.1s;
+}
+
+.formContainer.expanded .searchInput {
+  opacity: 1;
+}
+
+.searchButton {
+  background-color: var(--action-color);
+  color: var(--bg-color);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease 0.1s;
+}
+
+.formContainer.expanded .searchButton {
+  opacity: 1;
+}
+
+.searchButton:hover {
+  background-color: var(--accent-color);
+  color: var(--action-color);
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  opacity: 0;
+  transition: opacity 0.2s ease 0.1s, background-color 0.2s ease;
+  margin-left: 4px;
+}
+
+.formContainer.expanded .clearButton {
+  opacity: 1;
+}
+
+.clearButton:hover {
+  background-color: var(--accent-color);
+  color: var(--action-color);
+}

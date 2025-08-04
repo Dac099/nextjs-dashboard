@@ -11,12 +11,14 @@ import { GanttView } from '@/components/projects/viewsContent/ganttView/gantView
 
 type Props = {
   params: Promise<{ id: string; viewId: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 };
 
-export default async function Page({ params }: Props) {
+export default async function Page({ params, searchParams }: Props) {
   const { id: boardId, viewId } = await params;
+  const query = (await searchParams).query;
   const { allowedUserActions, viewType } = await validateBoardAccess(boardId, viewId);
-  const boardDataPromise = getBoardData(boardId);
+  const boardDataPromise = getBoardData(boardId, query as string | undefined);
   const boardColumnsPromise = getBoardColumns(boardId);
   const boardValuesPromise = fetchBoardValues(boardId);
 

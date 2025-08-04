@@ -150,12 +150,9 @@ export async function getWorkspaceAndBoardData(boardId: string) {
     }
 }
 
-export async function getBoardData(boardId: string): Promise<GroupData[]> {
+export async function getBoardData(boardId: string, query: string | undefined): Promise<GroupData[]> {
     try {
         await connection.connect();
-
-        // Delay artificial de 3 segundos para testing del skeleton
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
         const result: GroupData[] = [];
 
@@ -172,6 +169,12 @@ export async function getBoardData(boardId: string): Promise<GroupData[]> {
                 AND g.deleted_at IS NULL
                 AND i.deleted_at IS NULL
                 AND tb.deleted_at IS NULL
+            ${query && query.trim() !== ''
+                ? `
+                    AND tb.value like '%${query}%'
+                `
+                : ''
+            }
         `;
 
         const itemsQuery: string = `
@@ -185,6 +188,12 @@ export async function getBoardData(boardId: string): Promise<GroupData[]> {
             LEFT JOIN Groups g ON i.group_id = g.id
             WHERE g.board_id = @boardId 
                 AND i.deleted_at IS NULL
+            ${query && query.trim() !== ''
+                ? `
+                    AND i.name like '%${query}%'
+                `
+                : ''
+            }
             ORDER BY i.position, g.position
         `;
 
@@ -197,6 +206,12 @@ export async function getBoardData(boardId: string): Promise<GroupData[]> {
             FROM Groups g
             LEFT JOIN Boards b ON g.board_id = b.id
             WHERE b.id = @boardId 
+            ${query && query.trim() !== ''
+                ? `
+                    AND g.name like '%${query}%'
+                `
+                : ''
+            }
                 AND g.deleted_at IS NULL
             ORDER BY g.position
         `;
@@ -242,6 +257,7 @@ export async function getBoardData(boardId: string): Promise<GroupData[]> {
             result.push(groupData);
         });
 
+        console.log(result)
         return result;
     } catch (error) {
         throw new CustomError(500, 'Error al obtener los datos del tablero', error instanceof Error ? error.message : error?.toString());
