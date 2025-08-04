@@ -83,8 +83,8 @@ export function CollapsibleItems({ title, items, expandAll, globalFilterValue }:
                   </td>
                   <td>{item.poNumber}</td>
                   <td>
-                    {item.deliveryDate
-                      ? transformDateObjectToLocalString(item.deliveryDate)
+                    {item.poDate
+                      ? transformDateObjectToLocalString(item.poDate)
                       : <Tag
                           value='Sin Fecha de Entrega'
                           severity='warning'
@@ -93,8 +93,8 @@ export function CollapsibleItems({ title, items, expandAll, globalFilterValue }:
                     }
                   </td>
                   <td>
-                    {item.poDate 
-                      ? transformDateObjectToLocalString(item.poDate)
+                    {item.deliveryDate 
+                      ? transformDateObjectToLocalString(item.deliveryDate)
                       : <Tag 
                           value='Sin PO' 
                           severity='warning' 

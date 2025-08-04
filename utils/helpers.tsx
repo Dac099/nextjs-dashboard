@@ -414,17 +414,14 @@ export function getRFQStatusText(rfq: Requisition): JSX.Element {
     return <Tag value='Sin registro SAP' severity='danger' style={tagStyle}/>;
   }
 
-  if(rfq.purchaseItems.every(item => item.sapPartNumber)) {
-    return <Tag value='Registrada en SAP' severity='secondary' style={tagStyle}/>;
-  }
-
-  return <Tag value='Parcialmente registrada' severity='warning' style={tagStyle}/>;
+  return <Tag value='Registrada en SAP' severity='secondary' style={tagStyle}/>;
 }
 
 export function getItemReportStatus(item: ItemReport): {
   text: string, 
   severity: "success" | "info" | "warning" | "danger" | "secondary" | "contrast" | null | undefined 
 } 
+
 {
   if(item.poStatus && (item.poStatus.trim() === 'Cancelada'.trim())) {
     return { text: 'PO cancelada', severity: 'danger' };
@@ -496,10 +493,10 @@ export function buildWhereClause(globalFilter: string | null, advancedFilter: Ad
       const startDate = (userInput as Date[])[0].toISOString().slice(0, 10);
       const endDate = (userInput as Date[])[1].toISOString().slice(0, 10);
       clause.concat(`${operatorStringToSQL[operator]} '${startDate}' AND '${endDate}'`);
+    }else{
+      const parsedDate = (userInput as Date).toISOString().slice(0, 10);
+      clause.concat(`${operatorStringToSQL[operator]} '${parsedDate}'`);
     }
-
-    const parsedDate = (userInput as Date).toISOString().slice(0, 10);
-    clause.concat(`${operatorStringToSQL[operator]} '${parsedDate}'`);
   }
 
   if(column === 'rfq_state'){
@@ -537,8 +534,43 @@ export function buildWhereClause(globalFilter: string | null, advancedFilter: Ad
     }
   }
 
-  if(column === 'po_date'){
-    clause = `WHERE CONVERT(date, fdc.) `;
+  if(['po_date', 'promise_date', 'reception_date'].includes(column)){
+    const columnName = column === 'po_date'
+    ? 'orderDate'
+    : column === 'promise_date'
+    ? 'promisedDeliveryDate'
+    : 'receivedDate';
+
+    clause = `WHERE CONVERT(date, fdc.${columnName})`;
+
+    if(operator === 'between'){
+      const startDate = (userInput as Date[])[0].toISOString().slice(0, 10);
+      const endDate = (userInput as Date[])[1].toISOString().slice(0, 10);
+      clause += ` ${operatorStringToSQL[operator]} '${startDate}' AND '${endDate}'`;
+    }else{
+      const parsedDate = (userInput as Date).toISOString().slice(0, 10);
+      clause += ` ${operatorStringToSQL[operator]} '${parsedDate}'`;
+    }    
+  }
+
+  if(column === `article_state`){
+    switch(userInput as string) {
+      case 'po_canceled':
+        clause = `WHERE fdc.poStatus = 'Cancelada'`
+        break;
+      case 'po_generated':
+        clause = 'WHERE fdc.orderDate IS NOT NULL AND fdc.receiptNumbers IS NULL AND fdc.poStatus != \'Cancelada\'';
+        break;
+      case 'on_warehouse':
+        clause =  'WHERE fdc.receiptNumbers IS NOT NULL';
+        break;
+      case 'found_in_sap':
+        clause = 'WHERE fdc.itemCode IS NOT NULL AND fdc.orderNumber IS NULL';
+        break;
+      case 'not_found_in_sap':
+        clause = 'WHERE fdc.itemCode IS NULL';
+        break;
+    }
   }
 
   // The final step is to add the global filter to the made up clause of conditions based on the advanced filter
@@ -557,7 +589,6 @@ export function buildWhereClause(globalFilter: string | null, advancedFilter: Ad
 
   return clause;
 }
-
 
 const operatorStringToSQL: Record<string, string> = {
   'between': 'BETWEEN',

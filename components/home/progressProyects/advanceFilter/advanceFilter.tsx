@@ -168,7 +168,6 @@ export function AdvanceFilter({ setFilter, filter, closeOverlayPanel }: Props) {
               <option value="po_generated">PO generada</option>
               <option value="on_warehouse">En almacén</option>
               <option value="found_in_sap">Registrada en SAP</option>
-              <option value="partial_found_sap">En SAP sin RFQ</option>
               <option value="not_found_in_sap">Sin registro SAP</option>
             </select>
           )}
