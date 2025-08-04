@@ -1,8 +1,7 @@
 "use client";
 import css from "./groupsView.module.css";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type {
-  ColumnData,
   GroupData,
   ItemData as RowData,
 } from "@/utils/types/views"; // Renombrar ItemData a RowData para consistencia
@@ -30,17 +29,18 @@ import {
   restrictToHorizontalAxis,
 } from "@dnd-kit/modifiers";
 import { CustomError } from "@/utils/customError";
-import { ItemValues } from '@/utils/types/groups';
 import { useBoardStore } from '@/stores/boardStore';
 import { useBoardConfigurationStore } from '@/stores/boardConfiguration';
+import { getBoardColumns, getBoardData } from '@/actions/boards';
+import { fetchBoardValues } from '@/actions/groups';
+import { CommonLoader } from '@/components/common/commonLoader/commonLoader';
+import { useSearchParams } from 'next/navigation';
 
 type Props = {
-  boardDataPromise: Promise<GroupData[]>;
-  boardColumnsPromise: Promise<ColumnData[]>;
-  boardValuesPromise: Promise<ItemValues>
+  boardId: string;
 };
 
-export function GroupsView({ boardDataPromise, boardColumnsPromise, boardValuesPromise }: Props) {
+export function GroupsView({ boardId }: Props) {
   const {
     groups,
     columns,
@@ -48,22 +48,39 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise, boardValuesP
     setColumns
   } = useBoardDataStore(state => state);
   const { setBoardStatus } = useBoardStore();
-  
-  const initialGroups = use(boardDataPromise);
-  const initialColumns = use(boardColumnsPromise);
-  const initialStatus = use(boardValuesPromise);
+  const [ loading, setLoading ] = useState(true);
+  const searchParams = useSearchParams();
+  const queryParam = searchParams.get('query');
 
   useEffect(() => {
-    setGroups(initialGroups);
-    setColumns(initialColumns);
-    setBoardStatus(initialStatus);
-    initialColumns.forEach(column => {
-      if(column.columnWidth && column.columnWidth > 0){
-        useBoardConfigurationStore.getState().setColumnWidth(column.id, column.columnWidth);
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const [ initialGroups, initialColumns, initialStatus ] = await Promise.all([
+          getBoardData(boardId, queryParam as string | undefined),
+          getBoardColumns(boardId), 
+          fetchBoardValues(boardId)
+        ]);
+        
+        setGroups(initialGroups);
+        setColumns(initialColumns);
+        setBoardStatus(initialStatus);        
+        
+        initialColumns.forEach(column => {
+          if(column.columnWidth && column.columnWidth > 0){
+            useBoardConfigurationStore.getState().setColumnWidth(column.id, column.columnWidth);
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching board data:", error);
+      } finally {
+        setLoading(false);
       }
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      
+    }
+
+    fetchData();
+  }, [boardId, queryParam, setBoardStatus, setColumns, setGroups]);
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensor = useSensor(PointerSensor, {
@@ -286,6 +303,12 @@ export function GroupsView({ boardDataPromise, boardColumnsPromise, boardValuesP
     if (isDraggingRow) return [restrictToVerticalAxis]; // Las filas solo se mueven verticalmente
     return []; // Por defecto, no hay modificadores
   };
+
+  if(loading){
+    return (
+      <CommonLoader />
+    );
+  }
 
   return (
     <section className={css.mainContainer}>

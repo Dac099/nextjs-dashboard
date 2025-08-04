@@ -8,6 +8,7 @@ import { ContextMenu } from 'primereact/contextmenu';
 import { updateItemName, deleteItem, getSubItems } from './actions';
 import { useBoardDataStore } from '@/stores/boardDataStore';
 import { LuListMinus as SubItemIcon } from "react-icons/lu";
+import { useSearchParams } from 'next/navigation';
 
 type Props = {
   itemData: ItemData | SubItemData;
@@ -24,6 +25,29 @@ export function RowName({ itemData, setShowSubItems, showSubItems, setSubItems, 
   const [editMode, setEditMode] = useState(false);
   const [itemName, setItemName] = useState(itemData.name);
   const { groups, setGroups } = useBoardDataStore();
+  const searchParams = useSearchParams();
+  const queryParam = searchParams.get('query');
+
+    const getHighlightedText = (text: string, highlight: string) => {
+    if (!highlight.trim()) {
+      return <span>{text}</span>;
+    }
+    const regex = new RegExp(`(${highlight})`, 'gi');
+    const parts = text.split(regex);
+    return (
+      <span>
+        {parts.map((part, i) =>
+          regex.test(part) ? (
+            <span key={i} className={styles.highlight}>
+              {part}
+            </span>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    );
+  };
 
   const contextMenuItem = [
     { label: 'Editar', icon: 'pi pi-pencil', command: () => setEditMode(true) },
@@ -128,7 +152,7 @@ export function RowName({ itemData, setShowSubItems, showSubItems, setSubItems, 
           className={styles.itemName}
           title={itemName}
         >
-          {itemName}
+          {getHighlightedText(itemName, queryParam || '')}
         </p>
       }
 

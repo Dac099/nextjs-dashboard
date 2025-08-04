@@ -71,3 +71,9 @@
   margin: 0;
   user-select: none;
 }
+
+.highlight {
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
+}

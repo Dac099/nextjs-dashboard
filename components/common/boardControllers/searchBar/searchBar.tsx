@@ -4,11 +4,14 @@ import { MdOutlineManageSearch } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import Form from 'next/form';
 import { useState, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 export function SearchBar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const searchParams = useSearchParams();
+  const queryParam = searchParams.get('query');
+  
   const toggleSearch = () => {
     setIsExpanded(!isExpanded);
   };
@@ -45,6 +48,7 @@ export function SearchBar() {
             name="query" 
             id="search-input"
             className={styles.searchInput}
+            defaultValue={queryParam || ''}
             placeholder="Buscar..."
           />   
           <button 

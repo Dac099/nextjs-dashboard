@@ -3,6 +3,7 @@ import { ViewWithSettings, GroupData, ColumnData } from "@/utils/types/views";
 import connection from '@/services/database';
 import { redirect } from "next/navigation";
 import { CustomError } from '@/utils/customError';
+import { revalidatePath } from 'next/cache';
 
 type ViewsDB = {
     id: string;
@@ -153,48 +154,42 @@ export async function getWorkspaceAndBoardData(boardId: string) {
 export async function getBoardData(boardId: string, query: string | undefined): Promise<GroupData[]> {
     try {
         await connection.connect();
-
+        
         const result: GroupData[] = [];
-
+        
         const valuesQuery: string = `
-            SELECT
-                tb.id,
-                tb.item_id as itemId,
-                tb.column_id as columnId, 
-                tb.value
-            FROM TableValues tb
-            LEFT JOIN Items i ON tb.item_id = i.id
-            LEFT JOIN Groups g ON i.group_id = g.id
-            WHERE g.board_id = @boardId 
-                AND g.deleted_at IS NULL
-                AND i.deleted_at IS NULL
-                AND tb.deleted_at IS NULL
-            ${query && query.trim() !== ''
-                ? `
-                    AND tb.value like '%${query}%'
-                `
-                : ''
-            }
+        SELECT
+        tb.id,
+        tb.item_id as itemId,
+        tb.column_id as columnId, 
+        tb.value
+        FROM TableValues tb
+        LEFT JOIN Items i ON tb.item_id = i.id
+        LEFT JOIN Groups g ON i.group_id = g.id
+        WHERE g.board_id = @boardId 
+        AND g.deleted_at IS NULL
+        AND i.deleted_at IS NULL
+        AND tb.deleted_at IS NULL
         `;
-
+        
         const itemsQuery: string = `
-            SELECT 
-                i.id,
-                i.group_id as groupId,
-                i.project_id as projectId,
-                i.name,
-                i.position
-            FROM Items i
-            LEFT JOIN Groups g ON i.group_id = g.id
-            WHERE g.board_id = @boardId 
-                AND i.deleted_at IS NULL
-            ${query && query.trim() !== ''
-                ? `
-                    AND i.name like '%${query}%'
-                `
-                : ''
-            }
-            ORDER BY i.position, g.position
+        SELECT 
+        i.id,
+        i.group_id as groupId,
+        i.project_id as projectId,
+        i.name,
+        i.position
+        FROM Items i
+        LEFT JOIN Groups g ON i.group_id = g.id
+        WHERE g.board_id = @boardId 
+        AND i.deleted_at IS NULL
+        ${query && query.trim() !== ''
+            ? `
+            AND LOWER(i.name) like '%${query.toLowerCase()}%'
+            `
+            : ''
+        }
+        ORDER BY i.position, g.position
         `;
 
         const groupsQuery: string = `
@@ -206,12 +201,6 @@ export async function getBoardData(boardId: string, query: string | undefined): 
             FROM Groups g
             LEFT JOIN Boards b ON g.board_id = b.id
             WHERE b.id = @boardId 
-            ${query && query.trim() !== ''
-                ? `
-                    AND g.name like '%${query}%'
-                `
-                : ''
-            }
                 AND g.deleted_at IS NULL
             ORDER BY g.position
         `;
@@ -257,7 +246,6 @@ export async function getBoardData(boardId: string, query: string | undefined): 
             result.push(groupData);
         });
 
-        console.log(result)
         return result;
     } catch (error) {
         throw new CustomError(500, 'Error al obtener los datos del tablero', error instanceof Error ? error.message : error?.toString());
