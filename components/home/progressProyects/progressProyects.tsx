@@ -158,6 +158,16 @@ export function ProgressProyects() {
                   severity='help'
                   disabled
                 />
+                <Button 
+                  label='Exportar'
+                  icon='pi pi-file-excel'
+                  severity='success'
+                  raised
+                  onClick={() => {
+                    const url = `/purchasings/api?globalFilter=${globalFilter}&advancedFilter=${JSON.stringify(advancedFilter)}`;
+                    window.location.href = url;
+                  }}
+                />
               </section>
               <section>
                 <Button 

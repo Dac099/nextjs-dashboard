@@ -4,8 +4,8 @@ import { buildWhereClause } from '@/utils/helpers';
 import type { ItemReport, AdvancedFilter } from '@/utils/types/requisitionsTracking';
 
 export async function getRFQsData(
-  offset: number = 0, 
-  limit: number = 300, 
+  offset: number | null = 0, 
+  limit: number | null = 300, 
   globalFilter: string | null = null,
   advancedFilter: AdvancedFilter | null = null
 ) : Promise<{items: ItemReport[], count: number}> 
@@ -81,8 +81,8 @@ export async function getRFQsData(
           )
         ${whereClause}
         ORDER BY tr.fecha_registro DESC
-        OFFSET @offset ROWS
-        FETCH NEXT @limit ROWS ONLY
+        ${offset !== null ? `OFFSET @offset ROWS` : ''}
+        ${limit !== null ? `FETCH NEXT @limit ROWS ONLY` : ''}
       `);
 
     return {
