@@ -24,20 +24,13 @@ export async function getRFQsData(
         LEFT JOIN tb_user tu ON tu.id_user = tr.id_usuario 
         LEFT JOIN Maquinados_Estatus me ON me.Id_Estatus = tr.Id_Estatus
         LEFT JOIN FileDataCache fdc 
-          ON (
-            TRIM(tr.num_req) = fdc.rfqSys AND 
-            (
-              TRIM(trd.no_parte) = fdc.manufacturerNumber OR
-              TRIM(trd.no_parte) = fdc.itemCode
-            ) AND 
-            TRIM(trd.id_proyecto) = fdc.project
-          ) OR  
+          ON  
           (
             (
-              TRIM(trd.no_parte) = fdc.manufacturerNumber OR
-              TRIM(trd.no_parte) = fdc.itemCode
+              (TRIM(trd.no_parte) LIKE '%' + TRIM(fdc.manufacturerNumber) + '%') OR
+              (TRIM(trd.no_parte) LIKE '%' + TRIM(fdc.itemCode) + '%')
             ) AND 
-            TRIM(trd.id_proyecto) = fdc.project
+            TRIM(tr.num_req) = fdc.rfqSys
           )
         ${whereClause}
         GROUP BY tr.num_req

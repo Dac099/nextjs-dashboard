@@ -492,11 +492,13 @@ export function buildWhereClause(globalFilter: string | null, advancedFilter: Ad
     if(operator === 'between'){
       const startDate = (userInput as Date[])[0].toISOString().slice(0, 10);
       const endDate = (userInput as Date[])[1].toISOString().slice(0, 10);
-      clause.concat(`${operatorStringToSQL[operator]} '${startDate}' AND '${endDate}'`);
+      clause = clause.concat(`${operatorStringToSQL[operator]} '${startDate}' AND '${endDate}' `);
     }else{
       const parsedDate = (userInput as Date).toISOString().slice(0, 10);
-      clause.concat(`${operatorStringToSQL[operator]} '${parsedDate}'`);
+      clause = clause.concat(`${operatorStringToSQL[operator]} '${parsedDate}' `);
     }
+
+    console.log(1, operator, userInput, clause);
   }
 
   if(column === 'rfq_state'){
@@ -587,13 +589,14 @@ export function buildWhereClause(globalFilter: string | null, advancedFilter: Ad
     `;
   }
 
+  console.log(clause  )
   return clause;
 }
 
 const operatorStringToSQL: Record<string, string> = {
-  'between': 'BETWEEN',
-  'equals': '=',
-  'contains': 'LIKE',
-  'greater': '>',
-  'less': '<',
+  'between': ' BETWEEN ',
+  'equals': ' = ',
+  'contains': ' LIKE ',
+  'greater': ' > ',
+  'less': ' < ',
 };
