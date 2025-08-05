@@ -498,7 +498,6 @@ export function buildWhereClause(globalFilter: string | null, advancedFilter: Ad
       clause = clause.concat(`${operatorStringToSQL[operator]} '${parsedDate}' `);
     }
 
-    console.log(1, operator, userInput, clause);
   }
 
   if(column === 'rfq_state'){
@@ -589,7 +588,6 @@ export function buildWhereClause(globalFilter: string | null, advancedFilter: Ad
     `;
   }
 
-  console.log(clause  )
   return clause;
 }
 
