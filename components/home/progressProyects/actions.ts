@@ -43,7 +43,10 @@ export async function getRFQsData(
         SELECT
           trd.no_parte AS partNumber,
           trd.desc_articulo AS description,
-          fdc.project AS projectId,
+          (CASE
+            WHEN TRIM(fdc.project) IS NULL OR TRIM(fdc.project) = '' THEN trd.id_proyecto
+            ELSE TRIM(fdc.project) 
+          END) AS projectId,
           trd.tipo_maquinado AS machineType,   
           tr.num_req AS rfqNumber,
           tr.id_tiporeq AS rfqType,
