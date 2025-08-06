@@ -42,7 +42,7 @@ export async function SideBar() {
         </SideBarItem>
       }
 
-      {userRole.name === 'SYSTEMS' &&
+      {(userRole.name === 'SYSTEMS' || userRole.name === 'PROJECTMANAGER') &&
         <SideBarItem url='/sap-reports'>
           <i
             className='pi pi-money-bill'

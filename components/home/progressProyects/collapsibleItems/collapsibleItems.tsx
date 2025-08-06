@@ -81,7 +81,7 @@ export function CollapsibleItems({ title, items, expandAll, globalFilterValue }:
                       className={styles.stateTag}
                     />
                   </td>
-                  <td>{item.poNumber}</td>
+                  <td>{highlightText(item.poNumber || '', globalFilterValue)}</td>
                   <td>
                     {item.poDate
                       ? transformDateObjectToLocalString(item.poDate)

@@ -481,6 +481,9 @@ export function buildWhereClause(globalFilter: string | null, advancedFilter: Ad
         OR LOWER(trd.tipo_maquinado) LIKE ${globalFilter}
         OR LOWER(tr.num_req) LIKE ${globalFilter}
         OR LOWER(tu.nom_user) LIKE ${globalFilter}
+        OR LOWER(fdc.orderNumber) LIKE ${globalFilter}
+        OR LOWER(fdc.project) LIKE ${globalFilter}
+        OR LOWER(fdc.receiptNumbers) LIKE ${globalFilter}
     `
   }
 
