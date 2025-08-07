@@ -95,19 +95,15 @@ export function TableDBData({ initialData = [] }: Props) {
     return date ? new Date(date).toLocaleDateString('es-ES') : '-';
   };
 
-  const currencyBodyTemplate = (value: SapReportRecord) => {
+  const currencyBodyTemplate = (value: number) => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
       currency: 'MXN'
-    }).format(value.unitPrice);
+    }).format(value);
   };
 
   const numberBodyTemplate = (value: number) => {
     return new Intl.NumberFormat('es-ES').format(value);
-  };
-
-  const percentBodyTemplate = (value: number) => {
-    return `${value.toFixed(2)}%`;
   };
 
   const renderPagination = () => {
@@ -203,6 +199,7 @@ export function TableDBData({ initialData = [] }: Props) {
             <table className={styles.table}>
               <thead>
                 <tr className={styles.tableHeader}>
+                  <th className={styles.tableHeaderCell}>#</th>
                   <th className={styles.tableHeaderCell}>RFQ Sys</th>
                   <th className={styles.tableHeaderCell}>Estado PO</th>
                   <th className={styles.tableHeaderCellMedium}>Estado Línea</th>
@@ -213,21 +210,16 @@ export function TableDBData({ initialData = [] }: Props) {
                   <th className={styles.tableHeaderCellMedium}>Código Item</th>
                   <th className={styles.tableHeaderCellMedium}>Código Fabricante</th>
                   <th className={styles.tableHeaderCellExtraWide}>Descripción</th>
-                  <th className={styles.tableHeaderCellRight}>Precio Unitario</th>
                   <th className={styles.tableHeaderCellRight}>Moneda</th>
+                  <th className={styles.tableHeaderCellRight}>Precio Unitario</th>
                   <th className={styles.tableHeaderCellRight}>Cantidad Ordenada</th>
-                  <th className={styles.tableHeaderCellRight}>Total Orden</th>
-                  <th className={styles.tableHeaderCellPromised}>Fecha Entrega Prometida</th>
+                  <th className={styles.tableHeaderCellRight}>Importe Total Orden (ME)</th>
+                  <th className={styles.tableHeaderCellRight}>Importe Total Orden</th>
+                  <th className={styles.tableHeaderCellPromised}>Fecha Promesa Entrega</th>
                   <th className={styles.tableHeaderCell}>Fecha Recepción</th>
+                  <th className={styles.tableHeaderCellRight}>Número Recepción</th>
                   <th className={styles.tableHeaderCellRight}>Cantidad Recibida</th>
-                  <th className={styles.tableHeaderCellRight}>Total Recibido</th>
-                  <th className={styles.tableHeaderCell}>Fecha Factura</th>
-                  <th className={styles.tableHeaderCellXLarge}>Cantidad Facturada</th>
-                  <th className={styles.tableHeaderCellRight}>Total Facturado</th>
-                  <th className={styles.tableHeaderCellXLarge}>% Recibido (Monto)</th>
-                  <th className={styles.tableHeaderCellXLarge}>% Facturado (Monto)</th>
-                  <th className={styles.tableHeaderCellXXLarge}>% Recibido (Cantidad)</th>
-                  <th className={styles.tableHeaderCellXXLarge}>% Facturado (Cantidad)</th>
+                  <th className={styles.tableHeaderCellRight}>Cantidad Pendiente Recibir</th>
                 </tr>
               </thead>
               <tbody>
@@ -240,6 +232,7 @@ export function TableDBData({ initialData = [] }: Props) {
                 ) : (
                   data.map((row, index) => (
                     <tr key={row.batchId + index} className={styles.tableRow}>
+                      <td className={styles.tableCell}>{row.id || '-'}</td>
                       <td className={styles.tableCell}>{row.rfqSys || '-'}</td>
                       <td className={styles.tableCell}>{row.poStatus || '-'}</td>
                       <td className={styles.tableCell}>{row.lineStatus || '-'}</td>
@@ -250,21 +243,16 @@ export function TableDBData({ initialData = [] }: Props) {
                       <td className={styles.tableCell}>{row.itemCode || '-'}</td>
                       <td className={styles.tableCell}>{row.manufacturerNumber || '-'}</td>
                       <td className={styles.tableCell}>{row.itemDescription || '-'}</td>
-                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row)}</td>
                       <td className={styles.tableCellRight}>{row.priceCurrency}</td>
+                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row.unitPrice)}</td>
                       <td className={styles.tableCellRight}>{numberBodyTemplate(row.orderedQuantity)}</td>
-                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row)}</td>
+                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row.totalOrderAmountFC)}</td>
+                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row.totalOrderAmount)}</td>
                       <td className={styles.tableCell}>{dateBodyTemplate(row.promisedDeliveryDate)}</td>
                       <td className={styles.tableCell}>{dateBodyTemplate(row.receivedDate)}</td>
+                      <td className={styles.tableCellRight}>{row.receiptNumbers}</td>
                       <td className={styles.tableCellRight}>{numberBodyTemplate(row.receivedQuantity)}</td>
-                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row)}</td>
-                      <td className={styles.tableCell}>{dateBodyTemplate(row.invoiceDate)}</td>
-                      <td className={styles.tableCellRight}>{numberBodyTemplate(row.invoicedQuantity)}</td>
-                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row)}</td>
-                      <td className={styles.tableCellRight}>{percentBodyTemplate(row.receivedPercentAmount)}</td>
-                      <td className={styles.tableCellRight}>{percentBodyTemplate(row.invoicedPercentAmount)}</td>
-                      <td className={styles.tableCellRight}>{percentBodyTemplate(row.receivedPercentQuantity)}</td>
-                      <td className={styles.tableCellRight}>{percentBodyTemplate(row.invoicedPercentQuantity)}</td>
+                      <td className={styles.tableCell}>{numberBodyTemplate(row.pendingReceiptQuantity)}</td>
                     </tr>
                   ))
                 )}
