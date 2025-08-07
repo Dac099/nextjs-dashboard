@@ -201,7 +201,7 @@ function parseDecimal(value: string, decimals: number = 2): number {
     const cleanValue = value.replace(/[^\d.,\-]/g, '');
         
     // Replace commas by points to ensure correct format
-    const normalizedValue = cleanValue.replace(/,/g, '.');
+    const normalizedValue = cleanValue.replace(/,/g, '');
     
     // Try to parse the value as a float
     const num = parseFloat(normalizedValue);

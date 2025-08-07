@@ -95,11 +95,11 @@ export function TableDBData({ initialData = [] }: Props) {
     return date ? new Date(date).toLocaleDateString('es-ES') : '-';
   };
 
-  const currencyBodyTemplate = (value: number) => {
+  const currencyBodyTemplate = (value: SapReportRecord) => {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
       currency: 'MXN'
-    }).format(value);
+    }).format(value.unitPrice);
   };
 
   const numberBodyTemplate = (value: number) => {
@@ -214,6 +214,7 @@ export function TableDBData({ initialData = [] }: Props) {
                   <th className={styles.tableHeaderCellMedium}>Código Fabricante</th>
                   <th className={styles.tableHeaderCellExtraWide}>Descripción</th>
                   <th className={styles.tableHeaderCellRight}>Precio Unitario</th>
+                  <th className={styles.tableHeaderCellRight}>Moneda</th>
                   <th className={styles.tableHeaderCellRight}>Cantidad Ordenada</th>
                   <th className={styles.tableHeaderCellRight}>Total Orden</th>
                   <th className={styles.tableHeaderCellPromised}>Fecha Entrega Prometida</th>
@@ -249,16 +250,17 @@ export function TableDBData({ initialData = [] }: Props) {
                       <td className={styles.tableCell}>{row.itemCode || '-'}</td>
                       <td className={styles.tableCell}>{row.manufacturerNumber || '-'}</td>
                       <td className={styles.tableCell}>{row.itemDescription || '-'}</td>
-                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row.unitPrice)}</td>
+                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row)}</td>
+                      <td className={styles.tableCellRight}>{row.priceCurrency}</td>
                       <td className={styles.tableCellRight}>{numberBodyTemplate(row.orderedQuantity)}</td>
-                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row.totalOrderAmount)}</td>
+                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row)}</td>
                       <td className={styles.tableCell}>{dateBodyTemplate(row.promisedDeliveryDate)}</td>
                       <td className={styles.tableCell}>{dateBodyTemplate(row.receivedDate)}</td>
                       <td className={styles.tableCellRight}>{numberBodyTemplate(row.receivedQuantity)}</td>
-                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row.totalReceivedAmount)}</td>
+                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row)}</td>
                       <td className={styles.tableCell}>{dateBodyTemplate(row.invoiceDate)}</td>
                       <td className={styles.tableCellRight}>{numberBodyTemplate(row.invoicedQuantity)}</td>
-                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row.totalInvoicedAmount)}</td>
+                      <td className={styles.tableCellRight}>{currencyBodyTemplate(row)}</td>
                       <td className={styles.tableCellRight}>{percentBodyTemplate(row.receivedPercentAmount)}</td>
                       <td className={styles.tableCellRight}>{percentBodyTemplate(row.invoicedPercentAmount)}</td>
                       <td className={styles.tableCellRight}>{percentBodyTemplate(row.receivedPercentQuantity)}</td>

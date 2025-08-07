@@ -102,32 +102,35 @@ export function TableData({ data }: Props) {
 
   return (
     <article className={styles.mainContainer}>
-      <DataTable
-        size='large'
-        showGridlines
-        stripedRows
-        value={items}
-        paginator
-        rows={10}
-        rowsPerPageOptions={[10, 20, 30, 40, 50]}
-        removableSort
-        globalFilterFields={header.map((_, index) => index.toString())}
-        header={renderHeader()}
-        emptyMessage="No se encontraron registros"
-        filters={filters}
-        columnResizeMode="expand"
-        tableStyle={{ maxWidth: '100%', overflowX: 'hidden' }}
-      >
-        {visibleColumns.map((col, index) => (
-          <Column
-            field={col.field}
-            header={col.header}
-            key={index}
-            sortable
-            style={{ minWidth: '120px', fontSize: '1.2rem' }}
-          />
-        ))}
-      </DataTable>
+      <div className={styles.tableContainer}>
+        <DataTable
+          size='large'
+          showGridlines
+          stripedRows
+          value={items}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[10, 20, 30, 40, 50]}
+          removableSort
+          globalFilterFields={header.map((_, index) => index.toString())}
+          header={renderHeader()}
+          emptyMessage="No se encontraron registros"
+          filters={filters}
+          columnResizeMode="expand"
+          scrollable
+          scrollHeight="flex"
+        >
+          {visibleColumns.map((col, index) => (
+            <Column
+              field={col.field}
+              header={col.header}
+              key={index}
+              sortable
+              style={{ minWidth: '150px', fontSize: '1.2rem' }}
+            />
+          ))}
+        </DataTable>
+      </div>
     </article>
   );
 }
