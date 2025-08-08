@@ -23,7 +23,7 @@ export async function updateNumberColumn(
         .query(`
           UPDATE TableValues 
           SET value = @value, 
-            updatedAt = GETDATE() 
+            updated_at = GETDATE() 
           WHERE id = @id`
         );
 

@@ -15,7 +15,7 @@ type Props = {
 
 export const NumberColumn = ({ value, item, column, isSubItem }: Props) => {
     const { setGroups, groups } = useBoardDataStore(state => state);
-    const parsedValue = (value !== undefined) ? Math.round(parseFloat(JSON.parse(value.value))) : undefined;
+    const parsedValue = (value !== undefined) ? parseFloat(JSON.parse(value.value)) : undefined;
     const [inputValue, setInputValue] = useState<number>(parsedValue || 0);
 
     const handleSubmitValue = async (e: React.KeyboardEvent | React.FocusEvent) => {
