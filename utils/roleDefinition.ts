@@ -101,5 +101,10 @@ export const ROLES: Record<string, Role> = {
         boards: ['Contratación', 'Solicitud de viáticos', '2025 Bono Horas Extra']
       },
     ]
+  },
+  SHIPMENTREADER: {
+    name: 'SHIPMENTREADER',
+    description: 'Role with read access to shipment-related boards',
+    permissions: []
   }
 };

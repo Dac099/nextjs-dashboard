@@ -56,6 +56,8 @@ export function UsersTable({users}: Props){
                 <option value="READER">Lector</option>
 
                 <option value="LEADPM">Lead</option>
+                
+                <option value="SHIPMENTREADER">Lector seguimiento</option>
 
               </select>
             </td>
